@@ -101,21 +101,6 @@ body.lock{overflow:hidden}
 <div class="era-cap" id="era-cap">EQUITYWORLD RECRUITMENT ACCESS</div>
 
 @include('partials.navbar', ['splash' => true])
-<!-- NAVBAR -->
-<header class="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-paper/70">
-  <nav class="max-w-7xl mx-auto px-6 h-16 grid grid-cols-[1fr_auto_1fr] items-center">
-    <a href="#" class="text-sm font-medium">LOGO ERA</a>
-    <ul class="hidden md:flex items-center gap-10 text-sm">
-  <li><a href="{{ route('home') }}" class="hover:opacity-60">Home</a></li>
-  <li><a href="{{ route('tentang') }}" class="hover:opacity-60">About</a></li>
-  <li><a href="{{ route('program.index') }}" class="hover:opacity-60">Internship</a></li>
-  <li><a href="{{ route('lowongan.index') }}" class="hover:opacity-60">Job</a></li>
-</ul>
-    <div class="col-start-3 justify-self-end">
-      <a href="{{ route('register') }}" class="inline-block px-5 py-1.5 rounded-full border border-black text-sm hover:bg-black hover:text-white transition">Get Started</a>
-    </div>
-  </nav>
-</header>
 
 <main>
 <!-- 1. HERO -->
