@@ -37,7 +37,7 @@ class LoginController extends Controller
         // Coba autentikasi Laravel
         if (Auth::attempt($request->only('email', 'password'), $request->filled('remember'))) {
             $request->session()->regenerate();
-            
+
             // Reset percobaan gagal jika login sukses
             $authUser = Auth::user();
             $authUser->update([
@@ -50,9 +50,11 @@ class LoginController extends Controller
                 return redirect()->route('admin.dashboard');
             } elseif ($authUser->isPimpinan()) {
                 return redirect()->route('pimpinan.dashboard');
-            } else {
-                return redirect()->route('pelamar.dashboard');
             }
+
+            // Pelamar / user biasa: tidak ada dashboard, langsung ke halaman utama
+            // (atau kembali ke halaman yang tadi mau dibuka sebelum diminta login)
+            return redirect()->intended(route('home'));
         }
 
         // Jika login GAGAL, tangani hitungan percobaan gagal

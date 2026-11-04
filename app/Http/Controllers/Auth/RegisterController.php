@@ -54,10 +54,9 @@ class RegisterController extends Controller
 
             DB::commit();
 
-            // Auto login setelah register
-            auth()->login($user);
-
-            return redirect()->route('pelamar.dashboard');
+            // Arahkan ke halaman login dengan pesan sukses (TIDAK AUTO-LOGIN)
+            // Pakai kunci 'status' karena itu yang ditampilkan oleh layout auth.
+            return redirect()->route('login')->with('status', 'Registrasi berhasil! Silakan login menggunakan akun Anda.');
 
         } catch (\Exception $e) {
             DB::rollBack();

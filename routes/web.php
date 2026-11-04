@@ -5,9 +5,13 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\LowonganController;
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\BantuanController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Pelamar\ProfilController as PelamarProfilController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Pimpinan\PimpinanDashboardController;
 
 // 1. RUTE PUBLIK
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -16,6 +20,7 @@ Route::get('/lowongan', [LowonganController::class, 'index'])->name('lowongan.in
 Route::get('/lowongan/{id}', [LowonganController::class, 'show'])->name('lowongan.show');
 Route::get('/program', [ProgramController::class, 'index'])->name('program.index');
 Route::get('/program/{id}', [ProgramController::class, 'show'])->name('program.show');
+Route::get('/bantuan', [BantuanController::class, 'index'])->name('bantuan');
 
 // 2. RUTE AUTHENTICATION & PASSWORD RESET (Guest Only)
 Route::middleware('guest')->group(function () {
@@ -38,15 +43,16 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 
 // 3. RUTE ROLE: ADMIN / HR
 Route::middleware(['auth', 'role:admin_hr'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 });
 
 // 4. RUTE ROLE: PIMPINAN
 Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan.')->group(function () {
-    Route::get('/dashboard', [\App\Http\Controllers\Pimpinan\PimpinanDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [PimpinanDashboardController::class, 'index'])->name('dashboard');
 });
 
 // 5. RUTE ROLE: PELAMAR
-Route::middleware(['auth', 'role:pelamar'])->prefix('pelamar')->name('pelamar.')->group(function () {
-    Route::get('/dashboard', [\App\Http\Controllers\Pelamar\PelamarDashboardController::class, 'index'])->name('dashboard');
+Route::middleware(['auth', 'role:pelamar'])->group(function () {
+    Route::get('/profil', [PelamarProfilController::class, 'show'])->name('pelamar.profil');
+    Route::put('/profil', [PelamarProfilController::class, 'update'])->name('pelamar.profil.update');
 });
