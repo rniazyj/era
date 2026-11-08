@@ -50,21 +50,7 @@
 </head>
 <body class="bg-paper text-zinc-900 font-sans antialiased overflow-x-hidden">
 
-<!-- NAVBAR -->
-<header class="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-paper/70 border-b border-black/5">
-  <nav class="max-w-7xl mx-auto px-6 h-16 grid grid-cols-[1fr_auto_1fr] items-center">
-    <a href="{{ route('home') }}" class="text-sm font-bold text-black tracking-wide">LOGO ERA</a>
-    <ul class="hidden md:flex items-center gap-10 text-sm font-medium">
-      <li><a href="{{ route('home') }}" class="text-black/50 hover:text-black transition">Home</a></li>
-      <li><a href="{{ route('tentang') }}" class="text-black/50 hover:text-black transition">About</a></li>
-      <li><a href="#" class="text-black">Internship</a></li>
-      <li><a href="{{ route('lowongan.index') }}" class="text-black/50 hover:text-black transition">Job</a></li>
-    </ul>
-    <div class="col-start-3 justify-self-end">
-      <a href="#" class="inline-block px-5 py-1.5 rounded-full border border-black text-sm hover:bg-black hover:text-white transition">Get Started</a>
-    </div>
-  </nav>
-</header>
+@include('partials.navbar')
 
 <main>
 <!-- 1. HERO & PENCARIAN -->
@@ -135,7 +121,7 @@
         </div>
         <div class="flex items-center justify-between">
           <span class="text-[10px] text-white/50">Ditutup 3 Hari Lagi</span>
-          <button class="px-4 py-1.5 bg-ewforange text-white text-xs font-semibold rounded-full hover:scale-105 transition">Lamar Posisi</button>
+          <a href="{{ route('pelamar.lamaran.create') }}" class="inline-block px-4 py-1.5 bg-ewforange text-white text-xs font-semibold rounded-full hover:scale-105 transition">Lamar Posisi</a>
         </div>
       </div>
     </div>
@@ -251,9 +237,6 @@
     </div>
   </div>
   
-  <div class="text-right mt-8 rv">
-    <a href="#" class="text-sm font-semibold text-black hover:text-ewforange transition">Lihat Semua Posisi →</a>
-  </div>
 </section>
 
 <!-- 3. FITUR PENDUKUNG KARIER (Bento Grid) -->
@@ -425,50 +408,7 @@
 </section>
 </main>
 
-<!-- FOOTER -->
-<footer class="px-6 md:px-16 py-12 max-w-7xl mx-auto grid md:grid-cols-[2fr_1fr_1fr_1fr] gap-8 text-xs text-black/60 border-t border-black/5">
-  <div>
-    <p class="text-sm font-bold text-ewforange mb-2 tracking-wide flex items-center gap-2">
-      <span class="w-5 h-5 bg-ewforange rounded text-white flex items-center justify-center text-[10px]">E</span>
-      EQUITYWORLD
-    </p>
-    <p class="max-w-xs mt-3 leading-relaxed">Portal karir resmi terintegrasi PT Equityworld Futures. Memberikan peluang karir tanpa batas di industri pialang berjangka untuk talenta profesional dan generasi penggerak bangsa.</p>
-    <a href="#" class="inline-flex mt-4 items-center gap-1 text-blue-600 font-semibold bg-blue-50 px-2 py-1 rounded">✓ Diawasi oleh BAPPEBTI</a>
-  </div>
-  <div>
-    <p class="text-sm font-semibold text-black mb-4">Peluang Karier</p>
-    <ul class="space-y-3">
-      <li><a href="#" class="hover:text-black">Cari Lowongan Kerja</a></li>
-      <li><a href="#" class="hover:text-black">Program Magang Nasional</a></li>
-      <li><a href="#" class="hover:text-black">Fresh Graduate</a></li>
-      <li><a href="#" class="hover:text-black">Tenaga Profesional</a></li>
-    </ul>
-  </div>
-  <div>
-    <p class="text-sm font-semibold text-black mb-4">Perusahaan</p>
-    <ul class="space-y-3">
-      <li><a href="{{ route('tentang') }}" class="hover:text-black">Tentang Kami</a></li>
-      <li><a href="#" class="hover:text-black">Budaya Kerja</a></li>
-      <li><a href="#" class="hover:text-black">Pusat Bantuan Pelamar</a></li>
-      <li><a href="#" class="hover:text-black">Kebijakan Privasi</a></li>
-    </ul>
-  </div>
-  <div>
-    <p class="text-sm font-semibold text-black mb-4">Hubungi Kami</p>
-    <ul class="space-y-3">
-      <li class="flex items-start gap-2"><span>📍</span> Sahid Sudirman Center Lt. 9, Jl. Jend. Sudirman Kav. 86, Jakarta Pusat 10220</li>
-      <li class="flex items-center gap-2"><span>✉</span> karir@equityworld.co.id</li>
-      <li class="flex items-center gap-2"><span>📞</span> +62 (21) 2788-9200</li>
-    </ul>
-  </div>
-  <div class="col-span-full border-t border-black/5 pt-6 flex flex-col md:flex-row justify-between items-center mt-4">
-    <p>© 2026 PT Equityworld Futures. Hak Cipta Dilindungi Undang-Undang.</p>
-    <div class="flex gap-4 mt-2 md:mt-0">
-      <a href="#" class="hover:text-black">Syarat & Ketentuan</a>
-      <a href="#" class="hover:text-black">Keamanan Platform</a>
-    </div>
-  </div>
-</footer>
+@include('partials.footer')
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>

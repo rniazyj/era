@@ -29,21 +29,7 @@
 </head>
 <body class="bg-paper text-zinc-900 font-sans antialiased overflow-x-hidden">
 
-<!-- NAVBAR -->
-<header class="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-paper/70">
-  <nav class="max-w-7xl mx-auto px-6 h-16 grid grid-cols-[1fr_auto_1fr] items-center">
-    <a href="#" class="text-sm font-bold text-black tracking-wide">LOGO ERA</a>
-    <ul class="hidden md:flex items-center gap-10 text-sm font-medium">
-      <li><a href="/" class="text-black/50 hover:text-black transition">Home</a></li>
-      <li><a href="#" class="text-black">About</a></li>
-      <li><a href="{{ route('program.index') }}" class="text-black/50 hover:text-black transition">Internship</a></li>
-      <li><a href="{{ route('lowongan.index') }}" class="text-black/50 hover:text-black transition">Job</a></li>
-    </ul>
-    <div class="col-start-3 justify-self-end">
-      <a href="#" class="inline-block px-5 py-1.5 rounded-full border border-black text-sm hover:bg-black hover:text-white transition">Get Started</a>
-    </div>
-  </nav>
-</header>
+@include('partials.navbar')
 
 <main>
 <!-- 1. HERO SECTION -->
@@ -279,21 +265,7 @@
 
 </main>
 
-<!-- FOOTER (Sama dengan Home, teks disesuaikan) -->
-<footer class="px-6 md:px-16 py-12 max-w-7xl mx-auto grid md:grid-cols-3 gap-8 text-xs text-black/60 border-t border-black/5">
-  <div>
-    <p class="text-sm font-bold text-ewforange mb-2 tracking-wide">EQUITYWORLD</p>
-    <p class="max-w-xs">PT Equityworld Futures merupakan anggota resmi Bursa Berjangka Jakarta yang berkomitmen memberikan layanan investasi derivatif transparan dan terpercaya.</p>
-  </div>
-  <div>
-    <p class="text-sm font-medium text-black mb-2">Navigasi Cepat</p>
-    <p class="leading-relaxed">Beranda<br>Tentang Perusahaan<br>Legalitas & Izin<br>Produk & Layanan<br>Karir & Magang</p>
-  </div>
-  <div class="md:text-right self-end">
-    <p>Hubungi: +62 21 2788 9200</p>
-    <p class="mt-2">© 2026 PT Equityworld Futures. Seluruh hak cipta dilindungi.</p>
-  </div>
-</footer>
+@include('partials.footer')
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>

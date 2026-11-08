@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Pelamar\ProfilController as PelamarProfilController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminLowonganController;
 use App\Http\Controllers\Pimpinan\PimpinanDashboardController;
 
 // 1. RUTE PUBLIK
@@ -46,6 +47,20 @@ Route::middleware(['auth', 'role:admin_hr'])->prefix('admin')->name('admin.')->g
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 });
 
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/lowongan', [AdminLowonganController::class, 'index'])->name('lowongan.index');
+    Route::get('/lowongan/create', [AdminLowonganController::class, 'create'])->name('lowongan.create');
+    Route::post('/lowongan', [AdminLowonganController::class, 'store'])->name('lowongan.store');
+    Route::get('/lowongan/{jenis}/{id}/edit', [AdminLowonganController::class, 'edit'])
+        ->whereIn('jenis', ['kerja', 'magang'])
+        ->whereNumber('id')
+        ->name('lowongan.edit');
+    Route::put('/lowongan/{jenis}/{id}', [AdminLowonganController::class, 'update'])
+        ->whereIn('jenis', ['kerja', 'magang'])
+        ->whereNumber('id')
+        ->name('lowongan.update');
+});
+
 // 4. RUTE ROLE: PIMPINAN
 Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan.')->group(function () {
     Route::get('/dashboard', [PimpinanDashboardController::class, 'index'])->name('dashboard');
@@ -53,6 +68,13 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan
 
 // 5. RUTE ROLE: PELAMAR
 Route::middleware(['auth', 'role:pelamar'])->group(function () {
+    // Tambahkan baris rute dashboard ini:
+    Route::get('/dashboard', [\App\Http\Controllers\Pelamar\PelamarDashboardController::class, 'index'])->name('pelamar.dashboard');
+    
+    Route::get('/lamaran/create', [\App\Http\Controllers\Pelamar\LamaranController::class, 'create'])->name('pelamar.lamaran.create');
+    Route::post('/lamaran', [\App\Http\Controllers\Pelamar\LamaranController::class, 'store'])->name('pelamar.lamaran.store');
+
+    // Rute profil yang sudah ada sebelumnya biarkan saja:
     Route::get('/profil', [PelamarProfilController::class, 'show'])->name('pelamar.profil');
     Route::put('/profil', [PelamarProfilController::class, 'update'])->name('pelamar.profil.update');
 });

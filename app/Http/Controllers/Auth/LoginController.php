@@ -50,10 +50,10 @@ class LoginController extends Controller
                 return redirect()->route('admin.dashboard');
             } elseif ($authUser->isPimpinan()) {
                 return redirect()->route('pimpinan.dashboard');
+            } elseif ($authUser->isPelamar()) {
+                return redirect()->route('pelamar.dashboard');
             }
 
-            // Pelamar / user biasa: tidak ada dashboard, langsung ke halaman utama
-            // (atau kembali ke halaman yang tadi mau dibuka sebelum diminta login)
             return redirect()->intended(route('home'));
         }
 
