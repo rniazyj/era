@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Cv extends Model
 {
+    // Nilai default kolom sumber_cv untuk CV yang dibuat lewat form.
+    // Sesuaikan kalau kolom sumber_cv kamu berupa enum dengan nilai lain.
+    public const SUMBER_DEFAULT = 'manual';
+
     protected $table = 'cv';
     protected $primaryKey = 'id_cv';
 

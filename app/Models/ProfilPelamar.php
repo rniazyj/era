@@ -12,13 +12,13 @@ class ProfilPelamar extends Model
     protected $fillable = [
         'id_pengguna',
         'foto',
-        'bio',
         'jenis_kelamin',
         'tempat_lahir',
         'tgl_lahir',
         'alamat',
         'kota',
         'linkedin_url',
+        'instagram_url',
         'portofolio_url',
         'nik_terenkripsi',
     ];
@@ -34,28 +34,33 @@ class ProfilPelamar extends Model
     }
 
     /**
-     * Kelengkapan data yang tampil di CV (PDF).
-     * NIK sengaja tidak dihitung karena tidak dicetak di CV.
-     * Kalau template CV bertambah bagian (pendidikan, pengalaman, skill),
-     * cukup tambah satu baris di $cek dan persentase ikut menyesuaikan.
+     * Kelengkapan = apa saja yang benar-benar tampil di CV (PDF).
+     * NIK tidak dihitung karena tidak dicetak di CV.
+     * Mau menambah bagian CV baru? Tambah satu baris di $cek.
      */
     public function kelengkapan(): array
     {
+        $cv = $this->exists ? $this->cv : null;
+
+        $ada   = fn (string $relasi): bool => $cv !== null && $cv->{$relasi}()->exists();
+        $skill = fn (string $jenis): bool => $cv !== null && $cv->skill()->where('kategori_skill', $jenis)->exists();
+
         $cek = [
-            'Nama lengkap'   => filled($this->user?->name),
-            'Foto'           => filled($this->foto),
-            'Ringkasan diri' => filled($this->bio),
-            'Jenis kelamin'  => filled($this->jenis_kelamin),
-            'Tempat lahir'   => filled($this->tempat_lahir),
-            'Tanggal lahir'  => filled($this->tgl_lahir),
-            'Kota'           => filled($this->kota),
-            'Alamat'         => filled($this->alamat),
-            'LinkedIn'       => filled($this->linkedin_url),
-            'Portofolio'     => filled($this->portofolio_url),
-            // Aktifkan kalau relasinya sudah ada (sesuaikan nama relasi):
-            // 'Pendidikan'  => $this->exists && $this->pendidikan()->exists(),
-            // 'Pengalaman'  => $this->exists && $this->pengalaman()->exists(),
-            // 'Skill'       => $this->exists && $this->skill()->exists(),
+            'Nama lengkap'        => filled($this->user?->name),
+            'No. telepon'         => filled($this->user?->no_telepon),
+            'Foto'                => filled($this->foto),
+            'Ringkasan diri'      => filled($cv?->ringkasan_profil),
+            'Jenis kelamin'       => filled($this->jenis_kelamin),
+            'Tempat lahir'        => filled($this->tempat_lahir),
+            'Tanggal lahir'       => filled($this->tgl_lahir),
+            'Kota'                => filled($this->kota),
+            'Alamat'              => filled($this->alamat),
+            'Media sosial'        => filled($this->linkedin_url) || filled($this->instagram_url),
+            'Pendidikan'          => $ada('dataAkademik'),
+            'Pengalaman / proyek' => $ada('pengalamanOrganisasi') || $ada('pengalamanProfesional') || $ada('proyek'),
+            'Hard skill'          => $skill('hard'),
+            'Soft skill'          => $skill('soft'),
+            'Tools'               => $skill('tools'),
         ];
 
         $terisi = collect($cek)->filter()->count();
@@ -66,6 +71,7 @@ class ProfilPelamar extends Model
             'total'  => $total,
             'persen' => (int) round($terisi / $total * 100),
             'kurang' => collect($cek)->reject()->keys()->all(),
+            'item'   => $cek,
         ];
     }
 }

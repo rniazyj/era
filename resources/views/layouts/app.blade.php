@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
+<html lang="id" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +12,7 @@
   <script>
     tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] }, colors: { paper: '#faf9fc' } } } };
   </script>
+
   @stack('styles')
 </head>
 <body class="bg-paper text-zinc-900 font-sans antialiased min-h-screen flex flex-col overflow-x-hidden" id="top">

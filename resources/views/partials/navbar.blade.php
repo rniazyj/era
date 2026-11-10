@@ -2,13 +2,14 @@
   Navbar ERA (dipakai bersama oleh semua halaman publik)
 
   Di halaman home (yang punya animasi splash ERA):
-      @include('partials.navbar', ['splash' => true])
+      @include('partials/navbar', ['splash' => true])
 
   Di halaman lain:
-      @include('partials.navbar')
+      @include('partials/navbar')
 
   Letakkan di resources/views/partials/navbar.blade.php
   Catatan: id "nav" / "nav-logo" dan class "nav-i" sengaja dipertahankan karena dipakai animasi GSAP di home.
+  Menu "About" punya dropdown (Perusahaan, Tim, Produk) yang terbuka saat hover / fokus keyboard.
 --}}
 @php
   $splash = $splash ?? false;
@@ -33,6 +34,13 @@
     $nama = $user->name;
     $inisial = mb_strtoupper(mb_substr($nama, 0, 1));
   }
+
+  // Isi dropdown "About"
+  $aboutItems = [
+    [__('Perusahaan'), __('Profil, legalitas & cabang'),  route('tentang'),         request()->routeIs('tentang')],
+    [__('Tim'),        __('Orang di balik Equityworld'),  route('tentang.tim'),     request()->routeIs('tentang.tim')],
+    [__('Produk'),     __('Produk & layanan'),            route('tentang.produk'), request()->routeIs('tentang.produk')],
+  ];
 @endphp
 
 <style>
@@ -45,19 +53,25 @@
   .nv-links a,.nv-text{ text-decoration:none; color:inherit; transition:opacity .2s; }
   .nv-links a:hover,.nv-text:hover{ opacity:.6; }
 
+  /* Dropdown About */
+  .nv-dd{ position:relative; }
+  .nv-dd-btn{ display:inline-flex; align-items:center; gap:.25rem; }
+  .nv-dd-btn span{ font-size:10px; display:inline-block; transition:transform .25s; }
+  .nv-dd:hover .nv-dd-btn span,.nv-dd:focus-within .nv-dd-btn span{ transform:rotate(180deg); }
+  .nv-dd-menu{
+    position:absolute; left:50%; top:100%; min-width:15rem; padding-top:.75rem;
+    opacity:0; visibility:hidden; transform:translate(-50%,6px);
+    transition:opacity .2s,transform .2s,visibility 0s .2s;
+  }
+  .nv-dd:hover .nv-dd-menu,.nv-dd:focus-within .nv-dd-menu{ opacity:1; visibility:visible; transform:translate(-50%,0); transition:opacity .2s,transform .2s; }
+  .nv-dd-box{ background:#fff; border-radius:.9rem; border:1px solid rgba(0,0,0,.06); box-shadow:0 20px 40px -16px rgba(0,0,0,.28); padding:.35rem; }
+  .nv-links .nv-dd-box a{ display:flex; flex-direction:column; gap:.1rem; padding:.6rem .8rem; border-radius:.6rem; opacity:1; font-size:.82rem; font-weight:600; color:#18181b; line-height:1.35; }
+  .nv-links .nv-dd-box a small{ font-size:.7rem; font-weight:500; color:rgba(0,0,0,.5); }
+  .nv-links .nv-dd-box a:hover{ background:#f4f4f5; opacity:1; }
+  .nv-links .nv-dd-box a.on{ background:#fff1e4; }
+
   .nv-r{ grid-column:3; justify-self:end; display:flex; align-items:center; gap:1.25rem; }
   @media(max-width:639px){ .nv-help{ display:none; } }
-
-  /* Bahasa */
-  .nv-lang{ position:relative; }
-  .nv-lang-btn{ display:flex; align-items:center; gap:.25rem; border:0; background:none; font:inherit; color:inherit; cursor:pointer; transition:opacity .2s; }
-  .nv-lang-btn:hover{ opacity:.6; }
-  .nv-lang-btn span{ font-size:10px; }
-  .nv-lang-menu{ position:absolute; right:0; top:100%; padding-top:.5rem; display:none; list-style:none; margin:0; }
-  .nv-lang:hover .nv-lang-menu,.nv-lang:focus-within .nv-lang-menu{ display:block; }
-  .nv-lang-menu li{ background:#fff; border-radius:.75rem; border:1px solid rgba(0,0,0,.05); box-shadow:0 10px 25px -8px rgba(0,0,0,.2); padding:.25rem; min-width:7rem; font-size:.75rem; }
-  .nv-lang-menu a{ display:block; padding:.5rem .75rem; border-radius:.5rem; text-decoration:none; color:inherit; }
-  .nv-lang-menu a:hover{ background:rgba(0,0,0,.05); }
 
   .nv-pill{
     display:inline-flex; align-items:center; gap:.5rem; padding:.375rem 1.25rem; border-radius:9999px; border:1px solid #111;
@@ -97,24 +111,33 @@
     <a href="{{ route('home') }}" id="nav-logo" class="nv-logo" @if($splash) style="opacity:0" @endif>ERA</a>
 
     <ul class="nv-links nav-i">
+<<<<<<< HEAD
       <li><a href="{{ route('home') }}">Home</a></li>
       <li><a href="{{ route('tentang') }}">About</a></li>
       <li><a href="{{ route('internship.index') }}">Internship</a></li>
       <li><a href="{{ route('lowongan.index') }}">Job</a></li>
+=======
+      <li><a href="{{ route('home') }}">{{ __('Beranda') }}</a></li>
+      <li class="nv-dd">
+        <a href="{{ route('tentang') }}" class="nv-dd-btn" aria-haspopup="true">{{ __('Tentang') }} <span>▾</span></a>
+        <div class="nv-dd-menu">
+          <div class="nv-dd-box">
+            @foreach($aboutItems as [$label, $ket, $url, $aktif])
+              <a href="{{ $url }}" class="{{ $aktif ? 'on' : '' }}">
+                {{ $label }}
+                <small>{{ $ket }}</small>
+              </a>
+            @endforeach
+          </div>
+        </div>
+      </li>
+      <li><a href="{{ route('program.index') }}">{{ __('Magang') }}</a></li>
+      <li><a href="{{ route('lowongan.index') }}">{{ __('Lowongan') }}</a></li>
+>>>>>>> vina
     </ul>
 
     <div class="nv-r nav-i">
-      <a href="{{ route('bantuan') }}" class="nv-text nv-help">Help</a>
-
-      <div class="nv-lang">
-        <button type="button" class="nv-lang-btn" aria-haspopup="true">EN <span>▾</span></button>
-        <ul class="nv-lang-menu">
-          <li>
-            <a href="#">English (EN)</a>
-            <a href="#">Indonesia (ID)</a>
-          </li>
-        </ul>
-      </div>
+      <a href="{{ route('bantuan') }}" class="nv-text nv-help">{{ __('Bantuan') }}</a>
 
       @auth
         <div class="nv-user" id="nvUser">
@@ -130,19 +153,19 @@
               <span>{{ $user->email }}</span>
             </div>
             @if($profilUrl)
-              <a href="{{ $profilUrl }}" class="nv-item" role="menuitem">Lihat profil</a>
+              <a href="{{ $profilUrl }}" class="nv-item" role="menuitem">{{ __('Lihat profil') }}</a>
             @endif
             @if($dashboardUrl)
-              <a href="{{ $dashboardUrl }}" class="nv-item" role="menuitem">Dashboard</a>
+              <a href="{{ $dashboardUrl }}" class="nv-item" role="menuitem">{{ __('Dashboard') }}</a>
             @endif
             <form action="{{ route('logout') }}" method="POST">
               @csrf
-              <button type="submit" class="nv-item out" role="menuitem">Keluar</button>
+              <button type="submit" class="nv-item out" role="menuitem">{{ __('Keluar') }}</button>
             </form>
           </div>
         </div>
       @else
-        <a href="{{ route('login') }}" class="nv-pill">Get Started</a>
+        <a href="{{ route('login') }}" class="nv-pill">{{ __('Mulai Sekarang') }}</a>
       @endauth
     </div>
   </nav>
