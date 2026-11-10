@@ -41,7 +41,7 @@ class User extends Authenticatable
     // Relasi ke Role
     public function role()
     {
-        return $this->belongsTo(Role::class, 'id_role');
+        return $this->belongsTo(Role::class, 'id_role', 'id_role');
     }
 
     // Relasi ke Profil Pelamar

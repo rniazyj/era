@@ -39,6 +39,199 @@
     .table-row-hover:hover { transform: translateY(-2px); background-color: rgba(249, 115, 22, 0.03); }
     .field { width: 100%; border-radius: 0.75rem; border: 1px solid rgba(0,0,0,.1); background: #fff; padding: .6rem .9rem; font-size: .8rem; outline: none; transition: all .2s; }
     .field:focus { border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,.15); }
+
+    /* CARD STATISTIK */
+.stat-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition: box-shadow 0.35s ease;
+  will-change: transform;
+}
+
+/* Orange */
+.stat-card-orange {
+  background: linear-gradient(
+    125deg,
+    #f97316,
+    #fb923c,
+    #ea580c,
+    #f97316
+  );
+  background-size: 300% 300%;
+  animation: orangeGradient 10s ease infinite;
+}
+
+/* Abu-abu */
+.stat-card-gray {
+  background: linear-gradient(
+    125deg,
+    #52525b,
+    #71717a,
+    #3f3f46,
+    #52525b
+  );
+  background-size: 300% 300%;
+  animation: grayGradient 10s ease infinite;
+}
+
+/* Gradient bergerak */
+@keyframes orangeGradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes grayGradient {
+  0%, 100% { background-position: 100% 50%; }
+  50% { background-position: 0% 50%; }
+}
+
+/* Lingkaran blur */
+.stat-decoration {
+  position: absolute;
+  z-index: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  filter: blur(12px);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.stat-decoration-one {
+  width: 190px;
+  height: 190px;
+  top: -65px;
+  right: -55px;
+  background: rgba(255, 255, 255, 0.30);
+  filter: blur(12px);
+  animation: circleMoveOne 12s ease-in-out infinite alternate;
+}
+
+.stat-decoration-two {
+  width: 140px;
+  height: 140px;
+  bottom: -55px;
+  right: 35px;
+  background: rgba(255, 255, 255, 0.20);
+  filter: blur(16px);
+  animation: circleMoveTwo 15s ease-in-out infinite alternate;
+}
+
+@keyframes circleMoveOne {
+  0%   { transform: translate(0, 0) scale(1); }
+  25%  { transform: translate(-90px, 55px) scale(1.1); }
+  50%  { transform: translate(-150px, 125px) scale(.95); }
+  75%  { transform: translate(-60px, 180px) scale(1.15); }
+  100% { transform: translate(-180px, 220px) scale(1); }
+}
+
+@keyframes circleMoveTwo {
+  0%   { transform: translate(0, 0) scale(1); }
+  25%  { transform: translate(-100px, -80px) scale(1.15); }
+  50%  { transform: translate(-180px, -160px) scale(.9); }
+  75%  { transform: translate(-70px, -220px) scale(1.1); }
+  100% { transform: translate(-200px, -260px) scale(1); }
+}
+
+/* Isi card tetap di atas dekorasi */
+.stat-card-inner {
+  position: relative;
+  z-index: 1;
+}
+
+/* Icon */
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+}
+
+/* Hover */
+.stat-card:hover {
+  box-shadow: 0 18px 35px rgba(39, 39, 42, 0.16);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stat-card-orange,
+  .stat-card-gray,
+  .stat-decoration-one,
+  .stat-decoration-two {
+    animation: none;
+  }
+
+  .stat-card {
+    transition: none;
+  }
+}
+
+.filter-tabs {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    background: #000000;
+    border: 1px solid rgba(0, 0, 0, 0.025);
+    border-radius: 9999px;
+    isolation: isolate;
+}
+
+.filter-tab-indicator {
+    position: absolute;
+    z-index: 0;
+    top: 4px;
+    left: 4px;
+    height: calc(100% - 8px);
+    width: 0;
+    border-radius: 9999px;
+    background: #ffffff;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.08),
+        0 1px 2px rgba(0, 0, 0, 0.04);
+    pointer-events: none;
+    will-change: transform, width;
+}
+
+.filter-tab {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 18px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #71717a;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.25s ease;
+}
+
+.filter-tab.active {
+    color: #18181b;
+}
+
+.filter-tab:not(.active):hover {
+    color: #ffffff;
+}
+
+.filter-tab:active {
+    transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .filter-tab {
+        transition: none;
+    }
+}
   </style>
 </head>
 
@@ -51,14 +244,76 @@
     <main class="min-w-0 w-full flex-1 px-4 sm:px-6 md:px-8 lg:px-10 pt-20 sm:pt-24 lg:pt-10 pb-20 sm:pb-24 space-y-6 sm:space-y-8 lg:space-y-10">
 
       <div
-        class="w-full max-w-6xl mx-auto space-y-6 sm:space-y-8 lg:space-y-10 min-w-0"
-        x-data="{
-          filter: 'Semua',
-          q: '',
-          visible(jenis, text) {
-            return (this.filter === 'Semua' || this.filter === jenis) && text.includes(this.q.toLowerCase().trim());
-          }
-        }">
+    class="w-full max-w-6xl mx-auto space-y-6 sm:space-y-8 lg:space-y-10 min-w-0"
+    x-data="{
+        filter: 'Semua',
+        q: '',
+        tabReady: false,
+
+        moveTab(tab, animate = true) {
+            const track = this.$refs.track;
+            const indicator = this.$refs.indicator;
+            const button = this.$refs['tab' + tab];
+
+            if (!track || !indicator || !button) return;
+
+            this.filter = tab;
+
+            const trackRect = track.getBoundingClientRect();
+            const buttonRect = button.getBoundingClientRect();
+
+            const targetX = buttonRect.left - trackRect.left - 4;
+            const targetWidth = buttonRect.width;
+
+            if (!this.tabReady || !animate) {
+                gsap.set(indicator, {
+                    x: targetX,
+                    width: targetWidth
+                });
+
+                this.tabReady = true;
+                return;
+            }
+
+            const currentX = Number(gsap.getProperty(indicator, 'x')) || 0;
+            const currentWidth = Number(gsap.getProperty(indicator, 'width')) || targetWidth;
+
+            const movingRight = targetX > currentX;
+
+            const stretchWidth = movingRight
+                ? targetX - currentX + targetWidth
+                : currentX - targetX + currentWidth;
+
+            const stretchX = movingRight
+                ? currentX
+                : targetX;
+
+            gsap.killTweensOf(indicator);
+
+            gsap.timeline()
+                .to(indicator, {
+                    x: stretchX,
+                    width: stretchWidth,
+                    duration: 0.35,
+                    ease: 'power2.inOut'
+                })
+                .to(indicator, {
+                    x: targetX,
+                    width: targetWidth,
+                    duration: 0.35,
+                    ease: 'power3.out'
+                });
+        },
+
+        visible(jenis, text) {
+            return (
+                (this.filter === 'Semua' || this.filter === jenis)
+                &&
+                text.includes(this.q.toLowerCase().trim())
+            );
+        }
+    }"
+>
 
         <!-- HEADER HALAMAN -->
         <div class="scroll-rv flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 min-w-0">
@@ -80,41 +335,178 @@
         @endif
 
         <!-- KARTU STATISTIK -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 scroll-rv min-w-0">
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 scroll-rv min-w-0">
 
-          <div class="stat-card bg-white rounded-3xl border border-black/5 p-6 shadow-sm flex items-center justify-between cursor-pointer">
-            <div>
-              <p class="text-xs font-medium text-zinc-400">Total Lowongan</p>
-              <h3 class="text-3xl font-bold text-zinc-900 mt-1 count-target" data-target="{{ $totalLowongan }}">0</h3>
-            </div>
-            <div class="w-12 h-12 rounded-2xl bg-orange-50 text-ewforange flex items-center justify-center text-xl font-bold">💼</div>
+  <!-- CARD 1: TOTAL LOWONGAN -->
+  <div class="stat-card stat-card-orange rounded-3xl p-5 sm:p-6 shadow-sm cursor-pointer text-white min-w-0">
+
+    <div class="stat-decoration stat-decoration-one"></div>
+    <div class="stat-decoration stat-decoration-two"></div>
+
+    <div class="stat-card-inner flex flex-col gap-5">
+
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="stat-icon">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor"
+                 stroke-width="1.8" viewBox="0 0 24 24">
+              <rect x="3" y="7" width="18" height="14" rx="2"/>
+              <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              <path d="M3 12h18M10 12v2h4v-2"/>
+            </svg>
           </div>
-
-          <div class="stat-card bg-white rounded-3xl border border-black/5 p-6 shadow-sm flex items-center justify-between cursor-pointer">
-            <div>
-              <p class="text-xs font-medium text-zinc-400">Total Program</p>
-              <h3 class="text-3xl font-bold text-zinc-900 mt-1 count-target" data-target="{{ $totalProgram }}">0</h3>
-            </div>
-            <div class="w-12 h-12 rounded-2xl bg-sky-50 text-sky-500 flex items-center justify-center text-xl font-bold">🎓</div>
-          </div>
-
-          <div class="stat-card bg-white rounded-3xl border border-black/5 p-6 shadow-sm flex items-center justify-between cursor-pointer">
-            <div>
-              <p class="text-xs font-medium text-zinc-400">Sedang Dibuka</p>
-              <h3 class="text-3xl font-bold text-zinc-900 mt-1 count-target" data-target="{{ $totalDibuka }}">0</h3>
-            </div>
-            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center text-xl font-bold">✅</div>
-          </div>
-
-          <div class="stat-card bg-white rounded-3xl border border-black/5 p-6 shadow-sm flex items-center justify-between cursor-pointer">
-            <div>
-              <p class="text-xs font-medium text-zinc-400">Draft / Ditutup</p>
-              <h3 class="text-3xl font-bold text-zinc-900 mt-1 count-target" data-target="{{ $totalLain }}">0</h3>
-            </div>
-            <div class="w-12 h-12 rounded-2xl bg-zinc-100 text-zinc-500 flex items-center justify-center text-xl font-bold">🔒</div>
-          </div>
-
+          <span class="text-xs font-semibold text-white/90">
+            Total Lowongan
+          </span>
         </div>
+
+      </div>
+
+      <div>
+        <h3 class="text-4xl font-bold tracking-tight count-target"
+            data-target="{{ $totalLowongan }}">0</h3>
+      </div>
+
+      <div class="flex items-center justify-between gap-2 pt-4 border-t border-white/20">
+        <span class="text-xs font-medium text-white/90">
+          Lowongan kerja
+        </span>
+        <span class="px-3 py-1.5 rounded-full bg-white text-orange-600 text-[10px] font-bold">
+          Kerja
+        </span>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- CARD 2: TOTAL PROGRAM -->
+  <div class="stat-card stat-card-gray rounded-3xl p-5 sm:p-6 shadow-sm cursor-pointer text-white min-w-0">
+
+    <div class="stat-decoration stat-decoration-one"></div>
+    <div class="stat-decoration stat-decoration-two"></div>
+
+    <div class="stat-card-inner flex flex-col gap-5">
+
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="stat-icon">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor"
+                 stroke-width="1.8" viewBox="0 0 24 24">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+              <path d="M6 12v5c3.5 3 8.5 3 12 0v-5"/>
+            </svg>
+          </div>
+          <span class="text-xs font-semibold text-white/90">
+            Total Program
+          </span>
+        </div>
+
+      </div>
+
+      <div>
+        <h3 class="text-4xl font-bold tracking-tight count-target"
+            data-target="{{ $totalProgram }}">0</h3>
+      </div>
+
+      <div class="flex items-center justify-between gap-2 pt-4 border-t border-white/20">
+        <span class="text-xs font-medium text-white/90">
+          Program magang
+        </span>
+        <span class="px-3 py-1.5 rounded-full bg-white text-zinc-700 text-[10px] font-bold">
+          Magang
+        </span>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- CARD 3: SEDANG DIBUKA -->
+  <div class="stat-card stat-card-orange rounded-3xl p-5 sm:p-6 shadow-sm cursor-pointer text-white min-w-0">
+
+    <div class="stat-decoration stat-decoration-one"></div>
+    <div class="stat-decoration stat-decoration-two"></div>
+
+    <div class="stat-card-inner flex flex-col gap-5">
+
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="stat-icon">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor"
+                 stroke-width="1.8" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="m8 12 2.5 2.5L16 9"/>
+            </svg>
+          </div>
+          <span class="text-xs font-semibold text-white/90">
+            Sedang Dibuka
+          </span>
+        </div>
+
+      </div>
+
+      <div>
+        <h3 class="text-4xl font-bold tracking-tight count-target"
+            data-target="{{ $totalDibuka }}">0</h3>
+      </div>
+
+      <div class="flex items-center justify-between gap-2 pt-4 border-t border-white/20">
+        <span class="text-xs font-medium text-white/90">
+          Status aktif
+        </span>
+        <span class="px-3 py-1.5 rounded-full bg-white text-orange-600 text-[10px] font-bold">
+          Dibuka
+        </span>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- CARD 4: DRAFT / DITUTUP -->
+  <div class="stat-card stat-card-gray rounded-3xl p-5 sm:p-6 shadow-sm cursor-pointer text-white min-w-0">
+
+    <div class="stat-decoration stat-decoration-one"></div>
+    <div class="stat-decoration stat-decoration-two"></div>
+
+    <div class="stat-card-inner flex flex-col gap-5">
+
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="stat-icon">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor"
+                 stroke-width="1.8" viewBox="0 0 24 24">
+              <rect x="3" y="11" width="18" height="10" rx="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              <circle cx="12" cy="16" r="1"/>
+            </svg>
+          </div>
+          <span class="text-xs font-semibold text-white/90">
+            Draft / Ditutup
+          </span>
+        </div>
+
+      </div>
+
+      <div>
+        <h3 class="text-4xl font-bold tracking-tight count-target"
+            data-target="{{ $totalLain }}">0</h3>
+      </div>
+
+      <div class="flex items-center justify-between gap-2 pt-4 border-t border-white/20">
+        <span class="text-xs font-medium text-white/90">
+          Status lainnya
+        </span>
+        <span class="px-3 py-1.5 rounded-full bg-white text-zinc-700 text-[10px] font-bold">
+          Draft / Ditutup
+        </span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
 
         <!-- DAFTAR LOWONGAN -->
         <div class="scroll-rv bg-white rounded-2xl sm:rounded-3xl border border-black/5 p-4 sm:p-6 md:p-8 lg:p-10 shadow-sm space-y-4 sm:space-y-6 min-w-0">
@@ -127,22 +519,84 @@
             <span class="text-xs bg-orange-50 text-ewforange font-bold px-3 py-1 rounded-full self-start sm:self-auto">{{ $rows->count() }} Data</span>
           </div>
 
-          <!-- Filter & Pencarian -->
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div class="flex flex-wrap gap-2">
-              @foreach(['Semua', 'Magang', 'Kerja'] as $tab)
-                <button type="button" @click="filter = '{{ $tab }}'"
-                        :class="filter === '{{ $tab }}' ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'"
-                        class="px-4 py-1.5 rounded-full text-[11px] font-semibold transition">
-                  {{ $tab }}
-                </button>
-              @endforeach
-            </div>
-            <div class="relative w-full md:w-72">
-              <svg class="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
-              <input type="text" x-model="q" placeholder="Cari judul lowongan..." class="field !pl-10 !rounded-full">
-            </div>
-          </div>
+          <!-- FILTER & PENCARIAN -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+    <!-- TAB FILTER -->
+    <div
+        class="filter-tabs"
+        x-ref="track"
+        x-init="$nextTick(() => moveTab('Semua', false))"
+    >
+
+        <!-- Indikator putih -->
+        <div
+            class="filter-tab-indicator"
+            x-ref="indicator"
+        ></div>
+
+        <!-- Semua -->
+        <button
+            type="button"
+            x-ref="tabSemua"
+            @click="moveTab('Semua')"
+            :class="{ 'active': filter === 'Semua' }"
+            class="filter-tab"
+        >
+            Semua
+        </button>
+
+        <!-- Magang -->
+        <button
+            type="button"
+            x-ref="tabMagang"
+            @click="moveTab('Magang')"
+            :class="{ 'active': filter === 'Magang' }"
+            class="filter-tab"
+        >
+            Magang
+        </button>
+
+        <!-- Kerja -->
+        <button
+            type="button"
+            x-ref="tabKerja"
+            @click="moveTab('Kerja')"
+            :class="{ 'active': filter === 'Kerja' }"
+            class="filter-tab"
+        >
+            Kerja
+        </button>
+
+    </div>
+
+    <!-- SEARCH -->
+    <div class="relative w-full sm:w-72">
+
+        <svg
+            class="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+        >
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"
+            />
+        </svg>
+
+        <input
+            type="text"
+            x-model="q"
+            placeholder="Cari judul lowongan..."
+            class="field !pl-10 !rounded-full"
+        >
+
+    </div>
+
+</div>
 
           <div class="w-full min-w-0 overflow-x-auto overscroll-x-contain">
             <table class="w-full min-w-[860px] text-left border-collapse">
@@ -170,7 +624,6 @@
                       x-show="visible(@js($row->jenis), @js(strtolower($row->judul)))">
                     <td class="py-4 px-4">
                       <p class="font-bold text-zinc-900">{{ $row->judul }}</p>
-                      <p class="text-[11px] text-zinc-400 mt-0.5 line-clamp-1 max-w-xs">{{ $row->deskripsi }}</p>
                     </td>
                     <td class="py-4 px-4">
                       <span class="px-2.5 py-1 rounded-md font-semibold text-[10px] {{ $row->jenis == 'Magang' ? 'bg-orange-50 text-ewforange' : 'bg-zinc-100 text-zinc-800' }}">
@@ -225,6 +678,23 @@
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
+    // Animasi masuk isi card statistik
+  gsap.fromTo(
+    '.stat-card-inner',
+    {
+      y: 25,
+      opacity: 0
+    },
+    {
+      y: 0,
+      opacity: 1,
+      duration: 0.8,
+      stagger: 0.15,
+      ease: 'power3.out',
+      delay: 0.2
+    }
+  );
+
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     window.scrollTo(0, 0);
 
@@ -260,14 +730,28 @@
     });
 
     // 4. Hover kartu statistik
-    $('.stat-card').forEach(card => {
-      card.addEventListener('pointerenter', () => {
-        gsap.to(card, { y: -6, scale: 1.02, duration: 0.3, ease: 'power2.out', overwrite: 'auto' });
-      });
-      card.addEventListener('pointerleave', () => {
-        gsap.to(card, { y: 0, scale: 1, duration: 0.4, ease: 'power2.out', overwrite: 'auto' });
-      });
+    // 4. Hover kartu statistik
+$('.stat-card').forEach(card => {
+  card.addEventListener('pointerenter', () => {
+    gsap.to(card, {
+      y: -6,
+      scale: 1.02,
+      duration: 0.3,
+      ease: 'power2.out',
+      overwrite: 'auto'
     });
+  });
+
+  card.addEventListener('pointerleave', () => {
+    gsap.to(card, {
+      y: 0,
+      scale: 1,
+      duration: 0.4,
+      ease: 'power2.out',
+      overwrite: 'auto'
+    });
+  });
+});
   </script>
 </body>
 </html>

@@ -99,7 +99,7 @@
     <ul class="nv-links nav-i">
       <li><a href="{{ route('home') }}">Home</a></li>
       <li><a href="{{ route('tentang') }}">About</a></li>
-      <li><a href="{{ route('program.index') }}">Internship</a></li>
+      <li><a href="{{ route('internship.index') }}">Internship</a></li>
       <li><a href="{{ route('lowongan.index') }}">Job</a></li>
     </ul>
 

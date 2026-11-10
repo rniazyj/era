@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\PersyaratanBerkas;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProgramMagang extends Model
 {
@@ -18,10 +20,14 @@ class ProgramMagang extends Model
         return $this->belongsTo(User::class, 'id_admin', 'id');
     }
 
-    public function persyaratan()
-    {
-        return $this->hasMany(PersyaratanBerkas::class, 'id_program', 'id_program');
-    }
+    public function persyaratan(): HasMany
+{
+    return $this->hasMany(
+        PersyaratanBerkas::class,
+        'id_program',
+        'id_program'
+    );
+}
 
     public function lamaran()
     {

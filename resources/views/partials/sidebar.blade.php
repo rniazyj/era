@@ -20,7 +20,7 @@
   $groups = [
     ['title' => null, 'roles' => null, 'items' => [
       ['Home',   'admin.dashboard',   'admin.dashboard*', 'home'],
-      ['Profil', 'admin.profil.index','admin.profil*',    'profile'],
+      ['Profil', 'admin.profil','admin.profil*',    'profile'],
     ]],
     ['title' => 'Rekrutmen', 'roles' => null, 'items' => [
       ['Kelola Lowongan', 'admin.lowongan.index', 'admin.lowongan*', 'briefcase'],

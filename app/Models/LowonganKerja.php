@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\PersyaratanBerkas;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LowonganKerja extends Model
 {
@@ -18,13 +20,18 @@ class LowonganKerja extends Model
         return $this->belongsTo(User::class, 'id_admin', 'id');
     }
 
-    public function persyaratan()
-    {
-        return $this->hasMany(PersyaratanBerkas::class, 'id_lowongan', 'id_lowongan');
-    }
+    public function persyaratan(): HasMany
+{
+    return $this->hasMany(
+        PersyaratanBerkas::class,
+        'id_lowongan',
+        'id_lowongan'
+    );
+}
 
     public function lamaran()
     {
         return $this->hasMany(Lamaran::class, 'id_lowongan', 'id_lowongan');
     }
+    
 }

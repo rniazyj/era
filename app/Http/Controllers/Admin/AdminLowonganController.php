@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use App\Models\PersyaratanBerkas;
+use Illuminate\Support\Facades\DB;
 
 class AdminLowonganController extends Controller
 {
@@ -41,8 +43,12 @@ class AdminLowonganController extends Controller
         abort_unless(in_array($jenis, ['Kerja', 'Magang'], true), 404);
 
         $item = $jenis === 'Kerja'
-            ? $this->mapKerja(LowonganKerja::findOrFail($id))
-            : $this->mapMagang(ProgramMagang::findOrFail($id));
+    ? $this->mapKerja(
+        LowonganKerja::with('persyaratan')->findOrFail($id)
+    )
+    : $this->mapMagang(
+        ProgramMagang::with('persyaratan')->findOrFail($id)
+    );
 
         return view('admin.lowongan.form', [
             'item'       => $item,
@@ -75,6 +81,24 @@ class AdminLowonganController extends Controller
             'tgl_buka'  => ['required', 'date'],
             'tgl_tutup' => ['required', 'date', 'after_or_equal:tgl_buka'],
             'status'    => ['required', Rule::in(self::STATUS)],
+            'persyaratan' => ['required', 'array', 'min:1'],
+
+'persyaratan.*.nama_berkas' => [
+    'required',
+    'string',
+    'max:255',
+],
+
+'persyaratan.*.format_file' => [
+    'required',
+    'string',
+    Rule::in(['pdf', 'doc', 'docx']),
+],
+
+'persyaratan.*.wajib' => [
+    'required',
+    Rule::in(['0', '1', 0, 1]),
+],
         ];
 
         if ($jenis === 'Kerja') {
@@ -92,6 +116,12 @@ class AdminLowonganController extends Controller
             }
 
             $model->save();
+
+            $this->simpanPersyaratan(
+    $data['persyaratan'],
+    'Kerja',
+    $model->id_lowongan
+);
         } else {
             $existing = $id ? ProgramMagang::findOrFail($id) : null;
 
@@ -149,6 +179,12 @@ class AdminLowonganController extends Controller
             }
 
             $model->save();
+
+            $this->simpanPersyaratan(
+    $data['persyaratan'],
+    'Magang',
+    $model->id_program
+);
         }
 
         return redirect()->route('admin.lowongan.index')
@@ -174,6 +210,14 @@ class AdminLowonganController extends Controller
             'durasi_hari'  => null,
             'status'       => $l->status,
             'created_at'   => $l->created_at?->timestamp ?? 0,
+            'persyaratan' => $l->persyaratan
+    ->map(fn ($p) => [
+        'nama_berkas' => $p->nama_berkas,
+        'format_file' => $p->format_file,
+        'wajib' => (int) $p->wajib,
+    ])
+    ->values()
+    ->toArray(),
         ];
     }
 
@@ -198,6 +242,14 @@ class AdminLowonganController extends Controller
             'durasi_hari'  => $p->durasi_hari,
             'status'       => $p->status,
             'created_at'   => $p->created_at?->timestamp ?? 0,
+            'persyaratan' => $p->persyaratan
+    ->map(fn ($p) => [
+        'nama_berkas' => $p->nama_berkas,
+        'format_file' => $p->format_file,
+        'wajib' => (int) $p->wajib,
+    ])
+    ->values()
+    ->toArray(),
         ];
     }
 
@@ -228,6 +280,32 @@ class AdminLowonganController extends Controller
             'silabus.file'               => 'Silabus harus berupa file.',
             'silabus.mimes'              => 'Silabus harus berupa file PDF, DOC, atau DOCX.',
             'silabus.max'                => 'Ukuran file silabus maksimal 5 MB.',
+            'persyaratan.required' =>
+    'Persyaratan berkas wajib diisi.',
+
+'persyaratan.array' =>
+    'Format persyaratan berkas tidak valid.',
+
+'persyaratan.min' =>
+    'Minimal harus ada satu persyaratan berkas.',
+
+'persyaratan.*.nama_berkas.required' =>
+    'Nama berkas persyaratan wajib diisi.',
+
+'persyaratan.*.nama_berkas.max' =>
+    'Nama berkas maksimal 255 karakter.',
+
+'persyaratan.*.format_file.required' =>
+    'Format file persyaratan wajib dipilih.',
+
+'persyaratan.*.format_file.in' =>
+    'Format file hanya boleh PDF, DOC, atau DOCX.',
+
+'persyaratan.*.wajib.required' =>
+    'Status persyaratan wajib dipilih.',
+
+'persyaratan.*.wajib.in' =>
+    'Status persyaratan tidak valid.',
         ];
     }
 
@@ -244,6 +322,41 @@ class AdminLowonganController extends Controller
             'tgl_tutup'   => 'Tanggal tutup',
             'tgl_mulai'   => 'Tanggal mulai magang',
             'tgl_selesai' => 'Tanggal selesai magang',
+            'persyaratan' => 'Persyaratan berkas',
+'persyaratan.*.nama_berkas' => 'Nama berkas',
+'persyaratan.*.format_file' => 'Format file',
+'persyaratan.*.wajib' => 'Status persyaratan',
         ];
     }
+
+    /**
+ * Simpan persyaratan berkas berdasarkan jenis lowongan.
+ */
+private function simpanPersyaratan(
+    array $persyaratan,
+    string $jenis,
+    int $id
+): void {
+    // Hapus persyaratan lama untuk lowongan/program ini
+    if ($jenis === 'Kerja') {
+        PersyaratanBerkas::where('id_lowongan', $id)->delete();
+    } else {
+        PersyaratanBerkas::where('id_program', $id)->delete();
+    }
+
+    // Simpan persyaratan terbaru
+    foreach ($persyaratan as $item) {
+        PersyaratanBerkas::create([
+            'id_lowongan' => $jenis === 'Kerja' ? $id : null,
+
+            'id_program' => $jenis === 'Magang' ? $id : null,
+
+            'nama_berkas' => trim($item['nama_berkas']),
+
+            'format_file' => strtolower($item['format_file']),
+
+            'wajib' => (int) $item['wajib'],
+        ]);
+    }
+}
 }

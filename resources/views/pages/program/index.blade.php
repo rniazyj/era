@@ -89,153 +89,125 @@
 
 <!-- 2. EKSPLORASI PROGRAM MAGANG -->
 <section class="px-6 md:px-16 py-16 max-w-7xl mx-auto border-t border-black/5">
-  <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 rv">
-    <div>
-      <h2 class="text-2xl md:text-3xl font-semibold tracking-tight">Eksplorasi Program Magang</h2>
-      <p class="text-sm text-black/50 mt-1">Temukan program magang yang sesuai dengan minat dan keahlianmu.</p>
-    </div>
-    <div class="flex gap-2 text-sm">
-      <button class="px-4 py-2 bg-zinc-900 text-white rounded-full font-medium">Semua Program (6)</button>
-      <button class="px-4 py-2 bg-white border border-black/10 rounded-full font-medium hover:bg-black/5 text-black/60">Teknologi Informasi (2)</button>
-      <button class="px-4 py-2 bg-white border border-black/10 rounded-full font-medium hover:bg-black/5 text-black/60">Bisnis & Sosial (4)</button>
-    </div>
+  <div class="flex flex-col items-center text-center gap-6 mb-10 rv">
+
+  <div>
+    <h2 class="text-2xl md:text-3xl font-semibold tracking-tight">
+      Eksplorasi Program Magang
+    </h2>
+
+    <p class="text-sm text-black/50 mt-2">
+      Temukan program magang yang sesuai dengan minat dan keahlianmu.
+    </p>
   </div>
 
-  <div class="grid md:grid-cols-3 gap-5 rv">
-    <!-- Highlighted Card (Data Analyst) -->
-    <div class="bg-zinc-900 text-white rounded-3xl p-6 flex flex-col justify-between shadow-lg relative overflow-hidden group">
-      <div class="absolute top-0 right-0 w-32 h-32 bg-ewforange/20 blur-3xl rounded-full -mr-10 -mt-10"></div>
+</div>
+
+  
+<div class="grid md:grid-cols-3 gap-5 rv">
+
+  @forelse ($programs as $program)
+
+    <div class="bg-white rounded-3xl p-6 flex flex-col justify-between border border-black/5 hover:border-ewforange/30 transition shadow-sm hover:shadow-md">
+
       <div>
         <div class="flex justify-between items-start mb-4">
-          <div class="w-10 h-10 rounded-xl bg-ewforange text-white flex items-center justify-center font-bold text-lg">D</div>
-          <span class="text-xs font-medium text-white/60">2 Posisi</span>
+
+          <div class="w-10 h-10 rounded-xl bg-orange-50 text-ewforange flex items-center justify-center font-bold text-lg">
+            {{ strtoupper(substr($program->nama_program, 0, 1)) }}
+          </div>
+
+          <span class="text-xs font-medium text-black/40">
+            {{ $program->kuota ?? 0 }} Posisi
+          </span>
+
         </div>
-        <h3 class="text-lg font-semibold mb-2">Data Analyst</h3>
-        <span class="inline-block px-2 py-1 bg-white/10 text-orange-300 text-[10px] font-semibold rounded mb-3">URGENT</span>
-        <p class="text-xs text-white/60 leading-relaxed">Menganalisa tren pasar derivatif dan data transaksi harian menggunakan Python dan alat visualisasi data.</p>
+
+        <h3 class="text-lg font-semibold mb-2 text-zinc-900">
+          {{ $program->nama_program }}
+        </h3>
+
+        <p class="text-xs text-black/50 leading-relaxed mb-3">
+          {{ $program->deskripsi }}
+        </p>
       </div>
-      <div class="mt-6 border-t border-white/10 pt-4">
-        <div class="flex gap-3 text-[11px] text-white/70 mb-4">
-          <span>📍 Surabaya (On-Site)</span>
-          <span>⏱ Full-Time</span>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-[10px] text-white/50">Ditutup 3 Hari Lagi</span>
-          <a href="{{ route('pelamar.lamaran.create') }}" class="inline-block px-4 py-1.5 bg-ewforange text-white text-xs font-semibold rounded-full hover:scale-105 transition">Lamar Posisi</a>
-        </div>
-      </div>
+
+      <div class="mt-4 border-t border-black/5 pt-4">
+
+    {{-- Lokasi dan jenis magang --}}
+    <div class="flex gap-3 text-[11px] text-black/60 mb-4">
+        <span>📍 Surabaya (On-Site)</span>
+        <span>⏱ Magang</span>
     </div>
 
-    <!-- Regular Card 1 -->
-    <div class="bg-white rounded-3xl p-6 flex flex-col justify-between border border-black/5 hover:border-ewforange/30 transition shadow-sm hover:shadow-md">
-      <div>
-        <div class="flex justify-between items-start mb-4">
-          <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center font-bold text-lg">A</div>
-          <span class="text-xs font-medium text-black/40">5 Posisi</span>
-        </div>
-        <h3 class="text-lg font-semibold mb-2 text-zinc-900">Administrasi Bisnis</h3>
-        <p class="text-xs text-black/50 leading-relaxed mb-3">Praktik tata kelola dokumen operasional pialang, input data nasabah ke CRM, dan dukung layanan kantor.</p>
-      </div>
-      <div class="mt-4 border-t border-black/5 pt-4">
-        <div class="flex gap-3 text-[11px] text-black/60 mb-4">
-          <span>📍 Surabaya (On-Site)</span>
-          <span>⏱ Full-Time</span>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-[10px] text-black/40">Tayang 2 Hari Lalu</span>
-          <button class="px-4 py-1.5 bg-orange-50 text-ewforange text-xs font-semibold rounded-full hover:bg-orange-100 transition">Lamar Posisi</button>
-        </div>
-      </div>
+    {{-- Tanggal dan tombol --}}
+    <div class="flex items-center justify-between gap-3">
+
+        {{-- Tanggal penutupan --}}
+        <span class="text-[10px] text-black/40">
+            @if ($program->tgl_tutup)
+                Ditutup {{ \Carbon\Carbon::parse($program->tgl_tutup)->translatedFormat('d F Y') }}
+            @else
+                Jadwal belum tersedia
+            @endif
+        </span>
+
+        <a
+    href="{{ route('internship.show', ['id' => $program->id_program]) }}"
+    class="inline-flex items-center justify-center px-4 py-2
+           bg-orange-50 text-ewforange text-xs font-semibold
+           rounded-full hover:bg-orange-100 transition whitespace-nowrap"
+>
+    Lihat Detail
+</a>
+
+        {{-- Guest --}}
+        @if (!auth()->check())
+
+            <a
+                href="{{ route('login') }}"
+                style="display: inline-flex;"
+                class="px-4 py-2 bg-orange-100 text-ewforange text-xs font-semibold rounded-full hover:bg-orange-50 transition whitespace-nowrap"
+            >
+                Lamar Posisi
+            </a>
+
+        {{-- Pelamar --}}
+        @elseif (auth()->user()->role && auth()->user()->role->nama_role === 'pelamar')
+
+            <a
+                href="{{ route('pelamar.lamaran.create', ['id_program' => $program->id_program]) }}"
+                style="display: inline-flex;"
+                class="px-4 py-2 bg-orange-100 text-ewforange text-xs font-semibold rounded-full hover:bg-orange-50 transition whitespace-nowrap"
+            >
+                Lamar Posisi
+            </a>
+
+        @endif
+
     </div>
 
-    <!-- Regular Card 2 -->
-    <div class="bg-white rounded-3xl p-6 flex flex-col justify-between border border-black/5 hover:border-ewforange/30 transition shadow-sm hover:shadow-md">
-      <div>
-        <div class="flex justify-between items-start mb-4">
-          <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-500 flex items-center justify-center font-bold text-lg">F</div>
-          <span class="text-xs font-medium text-black/40">1 Posisi</span>
-        </div>
-        <h3 class="text-lg font-semibold mb-2 text-zinc-900">Full-Stack Developer</h3>
-        <p class="text-xs text-black/50 leading-relaxed mb-3">Membantu tim IT internal merancang sistem registrasi nasabah online berbasis Laravel dan React.</p>
-      </div>
-      <div class="mt-4 border-t border-black/5 pt-4">
-        <div class="flex gap-3 text-[11px] text-black/60 mb-4">
-          <span>📍 Surabaya (On-Site)</span>
-          <span>⏱ Full-Time</span>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-[10px] text-black/40">Tayang 4 Hari Lalu</span>
-          <button class="px-4 py-1.5 bg-orange-50 text-ewforange text-xs font-semibold rounded-full hover:bg-orange-100 transition">Lamar Posisi</button>
-        </div>
-      </div>
+</div>
+  @empty
+
+    <div class="md:col-span-3 bg-white rounded-3xl p-10 text-center border border-black/5">
+
+      <div class="text-4xl mb-4">📋</div>
+
+      <h3 class="text-lg font-semibold text-zinc-900">
+        Belum Ada Program Magang
+      </h3>
+
+      <p class="text-sm text-black/50 mt-2">
+        Saat ini belum tersedia program magang yang dibuka.
+        Silakan cek kembali secara berkala.
+      </p>
+
     </div>
 
-    <!-- Regular Card 3 -->
-    <div class="bg-white rounded-3xl p-6 flex flex-col justify-between border border-black/5 hover:border-ewforange/30 transition shadow-sm hover:shadow-md">
-      <div>
-        <div class="flex justify-between items-start mb-4">
-          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center font-bold text-lg">A</div>
-          <span class="text-xs font-medium text-black/40">4 Posisi</span>
-        </div>
-        <h3 class="text-lg font-semibold mb-2 text-zinc-900">Akuntansi</h3>
-        <p class="text-xs text-black/50 leading-relaxed mb-3">Membantu penyusunan laporan harian kas, input mutasi segregated account, dan rekonsiliasi keuangan cabang.</p>
-      </div>
-      <div class="mt-4 border-t border-black/5 pt-4">
-        <div class="flex gap-3 text-[11px] text-black/60 mb-4">
-          <span>📍 Surabaya (On-Site)</span>
-          <span>⏱ Full-Time</span>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-[10px] text-black/40">Tayang 5 Hari Lalu</span>
-          <button class="px-4 py-1.5 bg-orange-50 text-ewforange text-xs font-semibold rounded-full hover:bg-orange-100 transition">Lamar Posisi</button>
-        </div>
-      </div>
-    </div>
+  @endforelse
 
-    <!-- Regular Card 4 -->
-    <div class="bg-white rounded-3xl p-6 flex flex-col justify-between border border-black/5 hover:border-ewforange/30 transition shadow-sm hover:shadow-md">
-      <div>
-        <div class="flex justify-between items-start mb-4">
-          <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-500 flex items-center justify-center font-bold text-lg">M</div>
-          <span class="text-xs font-medium text-black/40">6 Posisi</span>
-        </div>
-        <h3 class="text-lg font-semibold mb-2 text-zinc-900">Manajemen</h3>
-        <p class="text-xs text-black/50 leading-relaxed mb-3">Mempelajari alur manajerial divisi pemasaran derivatif, riset kompetitor, dan pengembangan strategi akuisisi klien.</p>
-      </div>
-      <div class="mt-4 border-t border-black/5 pt-4">
-        <div class="flex gap-3 text-[11px] text-black/60 mb-4">
-          <span>📍 Surabaya (On-Site)</span>
-          <span>⏱ Full-Time</span>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-[10px] text-black/40">Tayang 2 Hari Lalu</span>
-          <button class="px-4 py-1.5 bg-orange-50 text-ewforange text-xs font-semibold rounded-full hover:bg-orange-100 transition">Lamar Posisi</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Regular Card 5 -->
-    <div class="bg-white rounded-3xl p-6 flex flex-col justify-between border border-black/5 hover:border-ewforange/30 transition shadow-sm hover:shadow-md">
-      <div>
-        <div class="flex justify-between items-start mb-4">
-          <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-500 flex items-center justify-center font-bold text-lg">H</div>
-          <span class="text-xs font-medium text-black/40">2 Posisi</span>
-        </div>
-        <h3 class="text-lg font-semibold mb-2 text-zinc-900">Hubungan Internasional</h3>
-        <p class="text-xs text-black/50 leading-relaxed mb-3">Mempelajari dampak isu makroekonomi global terhadap pergerakan komoditas dan valuta asing (Forex).</p>
-      </div>
-      <div class="mt-4 border-t border-black/5 pt-4">
-        <div class="flex gap-3 text-[11px] text-black/60 mb-4">
-          <span>📍 Surabaya (On-Site)</span>
-          <span>⏱ Full-Time</span>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-[10px] text-black/40">Tayang Hari Ini</span>
-          <button class="px-4 py-1.5 bg-orange-50 text-ewforange text-xs font-semibold rounded-full hover:bg-orange-100 transition">Lamar Posisi</button>
-        </div>
-      </div>
-    </div>
-  </div>
+</div>
   
 </section>
 
@@ -384,26 +356,48 @@
   </div>
 </section>
 
-<!-- 5. CTA SECTION -->
+{{-- 5. CTA SECTION --}}
+@guest
 <section class="px-6 md:px-16 pb-24 max-w-7xl mx-auto">
   <div class="bg-zinc-900 rounded-3xl py-20 px-8 text-center text-white relative overflow-hidden rv">
-    <!-- Abstract blurred shapes -->
-<div class="animate-stroll-orange absolute top-0 left-1/4 w-64 h-64 bg-orange-500/30 blur-[80px] rounded-full mix-blend-screen pointer-events-none"></div>
-<div class="animate-stroll-blue absolute bottom-0 right-1/4 w-64 h-64 bg-blue-500/30 blur-[80px] rounded-full mix-blend-screen pointer-events-none"></div>
-    
+
+    {{-- Abstract blurred shapes --}}
+    <div class="animate-stroll-orange absolute top-0 left-1/4 w-64 h-64 bg-orange-500/30 blur-[80px] rounded-full mix-blend-screen pointer-events-none"></div>
+
+    <div class="animate-stroll-blue absolute bottom-0 right-1/4 w-64 h-64 bg-blue-500/30 blur-[80px] rounded-full mix-blend-screen pointer-events-none"></div>
+
     <div class="flex justify-center gap-4 text-white/30 text-xs font-semibold mb-8 flex-wrap max-w-lg mx-auto pointer-events-none">
-      <span>Data Analyst</span><span>Administrasi</span><span>Developer</span><span>Akuntansi</span><span>Manajemen</span><span>PR</span>
+      <span>Data Analyst</span>
+      <span>Administrasi</span>
+      <span>Developer</span>
+      <span>Akuntansi</span>
+      <span>Manajemen</span>
+      <span>PR</span>
     </div>
-    
+
     <h2 class="text-3xl md:text-5xl font-semibold tracking-tight relative z-10 leading-tight">
       Siap Mengambil Langkah Baru<br>
       <span class="text-ewforange">Dalam Karier Anda?</span>
     </h2>
-    <p class="mt-4 text-sm text-white/60 max-w-md mx-auto relative z-10">Bergabunglah dengan ribuan talenta berbakat yang telah mewujudkan impian karier profesional bersama PT Equityworld Futures.</p>
-    
+
+    <p class="mt-4 text-sm text-white/60 max-w-md mx-auto relative z-10">
+      Bergabunglah dengan ribuan talenta berbakat yang telah mewujudkan impian karier profesional bersama PT Equityworld Futures.
+    </p>
+
     <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4 relative z-10">
-      <a href="{{ route('register') }}" class="px-8 py-3.5 bg-ewforange text-white text-sm font-semibold rounded-full hover:bg-orange-600 transition">Daftar Akun</a>
+      <a
+        href="{{ route('register') }}"
+        class="px-8 py-3.5 bg-ewforange text-white text-sm font-semibold rounded-full hover:bg-orange-600 transition"
+      >
+        Daftar Akun
+      </a>
     </div>
+
+  </div>
+</section>
+@endguest
+
+</div>
   </div>
 </section>
 </main>

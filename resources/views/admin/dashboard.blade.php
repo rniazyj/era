@@ -13,11 +13,194 @@
       colors: { paper:'#faf9fc', lime:'#e9f56b', brand:'#34d3b0', ewforange:'#f97316' } } } };
   </script>
   <style>
-    .scroll-rv { opacity: 0; transform: translateY(40px); }
-    .table-row-item { opacity: 0; transform: translateY(20px); }
-    .table-row-hover { transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-    .table-row-hover:hover { transform: translateY(-2px); background-color: rgba(249, 115, 22, 0.03); }
-  </style>
+  /* Background card statistik */
+  .stat-card {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    transition:
+      transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.35s ease;
+    will-change: transform;
+  }
+
+  /* Gradient bergerak */
+  .stat-card-orange {
+    background: linear-gradient(
+      125deg,
+      #f97316,
+      #fb923c,
+      #ea580c,
+      #f97316
+    );
+    background-size: 300% 300%;
+    animation: orangeGradient 8s ease infinite;
+  }
+
+  .stat-card-gray {
+    background: linear-gradient(
+      125deg,
+      #52525b,
+      #71717a,
+      #3f3f46,
+      #52525b
+    );
+    background-size: 300% 300%;
+    animation: grayGradient 8s ease infinite;
+  }
+
+  @keyframes orangeGradient {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  @keyframes grayGradient {
+    0%, 100% {
+      background-position: 100% 50%;
+    }
+    50% {
+      background-position: 0% 50%;
+    }
+  }
+
+  /* Container dekorasi */
+.stat-decoration {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 50%;
+
+  /* Putih transparan dan blur */
+  background: rgba(255, 255, 255, 0.28);
+  filter: blur(12px);
+
+  /* Animasi bergerak */
+  will-change: transform;
+}
+
+/* Lingkaran pertama */
+.stat-decoration-one {
+  width: 190px;
+  height: 190px;
+
+  top: -65px;
+  right: -55px;
+
+  background: rgba(255, 255, 255, 0.30);
+  filter: blur(12px);
+
+  animation: circleMoveOne 12s ease-in-out infinite alternate;
+}
+
+/* Lingkaran kedua */
+.stat-decoration-two {
+  width: 140px;
+  height: 140px;
+
+  bottom: -55px;
+  right: 35px;
+
+  background: rgba(255, 255, 255, 0.20);
+  filter: blur(16px);
+
+  animation: circleMoveTwo 15s ease-in-out infinite alternate;
+}
+
+/* Gerakan lingkaran pertama */
+@keyframes circleMoveOne {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  25% {
+    transform: translate(-90px, 55px) scale(1.1);
+  }
+
+  50% {
+    transform: translate(-150px, 125px) scale(0.95);
+  }
+
+  75% {
+    transform: translate(-60px, 180px) scale(1.15);
+  }
+
+  100% {
+    transform: translate(-180px, 220px) scale(1);
+  }
+}
+
+/* Gerakan lingkaran kedua */
+@keyframes circleMoveTwo {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  25% {
+    transform: translate(-100px, -80px) scale(1.15);
+  }
+
+  50% {
+    transform: translate(-180px, -160px) scale(0.9);
+  }
+
+  75% {
+    transform: translate(-70px, -220px) scale(1.1);
+  }
+
+  100% {
+    transform: translate(-200px, -260px) scale(1);
+  }
+}
+
+/* Menghormati pengaturan reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .stat-decoration-one,
+  .stat-decoration-two {
+    animation: none;
+  }
+}
+
+  /* Icon card */
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    flex-shrink: 0;
+  }
+
+  /* Animasi hover */
+  .stat-card:hover {
+    transform: translateY(-6px) scale(1.015);
+    box-shadow: 0 18px 35px rgba(39, 39, 42, 0.16);
+  }
+
+  /* Animasi saat card muncul */
+  .stat-card-inner {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stat-card-orange,
+    .stat-card-gray {
+      animation: none;
+    }
+
+    .stat-card {
+      transition: none;
+    }
+  }
+</style>
 </head>
 
 <body class="bg-paper text-zinc-900 font-sans antialiased overflow-x-hidden">
@@ -40,23 +223,134 @@
       </div>
 
       <!-- KARTU STATISTIK RINGKAS -->
-      <div class="w-full max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 scroll-rv min-w-0">
-        <div class="stat-card bg-white rounded-3xl border border-black/5 p-6 shadow-sm flex items-center justify-between cursor-pointer">
-          <div>
-            <p class="text-xs font-medium text-zinc-400">Total Pelamar Baru</p>
-            <h3 class="text-3xl font-bold text-zinc-900 mt-1 count-target" data-target="{{ isset($pelamarBaruList) ? count($pelamarBaruList) : 2 }}">0</h3>
+<div class="w-full max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 scroll-rv min-w-0">
+
+  <!-- CARD 1: TOTAL PELAMAR BARU -->
+  <div class="stat-card stat-card-orange rounded-3xl p-5 sm:p-7 shadow-sm cursor-pointer text-white min-w-0">
+
+    <!-- Dekorasi background -->
+    <div class="stat-decoration stat-decoration-one"></div>
+    <div class="stat-decoration stat-decoration-two"></div>
+
+    <div class="stat-card-inner relative z-10 flex flex-col gap-5">
+
+      <!-- Header card -->
+      <div class="flex items-center justify-between gap-3">
+
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="stat-icon">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="24" height="24"
+                 viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="1.8"
+                 stroke-linecap="round"
+                 stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
           </div>
-          <div class="w-12 h-12 rounded-2xl bg-orange-50 text-ewforange flex items-center justify-center text-xl font-bold">📥</div>
+
+          <span class="text-xs sm:text-sm font-semibold text-white/90">
+            Total Pelamar Baru
+          </span>
         </div>
 
-        <div class="stat-card bg-white rounded-3xl border border-black/5 p-6 shadow-sm flex items-center justify-between cursor-pointer">
-          <div>
-            <p class="text-xs font-medium text-zinc-400">User / Pelamar Belum Lengkap</p>
-            <h3 class="text-3xl font-bold text-zinc-900 mt-1 count-target" data-target="{{ isset($userBelumLengkapList) ? count($userBelumLengkapList) : 1 }}">0</h3>
-          </div>
-          <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center text-xl font-bold">⚠️</div>
-        </div>
       </div>
+
+      <!-- Angka statistik -->
+      <div>
+        <h3
+          class="text-4xl sm:text-5xl font-bold tracking-tight count-target"
+          data-target="{{ isset($pelamarBaruList) ? count($pelamarBaruList) : 0 }}">
+          0
+        </h3>
+
+      </div>
+
+      <!-- Footer card -->
+      <div class="flex items-center justify-between gap-3 pt-4 border-t border-white/20">
+
+        <span class="text-xs font-medium text-white/90">
+          Perlu ditinjau
+        </span>
+
+        <span class="px-3 py-1.5 rounded-full bg-white text-orange-600 text-[10px] font-bold">
+          Pelamar
+        </span>
+
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- CARD 2: CV BELUM LENGKAP -->
+  <div class="stat-card stat-card-gray rounded-3xl p-5 sm:p-7 shadow-sm cursor-pointer text-white min-w-0">
+
+    <!-- Dekorasi background -->
+    <div class="stat-decoration stat-decoration-one"></div>
+    <div class="stat-decoration stat-decoration-two"></div>
+
+    <div class="stat-card-inner relative z-10 flex flex-col gap-5">
+
+      <!-- Header card -->
+      <div class="flex items-center justify-between gap-3">
+
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="stat-icon">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="24" height="24"
+                 viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="1.8"
+                 stroke-linecap="round"
+                 stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <path d="M14 2v6h6"/>
+              <path d="M8 13h8"/>
+              <path d="M8 17h5"/>
+            </svg>
+          </div>
+
+          <span class="text-xs sm:text-sm font-semibold text-white/90">
+            CV Belum Lengkap
+          </span>
+        </div>
+
+      </div>
+
+      <!-- Angka statistik -->
+      <div>
+        <h3
+          class="text-4xl sm:text-5xl font-bold tracking-tight count-target"
+          data-target="{{ isset($userBelumLengkapList) ? count($userBelumLengkapList) : 0 }}">
+          0
+        </h3>
+
+      </div>
+
+      <!-- Footer card -->
+      <div class="flex items-center justify-between gap-3 pt-4 border-t border-white/20">
+
+        <span class="text-xs font-medium text-white/90">
+          Perlu dilengkapi
+        </span>
+
+        <span class="px-3 py-1.5 rounded-full bg-white text-zinc-700 text-[10px] font-bold">
+          Profil & CV
+        </span>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
 
       <!-- BAGIAN 1: PELAMAR BARU -->
       <div class="w-full max-w-6xl mx-auto scroll-rv bg-white rounded-2xl sm:rounded-3xl border border-black/5 p-4 sm:p-6 md:p-8 lg:p-10 shadow-sm space-y-4 sm:space-y-6 min-w-0">
@@ -174,6 +468,23 @@
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
+    // Animasi masuk untuk card statistik
+  gsap.fromTo(
+    '.stat-card-inner',
+    {
+      y: 25,
+      opacity: 0
+    },
+    {
+      y: 0,
+      opacity: 1,
+      duration: 0.8,
+      stagger: 0.15,
+      ease: 'power3.out',
+      delay: 0.2
+    }
+  );
+
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     window.scrollTo(0, 0);
 
@@ -236,14 +547,29 @@
     });
 
     // 4. Efek Interaktif Hover pada Kartu Statistik
-    $('.stat-card').forEach(card => {
-      card.addEventListener('pointerenter', () => {
-        gsap.to(card, { y: -6, scale: 1.02, duration: 0.3, ease: 'power2.out', overwrite: 'auto' });
-      });
-      card.addEventListener('pointerleave', () => {
-        gsap.to(card, { y: 0, scale: 1, duration: 0.4, ease: 'power2.out', overwrite: 'auto' });
+  $('.stat-card').forEach(card => {
+
+    card.addEventListener('pointerenter', () => {
+      gsap.to(card, {
+        y: -6,
+        scale: 1.015,
+        duration: 0.35,
+        ease: 'power2.out',
+        overwrite: 'auto'
       });
     });
+
+    card.addEventListener('pointerleave', () => {
+      gsap.to(card, {
+        y: 0,
+        scale: 1,
+        duration: 0.4,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+    });
+
+  });
   </script>
 </body>
 </html>

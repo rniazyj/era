@@ -2,25 +2,54 @@
   $isEdit = ! empty($item);
   $jenis  = $isEdit ? $item['jenis'] : old('jenis', 'Magang');
 
-  // Ambil nilai lama (kalau validasi gagal), kalau tidak ada pakai data yang sedang diedit
-  $val = fn ($key, $default = '') => old($key, $isEdit ? ($item[$key] ?? $default) : $default);
+  $val = fn ($key, $default = '') =>
+    old($key, $isEdit ? ($item[$key] ?? $default) : $default);
 
   $silabusUrl  = $isEdit ? ($item['silabus_url'] ?? null) : null;
   $silabusNama = $isEdit ? ($item['silabus_nama'] ?? '') : '';
 
   $action = $isEdit
-    ? route('admin.lowongan.update', ['jenis' => strtolower($item['jenis']), 'id' => $item['id']])
+    ? route('admin.lowongan.update', [
+        'jenis' => strtolower($item['jenis']),
+        'id' => $item['id']
+      ])
     : route('admin.lowongan.store');
 
   $backUrl = route('admin.lowongan.index');
 
-  // Data awal untuk komponen Alpine (validasi di browser)
+  // Persyaratan lama dari database
+  $persyaratanAwal = $isEdit
+    ? ($item['persyaratan'] ?? [])
+    : [];
+
+  // Kalau validasi gagal, tampilkan input persyaratan sebelumnya
+  $persyaratanLama = old('persyaratan');
+
+  if (is_array($persyaratanLama)) {
+    $persyaratanAwal = array_values($persyaratanLama);
+  }
+
+  // Form baru minimal memiliki satu baris
+  if (empty($persyaratanAwal)) {
+    $persyaratanAwal = [
+      [
+        'nama_berkas' => '',
+        'format_file' => 'pdf',
+        'wajib' => 1,
+      ],
+    ];
+  }
+
   $init = [
-    'jenis'        => $jenis,
-    'hasExisting'  => (bool) $silabusUrl,
-    'existingUrl'  => $silabusUrl,
+    'jenis' => $jenis,
+
+    'hasExisting' => (bool) $silabusUrl,
+    'existingUrl' => $silabusUrl,
     'existingName' => $silabusNama,
-    'values'       => [
+
+    'persyaratan' => array_values($persyaratanAwal),
+
+    'values' => [
       'judul'       => (string) $val('judul'),
       'deskripsi'   => (string) $val('deskripsi'),
       'kualifikasi' => (string) $val('kualifikasi'),
@@ -229,6 +258,197 @@
               </div>
             </section>
 
+            <!-- SEKSI: PERSYARATAN BERKAS -->
+<section class="space-y-4">
+
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-black/5">
+
+    <div>
+      <h3 class="text-sm font-bold tracking-wide text-zinc-900 uppercase">
+        Persyaratan Berkas
+      </h3>
+
+      <p class="text-[11px] text-zinc-400 mt-1">
+        Tentukan dokumen yang harus dikumpulkan oleh pelamar.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      @click="tambahPersyaratan()"
+      class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-orange-50 text-ewforange hover:bg-orange-100 text-xs font-bold transition"
+    >
+      <svg
+        class="w-4 h-4"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M12 5v14m-7-7h14"
+        />
+      </svg>
+
+      Tambah Berkas
+    </button>
+
+  </div>
+
+  <!-- Error jumlah persyaratan -->
+  <p
+    x-show="errors.persyaratan"
+    x-cloak
+    x-text="errors.persyaratan"
+    class="text-[11px] font-medium text-rose-500"
+  ></p>
+
+  <!-- Daftar persyaratan -->
+  <div class="space-y-3">
+
+    <template x-for="(item, index) in persyaratan" :key="index">
+
+      <div
+        class="rounded-2xl border border-black/5 bg-paper p-4 sm:p-5 space-y-4"
+      >
+
+        <!-- Header baris -->
+        <div class="flex items-center justify-between gap-3">
+
+          <div class="flex items-center gap-2">
+
+            <span
+              class="w-7 h-7 rounded-lg bg-orange-50 text-ewforange flex items-center justify-center text-xs font-bold"
+              x-text="index + 1"
+            ></span>
+
+            <span class="text-xs font-bold text-zinc-800">
+              Dokumen Persyaratan
+            </span>
+
+          </div>
+
+          <button
+            type="button"
+            @click="hapusPersyaratan(index)"
+            :disabled="persyaratan.length <= 1"
+            :class="persyaratan.length <= 1
+              ? 'text-zinc-300 cursor-not-allowed'
+              : 'text-zinc-400 hover:text-rose-500'"
+            class="text-xs font-bold transition"
+            aria-label="Hapus persyaratan"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"
+              />
+            </svg>
+          </button>
+
+        </div>
+
+        <!-- Nama berkas -->
+        <div>
+
+          <label
+            class="block text-[11px] font-semibold text-zinc-500 mb-1.5"
+          >
+            Nama Berkas
+            <span class="text-rose-500">*</span>
+          </label>
+
+          <input
+            type="text"
+            :name="'persyaratan[' + index + '][nama_berkas]'"
+            x-model="item.nama_berkas"
+            maxlength="255"
+            placeholder="Contoh: Curriculum Vitae (CV)"
+            class="field"
+            :class="{
+              '!border-rose-400':
+                errors['persyaratan_' + index]
+            }"
+          >
+
+          <p
+            x-show="errors['persyaratan_' + index]"
+            x-cloak
+            x-text="errors['persyaratan_' + index]"
+            class="text-[11px] font-medium text-rose-500 mt-1.5"
+          ></p>
+
+        </div>
+
+        <!-- Format file dan wajib -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <!-- Format file -->
+          <div>
+
+            <label
+              class="block text-[11px] font-semibold text-zinc-500 mb-1.5"
+            >
+              Format File
+              <span class="text-rose-500">*</span>
+            </label>
+
+            <select
+              :name="'persyaratan[' + index + '][format_file]'"
+              x-model="item.format_file"
+              class="field"
+            >
+              <option value="pdf">PDF</option>
+              <option value="doc">DOC</option>
+              <option value="docx">DOCX</option>
+            </select>
+
+          </div>
+
+          <!-- Wajib -->
+          <div>
+
+            <label
+              class="block text-[11px] font-semibold text-zinc-500 mb-1.5"
+            >
+              Status Persyaratan
+            </label>
+
+            <select
+              :name="'persyaratan[' + index + '][wajib]'"
+              x-model="item.wajib"
+              class="field"
+            >
+              <option value="1">Wajib</option>
+              <option value="0">Opsional</option>
+            </select>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </template>
+
+  </div>
+
+  <p class="text-[11px] text-zinc-400">
+    Pelamar akan diminta mengunggah dokumen sesuai persyaratan
+    yang ditentukan. Format file mengikuti pilihan admin.
+  </p>
+
+</section>
+
             <!-- SEKSI: KUOTA & STATUS -->
             <section class="space-y-4">
               <h3 class="text-sm font-bold tracking-wide text-zinc-900 uppercase pb-3 border-b border-black/5">Kuota & Status</h3>
@@ -348,6 +568,9 @@
         jenis: init.jenis,
         f: init.values,
 
+        // Persyaratan berkas
+        persyaratan: init.persyaratan || [],
+
         // Silabus
         hasExisting: init.hasExisting, // true kalau file silabus lama sudah ada (mode edit)
         existingUrl: init.existingUrl,
@@ -364,8 +587,19 @@
 
         errors: {},
         submitted: false,
-        order: ['judul', 'deskripsi', 'kualifikasi', 'silabus', 'kuota', 'status',
-                'tgl_buka', 'tgl_tutup', 'tgl_mulai', 'tgl_selesai'],
+        order: [
+    'judul',
+    'deskripsi',
+    'kualifikasi',
+    'silabus',
+    'persyaratan',
+    'kuota',
+    'status',
+    'tgl_buka',
+    'tgl_tutup',
+    'tgl_mulai',
+    'tgl_selesai'
+],
 
         init() {
           // Setelah user pernah klik Simpan, cek ulang otomatis tiap ada perubahan
@@ -520,6 +754,24 @@
           });
         },
 
+// ---------- PERSYARATAN BERKAS ----------
+
+tambahPersyaratan() {
+    this.persyaratan.push({
+        nama_berkas: '',
+        format_file: 'pdf',
+        wajib: 1,
+    });
+
+    this.revalidate();
+},
+
+hapusPersyaratan(index) {
+    this.persyaratan.splice(index, 1);
+
+    this.revalidate();
+},
+
         // ---------- VALIDASI ----------
         validate() {
           const e = {};
@@ -570,6 +822,23 @@
             }
           }
 
+          // Persyaratan berkas
+if (!Array.isArray(this.persyaratan) || this.persyaratan.length === 0) {
+    e.persyaratan = 'Minimal harus ada satu persyaratan berkas.';
+} else {
+    this.persyaratan.forEach((item, index) => {
+        if (!item.nama_berkas || !String(item.nama_berkas).trim()) {
+            e['persyaratan_' + index] =
+                'Nama berkas persyaratan ke-' + (index + 1) + ' wajib diisi.';
+        }
+
+        if (!item.format_file) {
+            e['persyaratan_' + index] =
+                'Format file persyaratan ke-' + (index + 1) + ' wajib dipilih.';
+        }
+    });
+}
+
           this.errors = e;
           return Object.keys(e).length === 0;
         },
@@ -584,17 +853,65 @@
         },
 
         focusFirstError() {
-          const key = this.order.find((k) => this.errors[k]);
-          if (!key) return;
+    const key = this.order.find((k) => this.errors[k]);
 
-          this.$nextTick(() => {
-            const el = document.getElementById('field-' + key);
+    if (key === 'persyaratan') {
+        const el = document.querySelector(
+            '[name="persyaratan[0][nama_berkas]"]'
+        );
+
+        if (el) {
+            el.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+
+            el.focus({ preventScroll: true });
+        }
+
+        return;
+    }
+
+    if (!key) {
+        const requirementKey = Object.keys(this.errors).find(
+            k => k.startsWith('persyaratan_')
+        );
+
+        if (requirementKey) {
+            const index = requirementKey.replace('persyaratan_', '');
+
+            const el = document.querySelector(
+                `[name="persyaratan[${index}][nama_berkas]"]`
+            );
+
             if (el) {
-              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              el.focus({ preventScroll: true });
+                el.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+
+                el.focus({ preventScroll: true });
             }
-          });
-        },
+
+            return;
+        }
+    }
+
+    if (!key) return;
+
+    this.$nextTick(() => {
+        const el = document.getElementById('field-' + key);
+
+        if (el) {
+            el.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+
+            el.focus({ preventScroll: true });
+        }
+    });
+},
       }));
     });
   </script>
