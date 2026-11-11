@@ -9,7 +9,7 @@ class ProgramController extends Controller
     // Menampilkan daftar program magang
     public function index()
     {
-        $programs = ProgramMagang::where('status', 'dibuka')
+        $programs = ProgramMagang::whereIn('status', ['aktif', 'dibuka'])
             ->latest()
             ->paginate(9);
 
@@ -17,27 +17,24 @@ class ProgramController extends Controller
     }
 
     // Menampilkan detail program magang
-    // Menampilkan detail program magang berdasarkan ID
-public function show($id)
-{
-    $program = ProgramMagang::with('persyaratan')
-        ->findOrFail($id);
+    public function show($id)
+    {
+        $program = ProgramMagang::with('persyaratan')
+            ->findOrFail($id);
 
-    // Cek apakah file silabus tersedia di storage public
-    $silabusAda = !empty($program->silabus)
-        && \Illuminate\Support\Facades\Storage::disk('public')
-            ->exists($program->silabus);
+        $silabusAda = ! empty($program->silabus)
+            && \Illuminate\Support\Facades\Storage::disk('public')
+                ->exists($program->silabus);
 
-    // URL file silabus
-    $silabusUrl = $silabusAda
-        ? \Illuminate\Support\Facades\Storage::disk('public')
-            ->url($program->silabus)
-        : null;
+        $silabusUrl = $silabusAda
+            ? \Illuminate\Support\Facades\Storage::disk('public')
+                ->url($program->silabus)
+            : null;
 
-    return view('pages.program.show', compact(
-        'program',
-        'silabusAda',
-        'silabusUrl'
-    ));
-}
+        return view('pages.program.show', compact(
+            'program',
+            'silabusAda',
+            'silabusUrl'
+        ));
+    }
 }
