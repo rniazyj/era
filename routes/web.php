@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\AdminLowonganController;
 use App\Http\Controllers\Admin\SeleksiController;
 use App\Http\Controllers\Admin\AdminProfilController;
 use App\Http\Controllers\Pimpinan\PimpinanDashboardController;
+use App\Http\Controllers\Pimpinan\PimpinanProfilController;
 
 // 1. RUTE PUBLIK
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -107,6 +108,11 @@ Route::middleware(['auth', 'role:admin_hr'])->prefix('admin')->name('admin.')->g
 // 4. RUTE ROLE: PIMPINAN
 Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan.')->group(function () {
     Route::get('/dashboard', [PimpinanDashboardController::class, 'index'])->name('dashboard');
+
+    // Profil pimpinan
+    Route::get('/profil', [PimpinanProfilController::class, 'show'])->name('profil');
+    Route::put('/profil', [PimpinanProfilController::class, 'update'])->name('profil.update');
+    Route::put('/profil/password', [PimpinanProfilController::class, 'updatePassword'])->name('profil.password');
 });
 
 // 5. RUTE ROLE: PELAMAR
