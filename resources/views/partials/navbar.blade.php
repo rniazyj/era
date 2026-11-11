@@ -1,18 +1,20 @@
 {{--
   Navbar ERA (dipakai bersama oleh semua halaman publik)
 
-  Di halaman home (yang punya animasi splash ERA):
-      @include('partials/navbar', ['splash' => true])
-
-  Di halaman lain:
-      @include('partials/navbar')
+  Cara pakai di semua halaman (tanpa parameter):
+      @include('partials.navbar')
 
   Letakkan di resources/views/partials/navbar.blade.php
-  Catatan: id "nav" / "nav-logo" dan class "nav-i" sengaja dipertahankan karena dipakai animasi GSAP di home.
-  Menu "About" punya dropdown (Perusahaan, Tim, Produk) yang terbuka saat hover / fokus keyboard.
+
+  Splash ERA:
+  - Sekarang ada di dalam navbar ini, jadi berlaku di SEMUA halaman utama.
+  - Hanya tampil saat halaman di-RELOAD (refresh). Pindah halaman lewat link tidak memunculkan splash.
+  - Tidak tampil kalau pengguna mengaktifkan "kurangi animasi" di perangkatnya.
+  - Halaman yang punya animasi sendiri (misal home) bisa menunggu event "era:reveal" (lihat bagian bawah).
+
+  Catatan: id "nav" / "nav-logo" dan class "nav-i" sengaja dipertahankan.
 --}}
 @php
-  $splash = $splash ?? false;
   $user = auth()->user();
   $dashboardUrl = null;
   $profilUrl = null;
@@ -20,13 +22,13 @@
   $inisial = null;
 
   if ($user) {
-    // Pelamar / user biasa tidak punya dashboard, jadi tetap null (link dashboard disembunyikan)
+    // Pelamar / user biasa tidak punya dasbor, jadi tetap null (tautan dasbor disembunyikan)
     if ($user->isAdmin()) {
       $dashboardUrl = route('admin.dashboard');
     } elseif ($user->isPimpinan()) {
       $dashboardUrl = route('pimpinan.dashboard');
     }
-    // Halaman profil tiap role berbeda. Baru pelamar yang sudah punya halaman profil.
+    // Baru pelamar yang sudah punya halaman profil.
     // Nanti kalau admin/pimpinan sudah punya, isi $profilUrl di cabang masing-masing di atas.
     if (!$user->isAdmin() && !$user->isPimpinan()) {
       $profilUrl = route('pelamar.profil');
@@ -35,15 +37,54 @@
     $inisial = mb_strtoupper(mb_substr($nama, 0, 1));
   }
 
-  // Isi dropdown "About"
-  $aboutItems = [
-    [__('Perusahaan'), __('Profil, legalitas & cabang'),  route('tentang'),         request()->routeIs('tentang')],
-    [__('Tim'),        __('Orang di balik Equityworld'),  route('tentang.tim'),     request()->routeIs('tentang.tim')],
-    [__('Produk'),     __('Produk & layanan'),            route('tentang.produk'), request()->routeIs('tentang.produk')],
+  // Format item: [judul, keterangan, url, aktif?]
+  $tentangItems = [
+    ['Perusahaan', 'Profil, legalitas & cabang', route('tentang'),         request()->routeIs('tentang')],
+    ['Tim',        'Orang di balik Equityworld', route('tentang.tim'),     request()->routeIs('tentang.tim')],
+    ['Produk',     'Produk & layanan',           route('tentang.produk'),  request()->routeIs('tentang.produk')],
+  ];
+
+  $karierItems = [
+    ['Lowongan Kerja', 'Posisi full-time & fresh graduate', route('lowongan.index'), request()->routeIs('lowongan.*')],
+    ['Program Magang', 'Magang konversi & non-konversi',    route('program.index'),  request()->routeIs('program.*', 'internship.*')],
+  ];
+
+  // Menu dropdown di navbar. 'url' null = pemicu saja (tidak membuka halaman).
+  $menus = [
+    ['label' => 'Tentang', 'url' => route('tentang'), 'items' => $tentangItems],
+    ['label' => 'Karier',  'url' => null,             'items' => $karierItems],
   ];
 @endphp
 
+{{-- Tandai halaman reload sedini mungkin supaya tidak ada kedipan --}}
+<script>
+  (() => {
+    const nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    const reload = nav ? nav.type === 'reload' : !!(performance.navigation && performance.navigation.type === 1);
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.eraSplash = { active: reload && !reduce, revealed: false };
+    if (window.eraSplash.active) document.documentElement.classList.add('era-splash');
+  })();
+</script>
+
 <style>
+  /* ===== Splash ERA (hanya aktif saat html.era-splash) ===== */
+  html.era-splash{ overflow:hidden; }
+  .era-word,.era-cap{ display:none; }
+  html.era-splash .era-word,html.era-splash .era-cap{ display:block; }
+  .era-word{ position:fixed; left:50%; top:50%; z-index:60; font-weight:600; letter-spacing:-.02em; font-size:clamp(3rem,9vw,5.5rem); line-height:1; color:#18181b; transform:translate(-50%,-50%); transform-origin:center; pointer-events:none; white-space:nowrap; }
+  .era-word .m{ display:inline-block; overflow:hidden; vertical-align:top; padding-bottom:.08em; }
+  .era-word .m>span{ display:inline-block; transform:translateY(110%); }
+  .era-cap{ position:fixed; left:50%; top:calc(50% + 3.6rem); transform:translateX(-50%); z-index:60; font-size:.7rem; letter-spacing:.22em; color:rgba(0,0,0,.45); opacity:0; white-space:nowrap; pointer-events:none; }
+  /* Latar putih menutup halaman selama splash */
+  html.era-splash body::before{ content:""; position:fixed; inset:0; z-index:55; background:#faf9fc; }
+  html.era-splash .nv{ z-index:70; background:transparent; backdrop-filter:none; -webkit-backdrop-filter:none; }
+  html.era-splash #nav-logo{ opacity:0; }
+  .nav-i{ transition:opacity .6s ease, transform .6s ease; }
+  html.era-splash:not(.era-nav-in) .nav-i{ opacity:0; transform:translateY(-20px); }
+  html.era-splash .nav-i + .nav-i{ transition-delay:.1s; }
+
+  /* ===== Navbar ===== */
   .nv{ position:fixed; z-index:50; top:0; left:0; right:0; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); background:rgba(250,249,252,.7); color:#18181b; font-size:.875rem; line-height:1.5; }
   .nv *{ box-sizing:border-box; }
   .nv-in{ max-width:80rem; margin:0 auto; padding:0 1.5rem; height:4rem; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; }
@@ -53,9 +94,11 @@
   .nv-links a,.nv-text{ text-decoration:none; color:inherit; transition:opacity .2s; }
   .nv-links a:hover,.nv-text:hover{ opacity:.6; }
 
-  /* Dropdown About */
+  /* Dropdown (Tentang & Karier) */
   .nv-dd{ position:relative; }
-  .nv-dd-btn{ display:inline-flex; align-items:center; gap:.25rem; }
+  .nv-dd-btn{ display:inline-flex; align-items:center; gap:.25rem; background:none; border:0; padding:0; font:inherit; color:inherit; cursor:pointer; text-decoration:none; transition:opacity .2s; }
+  .nv-dd-btn:hover{ opacity:.6; }
+  .nv-dd-btn.on{ font-weight:600; }
   .nv-dd-btn span{ font-size:10px; display:inline-block; transition:transform .25s; }
   .nv-dd:hover .nv-dd-btn span,.nv-dd:focus-within .nv-dd-btn span{ transform:rotate(180deg); }
   .nv-dd-menu{
@@ -80,7 +123,7 @@
   }
   .nv-pill:hover{ background:#111; color:#fff; }
 
-  /* Profil (setelah login) */
+  /* Profil (setelah masuk) */
   .nv-user{ position:relative; }
   .nv-prof{ padding:.25rem .875rem .25rem .25rem; }
   .nv-av{ width:1.75rem; height:1.75rem; border-radius:50%; background:#f97316; color:#fff; display:grid; place-items:center; font-size:.78rem; font-weight:600; flex:none; }
@@ -106,38 +149,41 @@
   .nv-item.out:hover{ background:#fef2f2; color:#b91c1c; }
 </style>
 
+{{-- Splash ERA (hanya terlihat saat reload) --}}
+<div class="era-word" id="era-word" aria-hidden="true"><span class="m"><span>E</span></span><span class="m"><span>R</span></span><span class="m"><span>A</span></span></div>
+<div class="era-cap" id="era-cap" aria-hidden="true">EQUITYWORLD RECRUITMENT ACCESS</div>
+
 <header id="nav" class="nv">
-  <nav class="nv-in">
-    <a href="{{ route('home') }}" id="nav-logo" class="nv-logo" @if($splash) style="opacity:0" @endif>ERA</a>
+  <nav class="nv-in" aria-label="Navigasi utama">
+    <a href="{{ route('home') }}" id="nav-logo" class="nv-logo">ERA</a>
 
     <ul class="nv-links nav-i">
-<<<<<<< HEAD
-      <li><a href="{{ route('home') }}">Home</a></li>
-      <li><a href="{{ route('tentang') }}">About</a></li>
-      <li><a href="{{ route('internship.index') }}">Internship</a></li>
-      <li><a href="{{ route('lowongan.index') }}">Job</a></li>
-=======
-      <li><a href="{{ route('home') }}">{{ __('Beranda') }}</a></li>
-      <li class="nv-dd">
-        <a href="{{ route('tentang') }}" class="nv-dd-btn" aria-haspopup="true">{{ __('Tentang') }} <span>▾</span></a>
-        <div class="nv-dd-menu">
-          <div class="nv-dd-box">
-            @foreach($aboutItems as [$label, $ket, $url, $aktif])
-              <a href="{{ $url }}" class="{{ $aktif ? 'on' : '' }}">
-                {{ $label }}
-                <small>{{ $ket }}</small>
-              </a>
-            @endforeach
+      <li><a href="{{ route('home') }}">Beranda</a></li>
+
+      @foreach($menus as $menu)
+        @php $menuAktif = collect($menu['items'])->contains(fn ($it) => $it[3]); @endphp
+        <li class="nv-dd">
+          @if($menu['url'])
+            <a href="{{ $menu['url'] }}" class="nv-dd-btn {{ $menuAktif ? 'on' : '' }}" aria-haspopup="true">{{ $menu['label'] }} <span>▾</span></a>
+          @else
+            <button type="button" class="nv-dd-btn {{ $menuAktif ? 'on' : '' }}" aria-haspopup="true">{{ $menu['label'] }} <span>▾</span></button>
+          @endif
+          <div class="nv-dd-menu">
+            <div class="nv-dd-box">
+              @foreach($menu['items'] as [$label, $ket, $url, $aktif])
+                <a href="{{ $url }}" class="{{ $aktif ? 'on' : '' }}">
+                  {{ $label }}
+                  <small>{{ $ket }}</small>
+                </a>
+              @endforeach
+            </div>
           </div>
-        </div>
-      </li>
-      <li><a href="{{ route('program.index') }}">{{ __('Magang') }}</a></li>
-      <li><a href="{{ route('lowongan.index') }}">{{ __('Lowongan') }}</a></li>
->>>>>>> vina
+        </li>
+      @endforeach
     </ul>
 
     <div class="nv-r nav-i">
-      <a href="{{ route('bantuan') }}" class="nv-text nv-help">{{ __('Bantuan') }}</a>
+      <a href="{{ route('bantuan') }}" class="nv-text nv-help">Bantuan</a>
 
       @auth
         <div class="nv-user" id="nvUser">
@@ -153,23 +199,68 @@
               <span>{{ $user->email }}</span>
             </div>
             @if($profilUrl)
-              <a href="{{ $profilUrl }}" class="nv-item" role="menuitem">{{ __('Lihat profil') }}</a>
+              <a href="{{ $profilUrl }}" class="nv-item" role="menuitem">Lihat Profil</a>
             @endif
             @if($dashboardUrl)
-              <a href="{{ $dashboardUrl }}" class="nv-item" role="menuitem">{{ __('Dashboard') }}</a>
+              <a href="{{ $dashboardUrl }}" class="nv-item" role="menuitem">Dasbor</a>
             @endif
             <form action="{{ route('logout') }}" method="POST">
               @csrf
-              <button type="submit" class="nv-item out" role="menuitem">{{ __('Keluar') }}</button>
+              <button type="submit" class="nv-item out" role="menuitem">Keluar</button>
             </form>
           </div>
         </div>
       @else
-        <a href="{{ route('login') }}" class="nv-pill">{{ __('Mulai Sekarang') }}</a>
+        <a href="{{ route('login') }}" class="nv-pill">Mulai Sekarang</a>
       @endauth
     </div>
   </nav>
 </header>
+
+{{-- Animasi splash: jalan hanya kalau window.eraSplash.active (halaman di-reload) --}}
+<script>
+  (() => {
+    if (!window.eraSplash || !window.eraSplash.active) return;
+    const root = document.documentElement;
+    const word = document.getElementById('era-word');
+    const cap = document.getElementById('era-cap');
+    const logo = document.getElementById('nav-logo');
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    const fire = name => document.dispatchEvent(new CustomEvent(name));
+
+    (async () => {
+      await wait(200);
+      word.querySelectorAll('.m>span').forEach((l, i) =>
+        l.animate([{ transform: 'translateY(110%)' }, { transform: 'translateY(0)' }],
+          { duration: 800, delay: i * 120, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'forwards' }));
+      await wait(900);
+      cap.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 500, fill: 'forwards' });
+      await wait(1000);
+      cap.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: 'forwards' });
+      await wait(300);
+
+      // Wordmark berpindah ke posisi logo di navbar
+      const a = word.getBoundingClientRect(), b = logo.getBoundingClientRect();
+      const dx = b.left + b.width / 2 - (a.left + a.width / 2);
+      const dy = b.top + b.height / 2 - (a.top + a.height / 2);
+      const s = b.height / a.height * 0.9;
+      const move = word.animate([
+        { transform: 'translate(-50%,-50%) translate(0,0) scale(1)' },
+        { transform: `translate(-50%,-50%) translate(${dx}px,${dy}px) scale(${s})` }
+      ], { duration: 1100, easing: 'cubic-bezier(.76,0,.24,1)', fill: 'forwards' });
+
+      await wait(900);
+      window.eraSplash.revealed = true;
+      root.classList.add('era-nav-in');   // menu navbar muncul
+      fire('era:reveal');                 // halaman (misal home) mulai animasinya
+
+      try { await move.finished; } catch (e) {}
+      word.style.display = 'none';
+      root.classList.remove('era-splash', 'era-nav-in');
+      fire('era:done');
+    })();
+  })();
+</script>
 
 @auth
 <script>

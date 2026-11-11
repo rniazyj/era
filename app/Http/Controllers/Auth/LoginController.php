@@ -10,9 +10,14 @@ use Carbon\Carbon;
 
 class LoginController extends Controller
 {
+    // Halaman yang tidak boleh dijadikan tujuan setelah login
+    private const ABAIKAN = ['/login', '/daftar', '/lupa-password', '/reset-password', '/logout'];
+
     // Tampilkan halaman login
-    public function showLoginForm()
+    public function showLoginForm(Request $request)
     {
+        $this->simpanHalamanSebelumnya($request);
+
         return view('auth.login');
     }
 
@@ -29,13 +34,14 @@ class LoginController extends Controller
         if ($user) {
             // Cek apakah akun sedang dikunci karena terlalu banyak percobaan gagal
             if ($user->terkunci_sampai && Carbon::now()->lt($user->terkunci_sampai)) {
-                $sisaMenit = Carbon::now()->diffInMinutes($user->terkunci_sampai) + 1;
+                $sisaMenit = (int) ceil(Carbon::now()->diffInMinutes($user->terkunci_sampai, true));
                 return back()->withErrors(['email' => "Akun Anda terkunci sementara karena salah password berkali-kali. Coba lagi dalam {$sisaMenit} menit."]);
             }
         }
 
         // Coba autentikasi Laravel
         if (Auth::attempt($request->only('email', 'password'), $request->filled('remember'))) {
+            // regenerate() mempertahankan isi session, jadi 'url.intended' tidak hilang
             $request->session()->regenerate();
 
             // Reset percobaan gagal jika login sukses
@@ -45,16 +51,16 @@ class LoginController extends Controller
                 'terkunci_sampai' => null
             ]);
 
-            // Arahkan berdasarkan role
-            if ($authUser->isAdmin()) {
-                return redirect()->route('admin.dashboard');
-            } elseif ($authUser->isPimpinan()) {
-                return redirect()->route('pimpinan.dashboard');
-            } elseif ($authUser->isPelamar()) {
-                return redirect()->route('pelamar.dashboard');
-            }
+            // Tujuan bawaan per role, dipakai kalau tidak ada halaman sebelumnya
+            $default = match (true) {
+                $authUser->isAdmin()    => route('admin.dashboard'),
+                $authUser->isPimpinan() => route('pimpinan.dashboard'),
+                $authUser->isPelamar()  => route('pelamar.dashboard'),
+                default                 => route('home'),
+            };
 
-            return redirect()->intended(route('home'));
+            // Kembali ke halaman yang tadi dibuka (mis. form lamar), kalau tidak ada baru ke $default
+            return redirect()->intended($default);
         }
 
         // Jika login GAGAL, tangani hitungan percobaan gagal
@@ -82,5 +88,36 @@ class LoginController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('login');
+    }
+
+    /**
+     * Kalau pengunjung membuka login lewat tombol "Login" biasa (bukan lewat halaman yang
+     * dilindungi middleware auth), Laravel belum menyimpan tujuan. Di sini kita simpan
+     * halaman sebelumnya supaya setelah login ia kembali ke sana.
+     */
+    private function simpanHalamanSebelumnya(Request $request): void
+    {
+        // Sudah ada tujuan dari middleware auth (mis. klik "Lamar") -> jangan ditimpa
+        if ($request->session()->has('url.intended')) {
+            return;
+        }
+
+        $sebelumnya = url()->previous();
+        $bagian = parse_url($sebelumnya);
+
+        // Hanya halaman di situs ini sendiri (cegah open redirect)
+        if (($bagian['host'] ?? null) !== $request->getHost()) {
+            return;
+        }
+
+        $path = rtrim($bagian['path'] ?? '/', '/') ?: '/';
+
+        foreach (self::ABAIKAN as $p) {
+            if (str_starts_with($path, $p)) {
+                return;
+            }
+        }
+
+        $request->session()->put('url.intended', $sebelumnya);
     }
 }

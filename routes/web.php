@@ -9,16 +9,14 @@ use App\Http\Controllers\BantuanController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\PasswordResetController;
-<<<<<<< HEAD
 use App\Http\Controllers\Pelamar\ProfilController as PelamarProfilController;
 use App\Http\Controllers\Pelamar\ProgramMagangController;
-=======
-use App\Http\Controllers\Pelamar\ProfilController;
 use App\Http\Controllers\Pelamar\AkademikController;
 use App\Http\Controllers\Pelamar\PengalamanController;
 use App\Http\Controllers\Pelamar\SkillController;
 use App\Http\Controllers\Pelamar\CvController;
->>>>>>> vina
+use App\Http\Controllers\Pelamar\PelamarDashboardController;
+use App\Http\Controllers\Pelamar\LamaranController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminLowonganController;
 use App\Http\Controllers\Admin\SeleksiController;
@@ -32,12 +30,28 @@ Route::get('/tentang/tim', [TentangController::class, 'tim'])->name('tentang.tim
 Route::get('/tentang/legalitas', [TentangController::class, 'legalitas'])->name('tentang.legalitas');
 Route::get('/tentang/cabang', [TentangController::class, 'cabang'])->name('tentang.cabang');
 Route::get('/tentang/produk', [TentangController::class, 'produk'])->name('tentang.produk');
+
+// Lowongan kerja: daftar & detail terbuka untuk semua orang (termasuk guest)
 Route::get('/lowongan', [LowonganController::class, 'index'])->name('lowongan.index');
-Route::get('/lowongan/{id}', [LowonganController::class, 'show'])->name('lowongan.show');
+Route::get('/lowongan/{id}', [LowonganController::class, 'show'])->whereNumber('id')->name('lowongan.show');
+
+// Lowongan kerja: melamar wajib login.
+// Guest yang klik "Lamar" dilempar ke login, lalu kembali ke form (lihat catatan intended() di LoginController).
+// Cek role pelamar & kelengkapan profil ditangani LowonganController agar pesannya ramah.
+Route::middleware('auth')->group(function () {
+    Route::get('/lowongan/{id}/lamar', [LowonganController::class, 'apply'])->whereNumber('id')->name('lowongan.apply');
+    Route::post('/lowongan/{id}/lamar', [LowonganController::class, 'store'])->whereNumber('id')->name('lowongan.store');
+});
+
 Route::get('/internship', [ProgramController::class, 'index'])
     ->name('internship.index');
 Route::get('/internship/{id}', [ProgramController::class, 'show'])
     ->name('internship.show');
+
+// Alias kompatibel untuk route lama yang masih dipanggil di view/layout
+Route::get('/program', [ProgramController::class, 'index'])->name('program.index');
+Route::get('/program/{id}', [ProgramController::class, 'show'])->name('program.show');
+
 Route::get('/bantuan', [BantuanController::class, 'index'])->name('bantuan');
 
 // 2. RUTE AUTHENTICATION & PASSWORD RESET (Guest Only)
@@ -60,20 +74,17 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
 // 3. RUTE ROLE: ADMIN / HR
+// Semua rute admin digabung & dikunci role:admin_hr.
+// (Sebelumnya grup lowongan & pelamar hanya memakai 'auth', sehingga akun pelamar bisa membukanya.)
 Route::middleware(['auth', 'role:admin_hr'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/profil', [AdminProfilController::class, 'show'])
-        ->name('profil');
+    // Profil admin
+    Route::get('/profil', [AdminProfilController::class, 'show'])->name('profil');
+    Route::put('/profil', [AdminProfilController::class, 'update'])->name('profil.update');
+    Route::put('/profil/password', [AdminProfilController::class, 'updatePassword'])->name('profil.password');
 
-    Route::put('/profil', [AdminProfilController::class, 'update'])
-        ->name('profil.update');
-
-    Route::put('/profil/password', [AdminProfilController::class, 'updatePassword'])
-        ->name('profil.password');
-});
-
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    // Kelola lowongan (kerja | magang)
     Route::get('/lowongan', [AdminLowonganController::class, 'index'])->name('lowongan.index');
     Route::get('/lowongan/create', [AdminLowonganController::class, 'create'])->name('lowongan.create');
     Route::post('/lowongan', [AdminLowonganController::class, 'store'])->name('lowongan.store');
@@ -85,9 +96,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         ->whereIn('jenis', ['kerja', 'magang'])
         ->whereNumber('id')
         ->name('lowongan.update');
-});
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    // Seleksi pelamar
     Route::get('/pelamar', [SeleksiController::class, 'index'])->name('pelamar.index');
     Route::get('/pelamar/{id}', [SeleksiController::class, 'show'])->whereNumber('id')->name('pelamar.show');
     Route::patch('/pelamar/{id}/status', [SeleksiController::class, 'updateStatus'])->whereNumber('id')->name('pelamar.status');
@@ -101,22 +111,17 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan
 
 // 5. RUTE ROLE: PELAMAR
 Route::middleware(['auth', 'role:pelamar'])->group(function () {
-<<<<<<< HEAD
-    // Tambahkan baris rute dashboard ini:
-    Route::get('/dashboard', [\App\Http\Controllers\Pelamar\PelamarDashboardController::class, 'index'])->name('pelamar.dashboard');
-    
-    Route::get('/lamaran/create', [\App\Http\Controllers\Pelamar\LamaranController::class, 'create'])->name('pelamar.lamaran.create');
-    Route::post('/lamaran', [\App\Http\Controllers\Pelamar\LamaranController::class, 'store'])->name('pelamar.lamaran.store');
+    Route::get('/dashboard', [PelamarDashboardController::class, 'index'])->name('pelamar.dashboard');
 
-    // Rute profil yang sudah ada sebelumnya biarkan saja:
-    Route::get('/profil', [PelamarProfilController::class, 'show'])->name('pelamar.profil');
-    Route::put('/profil', [PelamarProfilController::class, 'update'])->name('pelamar.profil.update');
-=======
+    // Pendaftaran program magang (lowongan kerja memakai route lowongan.apply di atas)
+    Route::get('/lamaran/create', [LamaranController::class, 'create'])->name('pelamar.lamaran.create');
+    Route::post('/lamaran', [LamaranController::class, 'store'])->name('pelamar.lamaran.store');
 
     Route::prefix('profil')->group(function () {
-        // Data diri & profil (index.blade.php)
-        Route::get('/', [ProfilController::class, 'show'])->name('pelamar.profil');
-        Route::put('/', [ProfilController::class, 'update'])->name('pelamar.profil.update');
+        // Data diri & profil (index.blade.php) -> URL: /profil
+        // (Route /profil ganda di luar grup sudah dihapus; nama 'pelamar.profil' tetap sama.)
+        Route::get('/', [PelamarProfilController::class, 'show'])->name('pelamar.profil');
+        Route::put('/', [PelamarProfilController::class, 'update'])->name('pelamar.profil.update');
 
         // Data akademik
         Route::get('/akademik', [AkademikController::class, 'index'])->name('pelamar.profil.akademik');
@@ -142,6 +147,4 @@ Route::middleware(['auth', 'role:pelamar'])->group(function () {
         Route::get('/cv', [CvController::class, 'show'])->name('pelamar.profil.cv');
         Route::get('/cv/pdf', [CvController::class, 'pdf'])->name('pelamar.profil.cv.pdf');
     });
->>>>>>> vina
-
 });

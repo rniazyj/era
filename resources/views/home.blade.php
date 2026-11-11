@@ -12,18 +12,15 @@
       colors: { paper:'#faf9fc', lime:'#e9f56b', brand:'#34d3b0' } } } };
   </script>
   <style>
-/* Komponen & animasi pendukung landing.html */
+/* Komponen & animasi pendukung landing */
 .float-card{position:absolute;width:7rem;height:9rem;object-fit:cover;border-radius:1rem;box-shadow:0 16px 36px -14px rgba(0,0,0,.3)}
 .bubble{position:absolute;padding:.2rem .65rem;border-radius:.75rem;font-size:.7rem;font-weight:600;z-index:5}
 .avatar{width:100%;max-width:3.6rem;aspect-ratio:1;object-fit:cover;border-radius:1rem;margin-inline:auto;box-shadow:0 8px 20px -8px rgba(0,0,0,.3)}
 #statement .w{opacity:.15}
 
-/* ===== HERO (splash ERA + hero terang dengan foto yang membesar saat scroll) ===== */
+/* ===== HERO (hero terang dengan foto yang membesar saat scroll) =====
+   Splash ERA sekarang ada di partials/navbar.blade.php (hanya muncul saat reload) */
 body.lock{overflow:hidden}
-.era-word{position:fixed;left:50%;top:50%;z-index:60;font-weight:600;letter-spacing:-.02em;font-size:clamp(3rem,9vw,5.5rem);line-height:1;transform:translate(-50%,-50%);transform-origin:center;pointer-events:none;white-space:nowrap}
-.era-word .m{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em}
-.era-word .m>span{display:inline-block;transform:translateY(110%)}
-.era-cap{position:fixed;left:50%;top:calc(50% + 3.6rem);transform:translateX(-50%);z-index:60;font-size:.7rem;letter-spacing:.22em;color:rgba(0,0,0,.45);opacity:0;white-space:nowrap}
 #hero-h .w{display:inline-block;opacity:0;filter:blur(8px)}
 .hero-card img{display:block;width:100%;height:100%;object-fit:cover}
 
@@ -96,11 +93,8 @@ body.lock{overflow:hidden}
 </head>
 <body class="bg-paper text-zinc-900 font-sans antialiased overflow-x-hidden">
 
-<!-- LOADER: wordmark ERA -->
-<div class="era-word" id="era-word" aria-hidden="true"><span class="m"><span>E</span></span><span class="m"><span>R</span></span><span class="m"><span>A</span></span></div>
-<div class="era-cap" id="era-cap">EQUITYWORLD RECRUITMENT ACCESS</div>
-
-@include('partials.navbar', ['splash' => true])
+{{-- Navbar + splash ERA (splash otomatis hanya muncul saat halaman di-reload) --}}
+@include('partials.navbar')
 
 <main>
 <!-- 1. HERO -->
@@ -110,7 +104,7 @@ body.lock{overflow:hidden}
     <p class="hero-sub mt-5 text-xs md:text-sm text-black/60 max-w-xl">Akses ribuan peluang karir profesional bergengsi serta program magang bersertifikat nasional. Dirancang untuk membentuk pemimpin inovatif dan talenta tangguh masa depan.</p>
     <div class="hero-sub mt-5 flex items-center gap-3">
       <a href="#showcase" class="px-6 py-2.5 rounded-full bg-orange-500 text-white text-xs font-medium hover:scale-105 transition">Eksplorasi Semua Program</a>
-      <a href="#" class="px-6 py-2.5 rounded-full text-xs font-medium hover:scale-105 transition">Lihat Lowongan</a>
+      <a href="{{ route('lowongan.index') }}" class="px-6 py-2.5 rounded-full text-xs font-medium hover:scale-105 transition">Lihat Lowongan</a>
     </div>
   </div>
 
@@ -198,7 +192,7 @@ body.lock{overflow:hidden}
       <p class="text-[10px] tracking-[.2em] font-semibold mb-3">PROSES <span class="text-orange-500">REKRUTMEN</span></p>
       <h2 class="text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1]">Alur Seleksi yang<br><span class="text-black/25">Terstruktur &amp; Cepat</span></h2>
       <p class="mt-4 text-sm text-black/60 max-w-xl mx-auto lg:mx-0">Kami menghargai waktu dan komitmen Anda. Nikmati proses rekrutmen yang terstandarisasi, transparan, dan komunikatif dari awal hingga akhir.</p>
-      <a href="#" class="inline-block mt-6 px-6 py-2.5 rounded-full bg-orange-500 text-white text-xs font-medium hover:scale-105 transition">Daftar</a>
+      <a href="{{ route('register') }}" class="inline-block mt-6 px-6 py-2.5 rounded-full bg-orange-500 text-white text-xs font-medium hover:scale-105 transition">Daftar</a>
     </div>
 
     <!-- Kanan: peta -->
@@ -248,7 +242,7 @@ body.lock{overflow:hidden}
   <div class="relative z-10 text-center bg-paper/85 backdrop-blur px-8 py-8 rounded-3xl rv">
     <h2 class="text-2xl md:text-4xl font-semibold tracking-tight">Siap Melangkah Menuju<br>Babak Baru Perjalanan<br>Karier Anda?</h2>
     <p class="mt-3 text-xs text-black/60 max-w-sm mx-auto">Bergabunglah dengan ribuan talenta yang telah menemukan ruang bertumbuh dan memberikan kontribusi nyata bagi ekosistem industri Indonesia.</p>
-    <div class="mt-5 flex justify-center gap-3"><a href="#" class="px-5 py-2 rounded-full bg-orange-500 text-white text-xs font-medium">Daftar Sekarang</a><a href="#" class="px-5 py-2 rounded-full bg-black text-white text-xs font-medium">Jelajahi Posisi</a></div>
+    <div class="mt-5 flex justify-center gap-3"><a href="{{ route('register') }}" class="px-5 py-2 rounded-full bg-orange-500 text-white text-xs font-medium">Daftar Sekarang</a><a href="{{ route('lowongan.index') }}" class="px-5 py-2 rounded-full bg-black text-white text-xs font-medium">Jelajahi Posisi</a></div>
   </div>
 </section>
 
@@ -298,16 +292,14 @@ window.addEventListener('beforeunload', () => window.scrollTo(0, 0));
 window.addEventListener('load', () => window.scrollTo(0, 0));
 const $ = (s, c = document) => [...c.querySelectorAll(s)];
 
-/* 1. HERO: splash ERA -> wordmark pindah ke navbar -> judul menyala kata per kata -> foto naik; scroll: foto tengah membesar */
+/* 1. HERO: judul menyala kata per kata -> foto naik; scroll: foto tengah membesar.
+      Splash ERA & animasi menu navbar ditangani oleh partials/navbar.blade.php (hanya saat reload). */
 document.body.classList.add('lock');
-const eraWord = document.getElementById('era-word'), eraCap = document.getElementById('era-cap');
-const navLogo = document.getElementById('nav-logo');
 
 const heroH = document.getElementById('hero-h');
 heroH.innerHTML = heroH.textContent.trim().split(/\s+/).map(w => `<span class="w">${w}</span>`).join(' ');
 
 gsap.set('#card-c', { xPercent: -50 });
-gsap.set('.nav-i', { y: -20, opacity: 0 });
 gsap.set('.hero-sub', { y: 20, opacity: 0 });
 gsap.set('.hero-card', { y: 260, opacity: 0 });
 
@@ -319,21 +311,19 @@ gsap.timeline({ scrollTrigger: { trigger: '#hero', start: 'top top', end: '+=120
   .to('#card-c', { width: () => innerWidth - 32, height: () => innerHeight - 80, bottom: 16, borderRadius: 28, ease: 'none', duration: 1 }, 0)
   .to('#hero-cap', { opacity: 1, ease: 'none', duration: .35 }, .65);
 
-gsap.timeline({ defaults: { ease: 'power3.out' } })
-  .to('.era-word .m>span', { y: 0, duration: .8, stagger: .12, delay: .2 })
-  .to(eraCap, { opacity: 1, duration: .5 }, '-=.3')
-  .to(eraCap, { opacity: 0, duration: .3 }, '+=.5')
-  .add(() => {
-    const a = eraWord.getBoundingClientRect(), b = navLogo.getBoundingClientRect();
-    gsap.to(eraWord, { x: b.left + b.width / 2 - (a.left + a.width / 2), y: b.top + b.height / 2 - (a.top + a.height / 2),
-      scale: b.height / a.height * 0.9, duration: 1.1, ease: 'power4.inOut',
-      onComplete: () => { navLogo.style.opacity = 1; eraWord.style.display = 'none'; } });
-  })
-  .to('.nav-i', { y: 0, opacity: 1, stagger: .1, duration: .6 }, '<.9')
-  .to('#hero-h .w', { opacity: 1, filter: 'blur(0px)', stagger: .09, duration: .6 }, '-=.6')
+/* animasi masuk hero */
+const heroIntro = () => gsap.timeline({ defaults: { ease: 'power3.out' } })
+  .to('#hero-h .w', { opacity: 1, filter: 'blur(0px)', stagger: .09, duration: .6 })
   .to('.hero-sub', { y: 0, opacity: 1, stagger: .12, duration: .6 }, '-=.2')
   .to('.hero-card', { y: 0, opacity: 1, duration: 1, stagger: .12 }, '-=.5')
   .add(() => { document.body.classList.remove('lock'); ScrollTrigger.refresh(); });
+
+/* Reload: tunggu splash ERA sampai navbar muncul. Pindah halaman biasa: langsung jalan tanpa splash. */
+if (window.eraSplash && window.eraSplash.active && !window.eraSplash.revealed) {
+  document.addEventListener('era:reveal', heroIntro, { once: true });
+} else {
+  heroIntro();
+}
 
 /* 2. Kata tengah pada judul berganti (semua elemen [data-swap]) */
 $('[data-swap]').forEach(el => {
