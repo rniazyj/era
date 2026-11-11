@@ -14,8 +14,17 @@ class PersyaratanBerkas extends Model
 {
     protected $table = 'persyaratan_berkas';
     protected $primaryKey = 'id_persyaratan';
+    public $timestamps = false;
 
-    protected $fillable = ['id_lowongan', 'nama_berkas', 'keterangan', 'wajib', 'format', 'maks_kb'];
+    protected $fillable = [
+        'id_lowongan',
+        'id_program',
+        'nama_berkas',
+        'keterangan',
+        'wajib',
+        'format_file',
+        'maks_kb',
+    ];
     protected $casts = ['wajib' => 'boolean', 'maks_kb' => 'integer'];
 
     public function lowongan()
@@ -25,7 +34,7 @@ class PersyaratanBerkas extends Model
 
     public function getFormatListAttribute(): string
     {
-        return filled($this->format) ? $this->format : 'pdf,jpg,jpeg,png';
+        return filled($this->format_file) ? $this->format_file : 'pdf,jpg,jpeg,png';
     }
 
     public function getMaksKbAttrAttribute(): int
