@@ -1,3 +1,4 @@
+
 @php
     $user = auth()->user();
 
@@ -8,18 +9,40 @@
 @endphp
 
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
+
 <head>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Profil Admin - PT Equityworld Futures</title>
+    <title>Profil Admin - ERA</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    {{-- Tailwind CDN, tanpa Vite --}}
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        paper: '#faf9fc',
+                        ewforange: '#f97316'
+                    }
+                }
+            }
+        };
+    </script>
 
     <style>
         :root {
@@ -41,12 +64,6 @@
                 0 8px 30px rgba(15,15,17,.04);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
             min-height: 100vh;
             background: var(--bg);
@@ -56,21 +73,30 @@
             line-height: 1.5;
         }
 
-        button, input {
+        button,
+        input {
             font: inherit;
         }
 
-        .wrap {
+        /* =========================
+           KONTEN UTAMA
+        ========================= */
+
+        .profile-content {
+            width: 100%;
             max-width: 1320px;
-            margin: auto;
-            padding: 0 1.5rem;
+            margin: 0 auto;
+
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+
+            min-width: 0;
         }
 
-        /* HEADER */
-
-        .head-wrap {
-            margin-top: 1.5rem;
-        }
+        /* =========================
+           HEADER PROFIL
+        ========================= */
 
         .profile-head {
             background: var(--card);
@@ -82,6 +108,7 @@
 
         .banner {
             height: 190px;
+
             background: linear-gradient(
                 115deg,
                 #ffb366,
@@ -154,6 +181,7 @@
             font-weight: 800;
             letter-spacing: -.03em;
             line-height: 1.2;
+            overflow-wrap: anywhere;
         }
 
         .badges {
@@ -172,11 +200,13 @@
             font-size: .78rem;
             font-weight: 600;
             color: var(--muted);
+            overflow-wrap: anywhere;
         }
 
         .badge svg {
             width: 15px;
             height: 15px;
+            flex-shrink: 0;
         }
 
         .role-badge {
@@ -192,164 +222,17 @@
             font-size: .88rem;
         }
 
-        /* MAIN LAYOUT */
+        /* =========================
+           CARD
+        ========================= */
 
-        .layout {
-            display: grid;
-            grid-template-columns: 280px minmax(0, 1fr);
-            gap: 1.5rem;
-
-            padding-top: 1.5rem;
-            padding-bottom: 4rem;
-
-            align-items: start;
-        }
-
-        /* SIDEBAR */
-
-        .sidebar {
-            position: sticky;
-            top: 1.5rem;
-
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .side-card {
+        .profile-card {
             background: var(--card);
             border: 1px solid var(--line);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            padding: 1.1rem;
-        }
-
-        .side-user {
-            display: flex;
-            align-items: center;
-            gap: .9rem;
-            padding: .3rem;
-        }
-
-        .side-avatar {
-            width: 52px;
-            height: 52px;
-            flex: none;
-
-            border-radius: 50%;
-            background: var(--orange);
-            color: white;
-
-            display: grid;
-            place-items: center;
-
-            font-size: 1.4rem;
-            font-weight: 800;
-        }
-
-        .side-user h4 {
-            font-size: .9rem;
-            font-weight: 800;
-            overflow-wrap: anywhere;
-        }
-
-        .side-user p {
-            font-size: .74rem;
-            color: var(--muted);
-        }
-
-        .nav-label {
-            font-size: .65rem;
-            font-weight: 800;
-            letter-spacing: .15em;
-            text-transform: uppercase;
-
-            color: var(--muted);
-            padding: .8rem .7rem .4rem;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: .75rem;
-
-            padding: .7rem .75rem;
-            border-radius: 14px;
-
-            color: var(--ink-soft);
-            text-decoration: none;
-
-            font-size: .85rem;
-            font-weight: 600;
-
-            transition: .2s;
-        }
-
-        .nav-item:hover {
-            background: var(--orange-soft);
-            color: var(--orange-dark);
-        }
-
-        .nav-item.active {
-            background: var(--ink);
-            color: white;
-        }
-
-        .nav-item.active .nav-icon {
-            background: var(--orange);
-            color: white;
-        }
-
-        .nav-icon {
-            width: 34px;
-            height: 34px;
-            flex: none;
-
-            display: grid;
-            place-items: center;
-
-            background: #f4f4f6;
-            color: var(--ink-soft);
-
-            border-radius: 11px;
-        }
-
-        .nav-icon svg {
-            width: 18px;
-            height: 18px;
-        }
-
-        .logout-item {
-            width: 100%;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            text-align: left;
-            color: #dc2626;
-        }
-
-        .logout-item:hover {
-            background: #fef2f2;
-            color: #b91c1c;
-        }
-
-        /* CONTENT */
-
-        .main {
-            min-width: 0;
-
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
-
-        .card {
-            background: var(--card);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-
             padding: 1.7rem;
+            min-width: 0;
         }
 
         .card-head {
@@ -387,6 +270,10 @@
             color: var(--muted);
         }
 
+        /* =========================
+           FORM
+        ========================= */
+
         .fields {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -397,6 +284,7 @@
             display: flex;
             flex-direction: column;
             gap: .4rem;
+            min-width: 0;
         }
 
         .field.full {
@@ -415,7 +303,6 @@
 
         .input {
             width: 100%;
-
             padding: .75rem .9rem;
 
             background: #fafafb;
@@ -448,7 +335,7 @@
         }
 
         .password-input {
-            padding-right: 3rem;
+            padding-right: 5rem;
         }
 
         .toggle-password {
@@ -478,10 +365,13 @@
             font-weight: 600;
         }
 
+        /* =========================
+           ALERT
+        ========================= */
+
         .alert {
             border-radius: 15px;
             padding: .9rem 1.1rem;
-
             font-size: .84rem;
             font-weight: 600;
         }
@@ -498,9 +388,14 @@
             border: 1px solid #fecaca;
         }
 
+        /* =========================
+           FOOTER FORM
+        ========================= */
+
         .card-footer {
             display: flex;
             justify-content: flex-end;
+            flex-wrap: wrap;
             gap: .7rem;
 
             margin-top: 1.5rem;
@@ -553,38 +448,17 @@
             height: 16px;
         }
 
-        /* RESPONSIVE */
+        /* =========================
+           RESPONSIVE
+        ========================= */
 
-        @media (max-width: 1000px) {
-            .layout {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                position: static;
-            }
-
-            .side-nav {
-                display: flex;
-                flex-wrap: wrap;
-                gap: .4rem;
-            }
-
-            .nav-label {
-                width: 100%;
-            }
-
-            .nav-item {
-                flex: 1;
-                min-width: 150px;
+        @media (max-width: 1023px) {
+            .profile-content {
+                max-width: 100%;
             }
         }
 
         @media (max-width: 650px) {
-            .wrap {
-                padding: 0 1rem;
-            }
-
             .banner {
                 height: 135px;
             }
@@ -609,7 +483,7 @@
                 grid-template-columns: 1fr;
             }
 
-            .card {
+            .profile-card {
                 padding: 1.2rem;
             }
 
@@ -619,10 +493,6 @@
 
             .card-footer .btn {
                 width: 100%;
-            }
-
-            .nav-item {
-                min-width: 100%;
             }
         }
 
@@ -634,551 +504,421 @@
     </style>
 </head>
 
-<body>
+<body class="bg-paper text-zinc-900 font-sans antialiased overflow-x-hidden">
 
-{{-- HEADER PROFIL --}}
-<div class="wrap head-wrap">
+    {{-- WRAPPER UTAMA: SAMA SEPERTI HALAMAN HOME --}}
+    <div class="flex min-h-screen flex-col lg:flex-row">
 
-    <header class="profile-head">
+        {{-- MEMANGGIL SIDEBAR ADMIN --}}
+        @include('partials.sidebar')
 
-        <div class="banner"></div>
+        {{-- KONTEN UTAMA --}}
+        <main class="min-w-0 w-full flex-1 px-4 sm:px-6 md:px-8 lg:px-10 pt-6 sm:pt-8 lg:pt-10 pb-20">
 
-        <div class="head-inner">
+            <div class="profile-content">
 
-            <div class="avatar-wrap">
-                <div class="avatar">
-                    {{ $inisial }}
-                </div>
-            </div>
+                {{-- =========================
+                     HEADER PROFIL
+                ========================== --}}
+                <header class="profile-head">
 
-            <div class="hero-info">
+                    <div class="banner"></div>
 
-                <h1>{{ $nama }}</h1>
+                    <div class="head-inner">
 
-                <div class="badges">
-
-                    <span class="badge">
-                        <svg viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2"
-                             stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="4" width="20" height="16" rx="2"/>
-                            <path d="m22 7-10 6L2 7"/>
-                        </svg>
-
-                        {{ $user->email }}
-                    </span>
-
-                    <span class="badge role-badge">
-                        {{ $role }}
-                    </span>
-
-                </div>
-
-                <p class="hero-description">
-                    Kelola informasi akun dan keamanan akun admin kamu.
-                </p>
-
-            </div>
-
-        </div>
-
-    </header>
-
-</div>
-
-
-{{-- SIDEBAR + CONTENT --}}
-<div class="wrap layout">
-
-    {{-- SIDEBAR --}}
-    <aside class="sidebar">
-
-        <div class="side-card">
-
-            <div class="side-user">
-
-                <div class="side-avatar">
-                    {{ $inisial }}
-                </div>
-
-                <div>
-                    <h4>{{ $nama }}</h4>
-                    <p>{{ $role }}</p>
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="side-card side-nav">
-
-            <div class="nav-label">
-                Menu Utama
-            </div>
-
-            <a href="{{ route('admin.dashboard') }}"
-               class="nav-item">
-
-                <span class="nav-icon">
-                    <svg viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="7" height="7" rx="1"/>
-                        <rect x="14" y="3" width="7" height="7" rx="1"/>
-                        <rect x="3" y="14" width="7" height="7" rx="1"/>
-                        <rect x="14" y="14" width="7" height="7" rx="1"/>
-                    </svg>
-                </span>
-
-                Dashboard
-
-            </a>
-
-
-            <a href="{{ route('admin.profil') }}"
-               class="nav-item active">
-
-                <span class="nav-icon">
-                    <svg viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="8" r="4"/>
-                        <path d="M4 21a8 8 0 0 1 16 0"/>
-                    </svg>
-                </span>
-
-                Akun Saya
-
-            </a>
-
-
-            <a href="#password"
-               class="nav-item"
-               id="menuPassword">
-
-                <span class="nav-icon">
-                    <svg viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="10" rx="2"/>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                    </svg>
-                </span>
-
-                Ganti Password
-
-            </a>
-
-
-            <div class="nav-label">
-                Sistem
-            </div>
-
-
-            {{-- Logout --}}
-            <form method="POST"
-                  action="{{ route('logout') }}"
-                  onsubmit="return confirm('Apakah kamu yakin ingin logout?')">
-
-                @csrf
-
-                <button type="submit"
-                        class="nav-item logout-item">
-
-                    <span class="nav-icon">
-                        <svg viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2"
-                             stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M10 17l5-5-5-5"/>
-                            <path d="M15 12H3"/>
-                            <path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/>
-                        </svg>
-                    </span>
-
-                    Logout
-
-                </button>
-
-            </form>
-
-        </div>
-
-    </aside>
-
-
-    {{-- KONTEN --}}
-    <main class="main">
-
-        {{-- ALERT --}}
-        @if(session('success'))
-            <div class="alert alert-success">
-                ✓ {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('success_password'))
-            <div class="alert alert-success">
-                ✓ {{ session('success_password') }}
-            </div>
-        @endif
-
-        @if($errors->any())
-            <div class="alert alert-error">
-                Ada {{ $errors->count() }} kesalahan yang perlu diperbaiki.
-            </div>
-        @endif
-
-
-        {{-- AKUN SAYA --}}
-        <section class="card" id="akun">
-
-            <div class="card-head">
-
-                <div class="card-icon">
-                    <svg viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="8" r="4"/>
-                        <path d="M4 21a8 8 0 0 1 16 0"/>
-                    </svg>
-                </div>
-
-                <div>
-                    <h3>Akun Saya</h3>
-                    <p>Informasi akun admin yang terdaftar</p>
-                </div>
-
-            </div>
-
-
-            <form method="POST"
-                  action="{{ route('admin.profil.update') }}">
-
-                @csrf
-                @method('PUT')
-
-                <div class="fields">
-
-                    {{-- Nama --}}
-                    <div class="field">
-
-                        <label for="name">
-                            Nama Lengkap
-                        </label>
-
-                        <input
-                            type="text"
-                            id="name"
-                            name="name"
-                            class="input"
-                            value="{{ old('name', $user->name) }}"
-                            placeholder="Masukkan nama lengkap"
-                            required
-                        >
-
-                        @error('name')
-                            <span class="error">{{ $message }}</span>
-                        @enderror
-
-                    </div>
-
-
-                    {{-- Email --}}
-                    <div class="field">
-
-                        <label for="email">
-                            Email
-                        </label>
-
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            class="input"
-                            value="{{ old('email', $user->email) }}"
-                            placeholder="Masukkan email"
-                            required
-                        >
-
-                        @error('email')
-                            <span class="error">{{ $message }}</span>
-                        @enderror
-
-                    </div>
-
-
-                    {{-- Nomor Telepon --}}
-                    <div class="field">
-
-                        <label for="no_telepon">
-                            Nomor Telepon
-                        </label>
-
-                        <input
-                            type="text"
-                            id="no_telepon"
-                            name="no_telepon"
-                            class="input"
-                            value="{{ old('no_telepon', $user->no_telepon) }}"
-                            placeholder="Masukkan nomor telepon"
-                        >
-
-                        @error('no_telepon')
-                            <span class="error">{{ $message }}</span>
-                        @enderror
-
-                    </div>
-
-
-                    {{-- Role --}}
-                    <div class="field">
-
-                        <label for="role">
-                            Role
-                        </label>
-
-                        <input
-                            type="text"
-                            id="role"
-                            class="input"
-                            value="{{ $role }}"
-                            disabled
-                        >
-
-                        <span class="hint">
-                            Role akun ditentukan oleh sistem.
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <div class="card-footer">
-
-                    <button type="reset"
-                            class="btn btn-secondary">
-                        Reset
-                    </button>
-
-                    <button type="submit"
-                            class="btn btn-primary">
-
-                        <svg viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2.4"
-                             stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 6 9 17l-5-5"/>
-                        </svg>
-
-                        Simpan Perubahan
-
-                    </button>
-
-                </div>
-
-            </form>
-
-        </section>
-
-
-        {{-- GANTI PASSWORD --}}
-        <section class="card" id="password">
-
-            <div class="card-head">
-
-                <div class="card-icon">
-                    <svg viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="10" rx="2"/>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                    </svg>
-                </div>
-
-                <div>
-                    <h3>Ganti Password</h3>
-                    <p>Perbarui password untuk menjaga keamanan akun</p>
-                </div>
-
-            </div>
-
-
-            <form method="POST"
-                  action="{{ route('admin.profil.password') }}">
-
-                @csrf
-                @method('PUT')
-
-                <div class="fields">
-
-                    {{-- Password lama --}}
-                    <div class="field full">
-
-                        <label for="password_lama">
-                            Password Saat Ini
-                        </label>
-
-                        <div class="input-wrap">
-
-                            <input
-                                type="password"
-                                id="password_lama"
-                                name="password_lama"
-                                class="input password-input"
-                                placeholder="Masukkan password saat ini"
-                                required
-                            >
-
-                            <button
-                                type="button"
-                                class="toggle-password"
-                                data-target="password_lama">
-                                Lihat
-                            </button>
-
+                        <div class="avatar-wrap">
+                            <div class="avatar">
+                                {{ $inisial }}
+                            </div>
                         </div>
 
-                        @error('password_lama')
-                            <span class="error">{{ $message }}</span>
-                        @enderror
+                        <div class="hero-info">
 
-                    </div>
+                            <h1>{{ $nama }}</h1>
 
+                            <div class="badges">
 
-                    {{-- Password baru --}}
-                    <div class="field">
+                                <span class="badge">
+                                    <svg viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" stroke-width="2"
+                                         stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="2" y="4" width="20" height="16" rx="2"/>
+                                        <path d="m22 7-10 6L2 7"/>
+                                    </svg>
 
-                        <label for="password_baru">
-                            Password Baru
-                        </label>
+                                    {{ $user->email }}
+                                </span>
 
-                        <div class="input-wrap">
+                                <span class="badge role-badge">
+                                    {{ $role }}
+                                </span>
 
-                            <input
-                                type="password"
-                                id="password_baru"
-                                name="password_baru"
-                                class="input password-input"
-                                placeholder="Minimal 8 karakter"
-                                required
-                            >
+                            </div>
 
-                            <button
-                                type="button"
-                                class="toggle-password"
-                                data-target="password_baru">
-                                Lihat
-                            </button>
-
-                        </div>
-
-                        @error('password_baru')
-                            <span class="error">{{ $message }}</span>
-                        @enderror
-
-                    </div>
-
-
-                    {{-- Konfirmasi --}}
-                    <div class="field">
-
-                        <label for="password_baru_confirmation">
-                            Konfirmasi Password Baru
-                        </label>
-
-                        <div class="input-wrap">
-
-                            <input
-                                type="password"
-                                id="password_baru_confirmation"
-                                name="password_baru_confirmation"
-                                class="input password-input"
-                                placeholder="Ulangi password baru"
-                                required
-                            >
-
-                            <button
-                                type="button"
-                                class="toggle-password"
-                                data-target="password_baru_confirmation">
-                                Lihat
-                            </button>
+                            <p class="hero-description">
+                                Kelola informasi akun dan keamanan akun admin kamu.
+                            </p>
 
                         </div>
 
                     </div>
 
-                </div>
+                </header>
 
 
-                <div class="card-footer">
+                {{-- =========================
+                     ALERT
+                ========================== --}}
 
-                    <button type="reset"
-                            class="btn btn-secondary">
-                        Reset
-                    </button>
+                @if(session('success'))
+                    <div class="alert alert-success">
+                        ✓ {{ session('success') }}
+                    </div>
+                @endif
 
-                    <button type="submit"
-                            class="btn btn-primary">
+                @if(session('success_password'))
+                    <div class="alert alert-success">
+                        ✓ {{ session('success_password') }}
+                    </div>
+                @endif
 
-                        <svg viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2.4"
-                             stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 6 9 17l-5-5"/>
-                        </svg>
-
-                        Perbarui Password
-
-                    </button>
-
-                </div>
-
-            </form>
-
-        </section>
-
-    </main>
-
-</div>
+                @if($errors->any())
+                    <div class="alert alert-error">
+                        Ada {{ $errors->count() }} kesalahan yang perlu diperbaiki.
+                        Silakan periksa kembali isian formulir.
+                    </div>
+                @endif
 
 
-<script>
-    // Toggle tampil/sembunyikan password
-    document.querySelectorAll('.toggle-password').forEach(button => {
+                {{-- =========================
+                     AKUN SAYA
+                ========================== --}}
 
-        button.addEventListener('click', function () {
+                <section class="profile-card" id="akun">
 
-            const target = document.getElementById(
-                this.dataset.target
-            );
+                    <div class="card-head">
 
-            if (!target) return;
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="8" r="4"/>
+                                <path d="M4 21a8 8 0 0 1 16 0"/>
+                            </svg>
+                        </div>
 
-            if (target.type === 'password') {
-                target.type = 'text';
-                this.textContent = 'Sembunyikan';
-            } else {
-                target.type = 'password';
-                this.textContent = 'Lihat';
-            }
+                        <div>
+                            <h3>Akun Saya</h3>
+                            <p>Informasi akun admin yang terdaftar</p>
+                        </div>
+
+                    </div>
+
+
+                    <form method="POST" action="{{ route('admin.profil.update') }}">
+
+                        @csrf
+                        @method('PUT')
+
+                        <div class="fields">
+
+                            {{-- Nama --}}
+                            <div class="field">
+
+                                <label for="name">Nama Lengkap</label>
+
+                                <input
+                                    type="text"
+                                    id="name"
+                                    name="name"
+                                    class="input"
+                                    value="{{ old('name', $user->name) }}"
+                                    placeholder="Masukkan nama lengkap"
+                                    required
+                                >
+
+                                @error('name')
+                                    <span class="error">{{ $message }}</span>
+                                @enderror
+
+                            </div>
+
+
+                            {{-- Email --}}
+                            <div class="field">
+
+                                <label for="email">Email</label>
+
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    class="input"
+                                    value="{{ old('email', $user->email) }}"
+                                    placeholder="Masukkan email"
+                                    required
+                                >
+
+                                @error('email')
+                                    <span class="error">{{ $message }}</span>
+                                @enderror
+
+                            </div>
+
+
+                            {{-- Nomor Telepon --}}
+                            <div class="field">
+
+                                <label for="no_telepon">Nomor Telepon</label>
+
+                                <input
+                                    type="text"
+                                    id="no_telepon"
+                                    name="no_telepon"
+                                    class="input"
+                                    value="{{ old('no_telepon', $user->no_telepon) }}"
+                                    placeholder="Masukkan nomor telepon"
+                                >
+
+                                @error('no_telepon')
+                                    <span class="error">{{ $message }}</span>
+                                @enderror
+
+                            </div>
+
+
+                            {{-- Role --}}
+                            <div class="field">
+
+                                <label for="role">Role</label>
+
+                                <input
+                                    type="text"
+                                    id="role"
+                                    class="input"
+                                    value="{{ $role }}"
+                                    disabled
+                                >
+
+                                <span class="hint">
+                                    Role akun ditentukan oleh sistem.
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="card-footer">
+
+                            <button type="reset" class="btn btn-secondary">
+                                Reset
+                            </button>
+
+                            <button type="submit" class="btn btn-primary">
+
+                                <svg viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2.4"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 6 9 17l-5-5"/>
+                                </svg>
+
+                                Simpan Perubahan
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </section>
+
+
+                {{-- =========================
+                     GANTI PASSWORD
+                ========================== --}}
+
+                <section class="profile-card" id="password">
+
+                    <div class="card-head">
+
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="10" rx="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                        </div>
+
+                        <div>
+                            <h3>Ganti Password</h3>
+                            <p>Perbarui password untuk menjaga keamanan akun</p>
+                        </div>
+
+                    </div>
+
+
+                    <form method="POST" action="{{ route('admin.profil.password') }}">
+
+                        @csrf
+                        @method('PUT')
+
+                        <div class="fields">
+
+                            {{-- Password lama --}}
+                            <div class="field full">
+
+                                <label for="password_lama">
+                                    Password Saat Ini
+                                </label>
+
+                                <div class="input-wrap">
+
+                                    <input
+                                        type="password"
+                                        id="password_lama"
+                                        name="password_lama"
+                                        class="input password-input"
+                                        placeholder="Masukkan password saat ini"
+                                        required
+                                    >
+
+                                    <button
+                                        type="button"
+                                        class="toggle-password"
+                                        data-target="password_lama">
+                                        Lihat
+                                    </button>
+
+                                </div>
+
+                                @error('password_lama')
+                                    <span class="error">{{ $message }}</span>
+                                @enderror
+
+                            </div>
+
+
+                            {{-- Password baru --}}
+                            <div class="field">
+
+                                <label for="password_baru">
+                                    Password Baru
+                                </label>
+
+                                <div class="input-wrap">
+
+                                    <input
+                                        type="password"
+                                        id="password_baru"
+                                        name="password_baru"
+                                        class="input password-input"
+                                        placeholder="Minimal 8 karakter"
+                                        required
+                                    >
+
+                                    <button
+                                        type="button"
+                                        class="toggle-password"
+                                        data-target="password_baru">
+                                        Lihat
+                                    </button>
+
+                                </div>
+
+                                @error('password_baru')
+                                    <span class="error">{{ $message }}</span>
+                                @enderror
+
+                            </div>
+
+
+                            {{-- Konfirmasi password --}}
+                            <div class="field">
+
+                                <label for="password_baru_confirmation">
+                                    Konfirmasi Password Baru
+                                </label>
+
+                                <div class="input-wrap">
+
+                                    <input
+                                        type="password"
+                                        id="password_baru_confirmation"
+                                        name="password_baru_confirmation"
+                                        class="input password-input"
+                                        placeholder="Ulangi password baru"
+                                        required
+                                    >
+
+                                    <button
+                                        type="button"
+                                        class="toggle-password"
+                                        data-target="password_baru_confirmation">
+                                        Lihat
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="card-footer">
+
+                            <button type="reset" class="btn btn-secondary">
+                                Reset
+                            </button>
+
+                            <button type="submit" class="btn btn-primary">
+
+                                <svg viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2.4"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 6 9 17l-5-5"/>
+                                </svg>
+
+                                Perbarui Password
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </section>
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+    {{-- SCRIPT TOGGLE PASSWORD --}}
+    <script>
+        document.querySelectorAll('.toggle-password').forEach(button => {
+
+            button.addEventListener('click', function () {
+
+                const target = document.getElementById(this.dataset.target);
+
+                if (!target) return;
+
+                if (target.type === 'password') {
+                    target.type = 'text';
+                    this.textContent = 'Sembunyikan';
+                } else {
+                    target.type = 'password';
+                    this.textContent = 'Lihat';
+                }
+
+            });
 
         });
-
-    });
-
-
-    // Sidebar ganti password mengarah ke card password
-    document.getElementById('menuPassword')
-        ?.addEventListener('click', function () {
-
-            document.querySelectorAll('.nav-item')
-                .forEach(item => item.classList.remove('active'));
-
-            this.classList.add('active');
-
-        });
-</script>
+    </script>
 
 </body>
 </html>

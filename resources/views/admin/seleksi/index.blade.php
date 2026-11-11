@@ -187,6 +187,159 @@
     isolation: isolate;
 }
 
+
+/* CUSTOM DROPDOWN FILTER JENIS */
+.jenis-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+.jenis-dropdown-trigger {
+    width: 100%;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 15px;
+    border: 1px solid rgba(0, 0, 0, .10);
+    border-radius: 9999px;
+    background: #fff;
+    color: #3f3f46;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .25s ease;
+}
+
+.jenis-dropdown-trigger:hover,
+.jenis-dropdown-trigger.is-open {
+    border-color: #f97316;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, .10);
+}
+
+.jenis-dropdown-trigger .dropdown-arrow {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: #a1a1aa;
+    transition: transform .25s ease;
+}
+
+.jenis-dropdown-trigger.is-open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.jenis-dropdown-panel {
+    position: absolute;
+    z-index: 50;
+    top: calc(100% + 10px);
+    left: 0;
+    width: 100%;
+    min-width: 220px;
+    padding: 10px;
+    border: 1px solid rgba(0, 0, 0, .07);
+    border-radius: 17px;
+    background: #fff;
+    box-shadow:
+        0 12px 35px rgba(0, 0, 0, .10),
+        0 3px 8px rgba(0, 0, 0, .04);
+    transform-origin: top center;
+}
+
+.jenis-dropdown-search {
+    position: relative;
+    margin-bottom: 8px;
+}
+
+.jenis-dropdown-search input {
+    width: 100%;
+    padding: 10px 12px 10px 34px;
+    border: 1px solid #eeeeef;
+    border-radius: 10px;
+    background: #fafafa;
+    color: #27272a;
+    font-size: 11px;
+    outline: none;
+    transition: all .2s ease;
+}
+
+.jenis-dropdown-search input:focus {
+    border-color: #f97316;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, .09);
+}
+
+.jenis-dropdown-search svg {
+    position: absolute;
+    top: 50%;
+    left: 11px;
+    width: 14px;
+    height: 14px;
+    color: #a1a1aa;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.jenis-dropdown-options {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    max-height: 190px;
+    overflow-y: auto;
+}
+
+.jenis-dropdown-option {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 9px;
+    color: #52525b;
+    background: transparent;
+    font-size: 11px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: all .2s ease;
+}
+
+.jenis-dropdown-option:hover {
+    background: #fff4ea;
+    color: #ea580c;
+    padding-left: 16px;
+}
+
+.jenis-dropdown-option.selected {
+    background: #fff4ea;
+    color: #ea580c;
+    font-weight: 700;
+}
+
+.jenis-dropdown-option .check-icon {
+    width: 14px;
+    height: 14px;
+    color: #f97316;
+}
+
+.jenis-dropdown-empty {
+    padding: 14px 10px;
+    color: #a1a1aa;
+    font-size: 11px;
+    text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .jenis-dropdown-trigger,
+    .jenis-dropdown-trigger .dropdown-arrow,
+    .jenis-dropdown-option,
+    .jenis-dropdown-search input {
+        transition: none;
+    }
+}
+
+
 /* Indikator putih */
 .filter-tab-indicator {
     position: absolute;
@@ -552,11 +705,91 @@
 
           <!-- Filter jenis & pencarian -->
           <div class="flex flex-col md:flex-row md:items-center gap-3">
-            <select x-model="fJenis" class="field md:w-48">
-              <option value="Semua">Semua Jenis</option>
-              <option value="Magang">Magang</option>
-              <option value="Kerja">Kerja</option>
-            </select>
+            
+<!-- CUSTOM DROPDOWN FILTER JENIS -->
+<div class="jenis-dropdown md:w-48"
+     @click.outside="jenisOpen = false"
+     @keydown.escape.window="jenisOpen = false">
+
+    <!-- Tombol Dropdown -->
+    <button
+        type="button"
+        @click="jenisOpen = !jenisOpen; qJenisDropdown = ''"
+        :class="{ 'is-open': jenisOpen }"
+        :aria-expanded="jenisOpen"
+        class="jenis-dropdown-trigger">
+
+        <span x-text="fJenis === 'Semua' ? 'Semua Jenis' : fJenis"></span>
+
+        <svg class="dropdown-arrow"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="2"
+             viewBox="0 0 24 24">
+            <path stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="m6 9 6 6 6-6"/>
+        </svg>
+    </button>
+
+    <!-- Panel Dropdown -->
+    <div
+        x-show="jenisOpen"
+        x-cloak
+        x-transition:enter="transition ease-out duration-250"
+        x-transition:enter-start="opacity-0 -translate-y-3 scale-95"
+        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+        x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
+        class="jenis-dropdown-panel">
+
+        <!-- Daftar Pilihan -->
+        <div class="jenis-dropdown-options">
+
+            <template
+                x-for="jenis in jenisOptions.filter(item =>
+                    item.toLowerCase().includes(qJenisDropdown.toLowerCase().trim())
+                )"
+                :key="jenis">
+
+                <button
+                    type="button"
+                    @click="pilihJenis(jenis)"
+                    :class="{ 'selected': fJenis === jenis }"
+                    class="jenis-dropdown-option">
+
+                    <span x-text="jenis === 'Semua' ? 'Semua Jenis' : jenis"></span>
+
+                    <svg
+                        x-show="fJenis === jenis"
+                        class="check-icon"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              d="m5 12 4 4L19 6"/>
+                    </svg>
+                </button>
+
+            </template>
+
+            <!-- Jika pencarian tidak ditemukan -->
+            <div
+                x-show="jenisOptions.filter(item =>
+                    item.toLowerCase().includes(qJenisDropdown.toLowerCase().trim())
+                ).length === 0"
+                class="jenis-dropdown-empty">
+
+                Jenis tidak ditemukan.
+            </div>
+
+        </div>
+    </div>
+</div>
+
             <div class="relative w-full md:flex-1 md:max-w-sm">
               <svg class="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
               <input type="text" x-model="q" placeholder="Cari nama, email, atau posisi..." class="field !pl-10 !rounded-full">
@@ -666,6 +899,23 @@
         fStatus: 'Semua',
         fJenis: 'Semua',
         q: '',
+
+        // DROPDOWN FILTER JENIS
+jenisOpen: false,
+qJenisDropdown: '',
+
+jenisOptions: [
+    'Semua',
+    'Magang',
+    'Kerja'
+],
+
+// MEMILIH JENIS
+pilihJenis(jenis) {
+    this.fJenis = jenis;
+    this.jenisOpen = false;
+    this.qJenisDropdown = '';
+},
 
         // ANIMASI TAB
         tabReady: false,
