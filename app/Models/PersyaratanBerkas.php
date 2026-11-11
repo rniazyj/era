@@ -4,32 +4,45 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * ASUMSI kolom tabel persyaratan_berkas:
- *   id_persyaratan (PK), id_lowongan, nama_berkas, keterangan (nullable),
- *   wajib (boolean), format (mis. "pdf,jpg,png"), maks_kb (integer)
- * Kalau modelmu sudah ada, cukup samakan nama kolom di LowonganController.
- */
 class PersyaratanBerkas extends Model
 {
     protected $table = 'persyaratan_berkas';
     protected $primaryKey = 'id_persyaratan';
 
-    protected $fillable = ['id_lowongan', 'nama_berkas', 'keterangan', 'wajib', 'format', 'maks_kb'];
-    protected $casts = ['wajib' => 'boolean', 'maks_kb' => 'integer'];
+    // Tabel tidak punya created_at / updated_at
+    public $timestamps = false;
+
+    protected $fillable = [
+        'id_lowongan',
+        'id_program',
+        'nama_berkas',
+        'format_file',
+        'wajib',
+    ];
+
+    protected $casts = [
+        'wajib' => 'boolean',
+    ];
 
     public function lowongan()
     {
         return $this->belongsTo(LowonganKerja::class, 'id_lowongan', 'id_lowongan');
     }
 
-    public function getFormatListAttribute(): string
+    public function program()
     {
-        return filled($this->format) ? $this->format : 'pdf,jpg,jpeg,png';
+        return $this->belongsTo(ProgramMagang::class, 'id_program', 'id_program');
     }
 
+    // Daftar format yang diizinkan (dipakai untuk validasi upload pelamar)
+    public function getFormatListAttribute(): string
+    {
+        return filled($this->format_file) ? $this->format_file : 'pdf';
+    }
+
+    // Kolom maks_kb tidak ada di tabel, jadi pakai batas bawaan 2 MB
     public function getMaksKbAttrAttribute(): int
     {
-        return $this->maks_kb ?: 2048;
+        return 2048;
     }
 }

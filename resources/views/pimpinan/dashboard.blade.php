@@ -64,6 +64,13 @@
 
   $maxStatus = max(1, max($d['perStatus']));
 
+    // Opsi periode untuk dropdown kustom (array supaya urutan opsi tetap terjaga)
+  $periodeOpsi = collect($opsiPeriode)
+    ->map(fn ($label, $kode) => ['kode' => (string) $kode, 'label' => $label])
+    ->values()
+    ->all();
+
+  $labelPeriode = $opsiPeriode[$periode] ?? collect($opsiPeriode)->first();
 @endphp
 
 <!DOCTYPE html>
@@ -106,7 +113,74 @@
 
     .field:focus { border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,.15); }
 
+    /* ===== DROPDOWN KUSTOM (sama dengan form lowongan admin) ===== */
+    .dropdown-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .75rem;
+      min-width: 11rem;
+      border-radius: .75rem;
+      border: 1px solid rgba(0,0,0,.1);
+      background: #fff;
+      padding: .65rem .95rem;
+      font-size: .8rem;
+      text-align: left;
+      outline: none;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .dropdown-trigger:focus { border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,.15); }
 
+    .custom-dropdown-panel {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      z-index: 50;
+      width: 100%;
+      padding: 7px;
+      background: #fff;
+      border: 1px solid rgba(0, 0, 0, .08);
+      border-radius: 15px;
+      box-shadow: 0 16px 40px rgba(24, 24, 27, .13);
+      transform-origin: top center;
+    }
+
+    /* Panel mengikuti lebar teks; di layar sm ke atas rata kanan dengan tombol */
+    .custom-dropdown-panel--menu {
+      width: max-content;
+      min-width: 100%;
+      max-width: calc(100vw - 2rem);
+      max-height: 18rem;
+      overflow-y: auto;
+    }
+    @media (min-width: 640px) {
+      .custom-dropdown-panel--menu { left: auto; right: 0; transform-origin: top right; }
+    }
+
+    .custom-dropdown-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      width: 100%;
+      padding: 10px 12px;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: #52525b;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: background .2s ease, color .2s ease, transform .2s ease;
+    }
+    .custom-dropdown-option:hover { background: #fff7ed; color: #ea580c; transform: translateX(2px); }
+    .custom-dropdown-option.selected { background: #fff1e6; color: #ea580c; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .custom-dropdown-option { transition: none; }
+    }
 
     /* ===== KARTU STATISTIK (gradasi bergerak) ===== */
 
@@ -368,38 +442,83 @@
 
 
 
-        <!-- HEADER HALAMAN -->
-
-        <div class="scroll-rv flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 min-w-0">
+                <!-- HEADER HALAMAN -->
+        <div class="scroll-rv relative z-30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 min-w-0">
 
           <div>
-
             <span class="text-[10px] tracking-[.2em] font-bold text-ewforange bg-orange-50 px-3 py-1 rounded-full uppercase">PANEL PIMPINAN</span>
-
             <h1 class="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight mt-2 break-words">Dashboard Pimpinan</h1>
-
             <p class="text-[11px] text-zinc-400 mt-1">Data per {{ now()->locale('id')->translatedFormat('d F Y, H:i') }}</p>
-
           </div>
 
-
-
           <form method="GET" action="{{ route('pimpinan.dashboard') }}" class="flex items-center gap-2">
+            <label for="periode-btn" class="text-[11px] font-semibold text-zinc-400">Periode</label>
 
-            <label for="periode" class="text-[11px] font-semibold text-zinc-400">Periode</label>
+            <div class="relative"
+                 x-data="{
+                   open: false,
+                   value: @js((string) $periode),
+                   label: @js($labelPeriode),
+                   pilih(kode, label) {
+                     this.value = kode;
+                     this.label = label;
+                     this.open = false;
+                     this.$refs.periode.value = kode;
+                     this.$refs.periode.form.submit();
+                   }
+                 }"
+                 @click.outside="open = false"
+                 @keydown.escape.window="open = false">
 
-            <select id="periode" name="periode" class="field" onchange="this.form.submit()">
+              <input type="hidden" name="periode" x-ref="periode" :value="value" value="{{ $periode }}">
 
-              @foreach($opsiPeriode as $kode => $label)
+              <button type="button" id="periode-btn"
+                      @click="open = !open"
+                      :aria-expanded="open.toString()"
+                      aria-haspopup="listbox"
+                      class="dropdown-trigger">
 
-                <option value="{{ $kode }}" @selected($periode === (string) $kode)>{{ $label }}</option>
+                <span x-text="label"></span>
 
-              @endforeach
+                <svg class="w-4 h-4 shrink-0 text-zinc-400 transition-transform duration-300"
+                     :class="{ 'rotate-180': open }"
+                     viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m6 9 6 6 6-6"/>
+                </svg>
+              </button>
 
-            </select>
+              <div x-cloak
+                   x-show="open"
+                   x-transition:enter="transition ease-out duration-200"
+                   x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
+                   x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                   x-transition:leave="transition ease-in duration-150"
+                   x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                   x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
+                   role="listbox"
+                   class="custom-dropdown-panel custom-dropdown-panel--menu">
 
+                @foreach($periodeOpsi as $o)
+                  <button type="button"
+                          @click="pilih(@js($o['kode']), @js($o['label']))"
+                          class="custom-dropdown-option"
+                          :class="{ 'selected': value === @js($o['kode']) }">
+
+                    <span>{{ $o['label'] }}</span>
+
+                    <svg x-show="value === @js($o['kode'])"
+                         class="w-4 h-4 text-orange-600"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="m5 12 4 4L19 6"/>
+                    </svg>
+                  </button>
+                @endforeach
+
+              </div>
+            </div>
           </form>
-
         </div>
 
 
