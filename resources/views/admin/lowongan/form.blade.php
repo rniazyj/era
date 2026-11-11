@@ -43,6 +43,8 @@
   $init = [
     'jenis' => $jenis,
 
+    'statusOptions' => array_values($statusList),
+
     'hasExisting' => (bool) $silabusUrl,
     'existingUrl' => $silabusUrl,
     'existingName' => $silabusNama,
@@ -84,6 +86,57 @@
     .upload-item { transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
     .field { width: 100%; border-radius: 0.75rem; border: 1px solid rgba(0,0,0,.1); background: #fff; padding: .65rem .95rem; font-size: .8rem; outline: none; transition: all .2s; }
     .field:focus { border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,.15); }
+
+/* CUSTOM ANIMATED DROPDOWN */
+.custom-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 50;
+  width: 100%;
+  padding: 7px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, .08);
+  border-radius: 15px;
+  box-shadow: 0 16px 40px rgba(24, 24, 27, .13);
+  transform-origin: top center;
+}
+
+.custom-dropdown-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #52525b;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, transform .2s ease;
+}
+
+.custom-dropdown-option:hover {
+  background: #fff7ed;
+  color: #ea580c;
+  transform: translateX(2px);
+}
+
+.custom-dropdown-option.selected {
+  background: #fff1e6;
+  color: #ea580c;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .custom-dropdown-option {
+    transition: none;
+  }
+}
+
   </style>
 </head>
 
@@ -160,10 +213,72 @@
               @else
                 <div>
                   <label class="block text-[11px] font-semibold text-zinc-500 mb-1.5">Jenis <span class="text-rose-500">*</span></label>
-                  <select name="jenis" x-model="jenis" class="field sm:max-w-xs">
-                    <option value="Magang">Magang (Program)</option>
-                    <option value="Kerja">Kerja (Lowongan)</option>
-                  </select>
+                  
+<div class="relative w-full sm:max-w-xs"
+     x-data="{ open: false }"
+     @click.outside="open = false"
+     @keydown.escape.window="open = false">
+
+  <input type="hidden" name="jenis" :value="jenis">
+
+  <button type="button"
+          @click="open = !open"
+          :aria-expanded="open.toString()"
+          class="field flex items-center justify-between gap-3 text-left cursor-pointer">
+
+    <span x-text="jenis === 'Magang' ? 'Magang (Program)' : 'Kerja (Lowongan)'"></span>
+
+    <svg class="w-4 h-4 shrink-0 text-zinc-400 transition-transform duration-300"
+         :class="{ 'rotate-180': open }"
+         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m6 9 6 6 6-6"/>
+    </svg>
+  </button>
+
+  <div x-cloak
+       x-show="open"
+       x-transition:enter="transition ease-out duration-200"
+       x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
+       x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+       x-transition:leave="transition ease-in duration-150"
+       x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+       x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
+       class="custom-dropdown-panel">
+
+    <button type="button"
+            @click="jenis = 'Magang'; open = false"
+            class="custom-dropdown-option"
+            :class="{ 'selected': jenis === 'Magang' }">
+
+      <span>Magang (Program)</span>
+
+      <svg x-show="jenis === 'Magang'"
+           class="w-4 h-4 text-orange-600"
+           viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m5 12 4 4L19 6"/>
+      </svg>
+    </button>
+
+    <button type="button"
+            @click="jenis = 'Kerja'; open = false"
+            class="custom-dropdown-option"
+            :class="{ 'selected': jenis === 'Kerja' }">
+
+      <span>Kerja (Lowongan)</span>
+
+      <svg x-show="jenis === 'Kerja'"
+           class="w-4 h-4 text-orange-600"
+           viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m5 12 4 4L19 6"/>
+      </svg>
+    </button>
+
+  </div>
+</div>
+
                 </div>
               @endif
 
@@ -402,15 +517,60 @@
               <span class="text-rose-500">*</span>
             </label>
 
-            <select
-              :name="'persyaratan[' + index + '][format_file]'"
-              x-model="item.format_file"
-              class="field"
-            >
-              <option value="pdf">PDF</option>
-              <option value="doc">DOC</option>
-              <option value="docx">DOCX</option>
-            </select>
+            
+<div class="relative"
+     x-data="{ open: false }"
+     @click.outside="open = false"
+     @keydown.escape.window="open = false">
+
+  <input type="hidden"
+         :name="'persyaratan[' + index + '][format_file]'"
+         :value="item.format_file">
+
+  <button type="button"
+          @click="open = !open"
+          :aria-expanded="open.toString()"
+          class="field flex items-center justify-between gap-3 text-left cursor-pointer">
+
+    <span class="uppercase" x-text="item.format_file"></span>
+
+    <svg class="w-4 h-4 shrink-0 text-zinc-400 transition-transform duration-300"
+         :class="{ 'rotate-180': open }"
+         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m6 9 6 6 6-6"/>
+    </svg>
+  </button>
+
+  <div x-cloak
+       x-show="open"
+       x-transition:enter="transition ease-out duration-200"
+       x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
+       x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+       x-transition:leave="transition ease-in duration-150"
+       x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+       x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
+       class="custom-dropdown-panel">
+
+    <template x-for="format in ['pdf', 'doc', 'docx']" :key="format">
+      <button type="button"
+              @click="item.format_file = format; open = false"
+              class="custom-dropdown-option"
+              :class="{ 'selected': item.format_file === format }">
+
+        <span class="uppercase" x-text="format"></span>
+
+        <svg x-show="item.format_file === format"
+             class="w-4 h-4 text-orange-600"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m5 12 4 4L19 6"/>
+        </svg>
+      </button>
+    </template>
+
+  </div>
+</div>
 
           </div>
 
@@ -423,14 +583,73 @@
               Status Persyaratan
             </label>
 
-            <select
-              :name="'persyaratan[' + index + '][wajib]'"
-              x-model="item.wajib"
-              class="field"
-            >
-              <option value="1">Wajib</option>
-              <option value="0">Opsional</option>
-            </select>
+            
+<div class="relative"
+     x-data="{ open: false }"
+     @click.outside="open = false"
+     @keydown.escape.window="open = false">
+
+  <input type="hidden"
+         :name="'persyaratan[' + index + '][wajib]'"
+         :value="item.wajib">
+
+  <button type="button"
+          @click="open = !open"
+          :aria-expanded="open.toString()"
+          class="field flex items-center justify-between gap-3 text-left cursor-pointer">
+
+    <span x-text="String(item.wajib) === '1' ? 'Wajib' : 'Opsional'"></span>
+
+    <svg class="w-4 h-4 shrink-0 text-zinc-400 transition-transform duration-300"
+         :class="{ 'rotate-180': open }"
+         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m6 9 6 6 6-6"/>
+    </svg>
+  </button>
+
+  <div x-cloak
+       x-show="open"
+       x-transition:enter="transition ease-out duration-200"
+       x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
+       x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+       x-transition:leave="transition ease-in duration-150"
+       x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+       x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
+       class="custom-dropdown-panel">
+
+    <button type="button"
+            @click="item.wajib = '1'; open = false"
+            class="custom-dropdown-option"
+            :class="{ 'selected': String(item.wajib) === '1' }">
+
+      <span>Wajib</span>
+
+      <svg x-show="String(item.wajib) === '1'"
+           class="w-4 h-4 text-orange-600"
+           viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m5 12 4 4L19 6"/>
+      </svg>
+    </button>
+
+    <button type="button"
+            @click="item.wajib = '0'; open = false"
+            class="custom-dropdown-option"
+            :class="{ 'selected': String(item.wajib) === '0' }">
+
+      <span>Opsional</span>
+
+      <svg x-show="String(item.wajib) === '0'"
+           class="w-4 h-4 text-orange-600"
+           viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m5 12 4 4L19 6"/>
+      </svg>
+    </button>
+
+  </div>
+</div>
 
           </div>
 
@@ -485,13 +704,61 @@
 
                 <div>
                   <label for="field-status" class="block text-[11px] font-semibold text-zinc-500 mb-1.5">Status <span class="text-rose-500">*</span></label>
-                  <select id="field-status" name="status" x-model="f.status"
-                          :class="{ '!border-rose-400': errors.status }"
-                          class="field capitalize">
-                    @foreach($statusList as $st)
-                      <option value="{{ $st }}">{{ ucfirst($st) }}</option>
-                    @endforeach
-                  </select>
+                  
+<div class="relative"
+     x-data="{ open: false }"
+     @click.outside="open = false"
+     @keydown.escape.window="open = false">
+
+  <input type="hidden" id="field-status"
+         name="status" :value="f.status">
+
+  <button type="button"
+          @click="open = !open"
+          :aria-expanded="open.toString()"
+          :class="{ '!border-rose-400': errors.status }"
+          class="field flex items-center justify-between gap-3 text-left cursor-pointer capitalize">
+
+    <span x-text="f.status"></span>
+
+    <svg class="w-4 h-4 shrink-0 text-zinc-400 transition-transform duration-300"
+         :class="{ 'rotate-180': open }"
+         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m6 9 6 6 6-6"/>
+    </svg>
+  </button>
+
+  <div x-cloak
+       x-show="open"
+       x-transition:enter="transition ease-out duration-200"
+       x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
+       x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+       x-transition:leave="transition ease-in duration-150"
+       x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+       x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
+       class="custom-dropdown-panel">
+
+    <template x-for="statusOption in statusOptions" :key="statusOption">
+      <button type="button"
+              @click="f.status = statusOption; open = false; revalidate()"
+              class="custom-dropdown-option capitalize"
+              :class="{ 'selected': f.status === statusOption }">
+
+        <span x-text="statusOption"></span>
+
+        <svg x-show="f.status === statusOption"
+             class="w-4 h-4 text-orange-600"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m5 12 4 4L19 6"/>
+        </svg>
+      </button>
+    </template>
+
+  </div>
+</div>
+
                   <p x-show="errors.status" x-cloak x-text="errors.status" class="text-[11px] font-medium text-rose-500 mt-1.5"></p>
                 </div>
               </div>
@@ -567,6 +834,8 @@
       Alpine.data('lowonganForm', (init) => ({
         jenis: init.jenis,
         f: init.values,
+
+        statusOptions: init.statusOptions || [],
 
         // Persyaratan berkas
         persyaratan: init.persyaratan || [],

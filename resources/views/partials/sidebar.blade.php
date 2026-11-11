@@ -4,6 +4,9 @@
   $has  = fn ($name) => \Illuminate\Support\Facades\Route::has($name);
   $href = fn ($name) => $has($name) ? route($name) : '#';
 
+  // Cek peran: pimpinan memakai menu sendiri, selain itu memakai menu admin
+  $isPimpinan = $user && method_exists($user, 'isPimpinan') && $user->isPimpinan();
+
   // Daftar Ikon (path heroicons outline)
   $icons = [
     'home'      => 'M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3v-6h6v6h3a1 1 0 001-1V10',
@@ -13,25 +16,38 @@
     'globe'     => 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9',
     'clock'     => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
     'profile'   => 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM4 21a8 8 0 0116 0',
+    'chart'     => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+    'calculator' => 'M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z',
     'logout'    => 'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1',
   ];
 
-  // Struktur Menu Admin
-  $groups = [
-    ['title' => null, 'roles' => null, 'items' => [
-      ['Home',   'admin.dashboard',   'admin.dashboard*', 'home'],
-      ['Profil', 'admin.profil','admin.profil*',    'profile'],
-    ]],
-    ['title' => 'Rekrutmen', 'roles' => null, 'items' => [
-      ['Kelola Lowongan', 'admin.lowongan.index', 'admin.lowongan*', 'briefcase'],
-      ['Daftar Pelamar',  'admin.pelamar.index',  'admin.pelamar*',  'users'],
-      ['Buat Surat LoA',  'admin.surat.create',   'admin.surat*',    'document'],
-    ]],
-    ['title' => 'Pengaturan & Sistem', 'roles' => null, 'items' => [
-      ['Konten Perusahaan', 'admin.konten.index', 'admin.konten*', 'globe'],
-      ['Log Aktivitas',     'admin.log.index',    'admin.log*',    'clock'],
-    ]],
-  ];
+  // Struktur Menu: [label, nama route, pola route aktif, ikon]
+  if ($isPimpinan) {
+    // Menu Pimpinan
+    $groups = [
+      ['title' => null, 'roles' => null, 'items' => [
+        ['Dashboard', 'pimpinan.dashboard', 'pimpinan.dashboard*', 'home'],
+        ['Analisis',  'pimpinan.analisis.index', 'pimpinan.analisis*', 'chart'],
+        ['Profil',    'pimpinan.profil', 'pimpinan.profil*', 'profile'],
+      ]],
+    ];
+  } else {
+    // Menu Admin
+    $groups = [
+      ['title' => null, 'roles' => null, 'items' => [
+        ['Home',   'admin.dashboard', 'admin.dashboard*', 'home'],
+        ['Profil', 'admin.profil',    'admin.profil*',    'profile'],
+      ]],
+      ['title' => 'Rekrutmen', 'roles' => null, 'items' => [
+        ['Kelola Lowongan', 'admin.lowongan.index', 'admin.lowongan*', 'briefcase'],
+        ['Daftar Pelamar',  'admin.pelamar.index',  'admin.pelamar*',  'users'],
+      ]],
+      ['title' => 'Pengaturan & Sistem', 'roles' => null, 'items' => [
+        ['Konten Website', 'admin.konten.index', 'admin.konten*', 'globe'],
+        ['Log Aktivitas',  'admin.log.index',    'admin.log*',    'clock'],
+      ]],
+    ];
+  }
 
   $show = fn ($roles) => !$roles || !$role || in_array($role, $roles, true);
 @endphp

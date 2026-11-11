@@ -84,7 +84,7 @@ Route::middleware(['auth', 'role:admin_hr'])->prefix('admin')->name('admin.')->g
     Route::put('/profil', [AdminProfilController::class, 'update'])->name('profil.update');
     Route::put('/profil/password', [AdminProfilController::class, 'updatePassword'])->name('profil.password');
 
-    // Kelola lowongan (kerja | magang)
+    // Kelola lowongan & program
     Route::get('/lowongan', [AdminLowonganController::class, 'index'])->name('lowongan.index');
     Route::get('/lowongan/create', [AdminLowonganController::class, 'create'])->name('lowongan.create');
     Route::post('/lowongan', [AdminLowonganController::class, 'store'])->name('lowongan.store');
@@ -97,7 +97,7 @@ Route::middleware(['auth', 'role:admin_hr'])->prefix('admin')->name('admin.')->g
         ->whereNumber('id')
         ->name('lowongan.update');
 
-    // Seleksi pelamar
+    // Daftar pelamar & seleksi
     Route::get('/pelamar', [SeleksiController::class, 'index'])->name('pelamar.index');
     Route::get('/pelamar/{id}', [SeleksiController::class, 'show'])->whereNumber('id')->name('pelamar.show');
     Route::patch('/pelamar/{id}/status', [SeleksiController::class, 'updateStatus'])->whereNumber('id')->name('pelamar.status');
