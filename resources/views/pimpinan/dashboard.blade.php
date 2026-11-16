@@ -107,7 +107,14 @@
 
     [x-cloak] { display: none !important; }
 
-    .scroll-rv { opacity: 0; transform: translateY(40px); }
+    .scroll-rv {
+  will-change: transform, opacity;
+}
+
+/* Isi kartu statistik */
+.stat-card-inner {
+  will-change: transform, opacity;
+}
 
     .field { border-radius: 9999px; border: 1px solid rgba(0,0,0,.1); background: #fff; padding: .55rem 1rem; font-size: .75rem; font-weight: 500; outline: none; transition: all .2s; cursor: pointer; }
 
@@ -518,6 +525,24 @@
 
               </div>
             </div>
+
+            <a href="{{ route('pimpinan.dashboard.export.pdf', request()->query()) }}"
+   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-bold transition">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              d="M12 16V4m0 12-4-4m4 4 4-4M4 20h16"/>
+    </svg>
+    PDF
+</a>
+
+<a href="{{ route('pimpinan.dashboard.export.excel', request()->query()) }}"
+   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 text-xs font-bold transition">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              d="M12 16V4m0 12-4-4m4 4 4-4M4 20h16"/>
+    </svg>
+    Excel
+</a>
           </form>
         </div>
 
@@ -525,7 +550,7 @@
 
         <!-- KARTU STATISTIK UTAMA -->
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 scroll-rv min-w-0">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 min-w-0">
 
 
 
@@ -1369,174 +1394,275 @@
 
   <script>
 
-    gsap.registerPlugin(ScrollTrigger);
+    
+gsap.registerPlugin(ScrollTrigger);
 
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
 
+window.scrollTo(0, 0);
 
-    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+const $ = (selector, context = document) =>
+  [...context.querySelectorAll(selector)];
 
-    window.scrollTo(0, 0);
+const reduceMotion = window.matchMedia(
+  '(prefers-reduced-motion: reduce)'
+).matches;
 
+// Format angka
+function formatAngka(value, decimals = 0) {
+  return Number(value).toFixed(decimals).replace('.', ',');
+}
 
+// Jika pengguna memilih mengurangi animasi
+if (reduceMotion) {
+  gsap.set('.scroll-rv, .stat-card-inner', {
+    opacity: 1,
+    y: 0,
+    clearProps: 'all'
+  });
 
-    const $ = (s, c = document) => [...c.querySelectorAll(s)];
+  $('.count-target').forEach(counter => {
+    const target = parseFloat(counter.dataset.target) || 0;
+    const decimals = parseInt(counter.dataset.decimals) || 0;
+    const suffix = counter.dataset.suffix || '';
 
+    counter.textContent = formatAngka(target, decimals) + suffix;
+  });
 
+  $('.bar-h').forEach(bar => {
+    bar.style.width = bar.dataset.pct + '%';
+  });
 
-    // 1. Animasi masuk isi kartu statistik
+  $('.bar-v').forEach(bar => {
+    bar.style.height = bar.dataset.pct + '%';
+  });
 
-    gsap.fromTo('.stat-card-inner',
+  $('.donut-arc').forEach(arc => {
+    arc.style.strokeDashoffset = arc.dataset.final;
+  });
 
-      { y: 25, opacity: 0 },
+} else {
 
-      { y: 0, opacity: 1, duration: 0.8, stagger: 0.15, ease: 'power3.out', delay: 0.2 }
+  // 1. ANIMASI HEADER
+  gsap.fromTo(
+    '.scroll-rv:first-child',
+    {
+      opacity: 0,
+      y: 30,
+      filter: 'blur(5px)'
+    },
+    {
+      opacity: 1,
+      y: 0,
+      filter: 'blur(0px)',
+      duration: 0.9,
+      ease: 'power3.out',
+      clearProps: 'filter'
+    }
+  );
 
-    );
+  // 2. ANIMASI KARTU STATISTIK
+  gsap.fromTo(
+    '.stat-card',
+    {
+      opacity: 0,
+      y: 45,
+      scale: 0.94
+    },
+    {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.85,
+      stagger: 0.13,
+      delay: 0.15,
+      ease: 'power3.out',
+      clearProps: 'opacity'
+    }
+  );
 
+  // Isi kartu muncul sedikit setelah kartu terbentuk
+  gsap.fromTo(
+    '.stat-card-inner',
+    {
+      opacity: 0,
+      y: 18
+    },
+    {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      stagger: 0.13,
+      delay: 0.3,
+      ease: 'power3.out'
+    }
+  );
 
+  // 3. ANIMASI SECTION SAAT SCROLL
+  $('.scroll-rv').forEach((section, index) => {
 
-    // 2. Animasi section saat scroll
+    // Header sudah memiliki animasi tersendiri
+    if (index === 0) return;
 
-    $('.scroll-rv').forEach((section) => {
-
-      gsap.fromTo(section,
-
-        { y: 50, opacity: 0 },
-
-        { y: 0, opacity: 1, duration: 1, ease: 'power3.out',
-
-          scrollTrigger: { trigger: section, start: 'top 85%', toggleActions: 'play none none none' } }
-
-      );
-
-    });
-
-
-
-    // 3. Count-up angka statistik (mendukung desimal dan akhiran seperti % atau " hari")
-
-    $('.count-target').forEach(counter => {
-
-      const target   = parseFloat(counter.dataset.target) || 0;
-
-      const decimals = parseInt(counter.dataset.decimals) || 0;
-
-      const suffix   = counter.dataset.suffix || '';
-
-      const obj = { val: 0 };
-
-
-
-      gsap.to(obj, {
-
-        val: target, duration: 1.5, ease: 'power1.out',
-
-        scrollTrigger: { trigger: counter, start: 'top 90%', toggleActions: 'play none none none' },
-
-        onUpdate: () => {
-
-          counter.textContent = obj.val.toFixed(decimals).replace('.', ',') + suffix;
-
+    gsap.fromTo(
+      section,
+      {
+        opacity: 0,
+        y: 45,
+        filter: 'blur(4px)'
+      },
+      {
+        opacity: 1,
+        y: 0,
+        filter: 'blur(0px)',
+        duration: 1,
+        ease: 'power3.out',
+        clearProps: 'filter',
+        scrollTrigger: {
+          trigger: section,
+          start: 'top 88%',
+          toggleActions: 'play none none none',
+          once: true
         }
+      }
+    );
+  });
 
+  // 4. ANIMASI ANGKA COUNT-UP
+  $('.count-target').forEach(counter => {
+
+    const target = parseFloat(counter.dataset.target) || 0;
+    const decimals = parseInt(counter.dataset.decimals) || 0;
+    const suffix = counter.dataset.suffix || '';
+
+    const obj = { val: 0 };
+
+    gsap.to(obj, {
+      val: target,
+      duration: 1.7,
+      ease: 'power2.out',
+
+      onUpdate: () => {
+        counter.textContent =
+          formatAngka(obj.val, decimals) + suffix;
+      },
+
+      scrollTrigger: {
+        trigger: counter,
+        start: 'top 90%',
+        toggleActions: 'play none none none',
+        once: true
+      }
+    });
+  });
+
+  // 5. ANIMASI HOVER KARTU
+  $('.stat-card').forEach(card => {
+
+    card.addEventListener('pointerenter', () => {
+      gsap.to(card, {
+        y: -7,
+        scale: 1.015,
+        duration: 0.35,
+        ease: 'power2.out',
+        overwrite: 'auto'
       });
-
     });
 
-
-
-    // 4. Hover kartu statistik
-
-    $('.stat-card').forEach(card => {
-
-      card.addEventListener('pointerenter', () => {
-
-        gsap.to(card, { y: -6, scale: 1.015, duration: 0.35, ease: 'power2.out', overwrite: 'auto' });
-
+    card.addEventListener('pointerleave', () => {
+      gsap.to(card, {
+        y: 0,
+        scale: 1,
+        duration: 0.4,
+        ease: 'power2.out',
+        overwrite: 'auto'
       });
-
-      card.addEventListener('pointerleave', () => {
-
-        gsap.to(card, { y: 0, scale: 1, duration: 0.4, ease: 'power2.out', overwrite: 'auto' });
-
-      });
-
     });
+  });
 
+  // 6. ANIMASI DONUT
+  $('.donut-arc').forEach(arc => {
 
+    const keliling = parseFloat(arc.dataset.c);
+    const akhir = parseFloat(arc.dataset.final);
 
-    // 5. Donut: lingkaran terisi dari kosong sampai persentasenya
+    gsap.fromTo(
+      arc,
+      {
+        strokeDashoffset: keliling
+      },
+      {
+        strokeDashoffset: akhir,
+        duration: 1.6,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: arc,
+          start: 'top 90%',
+          toggleActions: 'play none none none',
+          once: true
+        }
+      }
+    );
+  });
 
-    $('.donut-arc').forEach(arc => {
+  // 7. ANIMASI BATANG STATUS LAMARAN
+  $('.bar-h').forEach(bar => {
 
-      const keliling = parseFloat(arc.dataset.c);
+    gsap.fromTo(
+      bar,
+      {
+        width: '0%'
+      },
+      {
+        width: bar.dataset.pct + '%',
+        duration: 1.2,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: bar,
+          start: 'top 92%',
+          toggleActions: 'play none none none',
+          once: true
+        }
+      }
+    );
+  });
 
-      const akhir    = parseFloat(arc.dataset.final);
+  // 8. ANIMASI BATANG TREN PENDAFTAR
+  $('.bar-v').forEach((bar, index) => {
 
-
-
-      gsap.fromTo(arc,
-
-        { strokeDashoffset: keliling },
-
-        { strokeDashoffset: akhir, duration: 1.4, ease: 'power2.out',
-
-          scrollTrigger: { trigger: arc, start: 'top 90%', toggleActions: 'play none none none' } }
-
-      );
-
-    });
-
-
-
-    // 6. Batang horizontal (status lamaran)
-
-    $('.bar-h').forEach(bar => {
-
-      gsap.fromTo(bar,
-
-        { width: '0%' },
-
-        { width: bar.dataset.pct + '%', duration: 1.1, ease: 'power3.out',
-
-          scrollTrigger: { trigger: bar, start: 'top 92%', toggleActions: 'play none none none' } }
-
-      );
-
-    });
-
-
-
-    // 7. Animasi batang vertikal (tren pendaftar)
-    // Batang tumbuh dari bawah secara berurutan, dengan efek overshoot yang halus.
-    // Tinggi akhir tetap mengikuti data-pct; warna, ukuran, dan layout tidak diubah.
-    $('.bar-v').forEach((bar, i) => {
-      gsap.set(bar, {
+    gsap.fromTo(
+      bar,
+      {
         height: '0%',
-        scaleY: 0.08,
-        transformOrigin: '50% 100%',
-        opacity: 0.65,
-        willChange: 'transform, height, opacity'
-      });
-
-      gsap.to(bar, {
+        scaleY: 0.05,
+        opacity: 0.5,
+        transformOrigin: '50% 100%'
+      },
+      {
         height: bar.dataset.pct + '%',
         scaleY: 1,
         opacity: 1,
-        duration: 1.25,
-        delay: i * 0.14,
-        ease: 'back.out(1.35)',
-        overwrite: 'auto',
+        duration: 1.35,
+        delay: index * 0.12,
+        ease: 'back.out(1.3)',
         scrollTrigger: {
           trigger: bar,
           start: 'top 95%',
-          toggleActions: 'play none none none'
-        },
-        onComplete: () => {
-          gsap.set(bar, { clearProps: 'willChange' });
+          toggleActions: 'play none none none',
+          once: true
         }
-      });
-    });
+      }
+    );
+  });
+
+  // 9. REFRESH POSISI SCROLL TRIGGER
+  window.addEventListener('load', () => {
+    ScrollTrigger.refresh();
+  });
+}
+
   </script>
 
 </body>

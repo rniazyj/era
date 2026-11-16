@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Lamaran;
 use App\Models\LogKirim;
 use App\Models\SuratPenerimaan;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -213,6 +214,176 @@ class PimpinanDashboardController extends Controller
             'opsiPeriode' => self::OPSI_PERIODE,
         ]);
     }
+
+    // ==========================================
+// EKSPOR LAPORAN DASHBOARD KE EXCEL (CSV)
+// ==========================================
+public function exportExcel(Request $request)
+{
+    // Ambil data dashboard sesuai periode yang dipilih
+    $view = $this->index($request);
+    $viewData = $view->getData();
+
+    $d = $viewData['d'];
+    $periode = $viewData['periode'];
+    $opsiPeriode = self::OPSI_PERIODE;
+
+    $namaFile = 'laporan-dashboard-pimpinan-' . now()->format('Ymd-His') . '.csv';
+
+    return response()->streamDownload(function () use ($d, $periode, $opsiPeriode) {
+
+        $handle = fopen('php://output', 'w');
+
+        // BOM agar karakter UTF-8 terbaca dengan benar di Excel
+        fwrite($handle, "\xEF\xBB\xBF");
+
+        // Informasi laporan
+        fputcsv($handle, ['LAPORAN DASHBOARD PIMPINAN'], ';');
+        fputcsv($handle, ['PT Equityworld Futures'], ';');
+        fputcsv($handle, ['Periode', $opsiPeriode[$periode]], ';');
+        fputcsv($handle, ['Tanggal Ekspor', now()->format('d-m-Y H:i:s')], ';');
+        fputcsv($handle, [], ';');
+
+        // 1. RINGKASAN PENDAFTAR
+        fputcsv($handle, ['RINGKASAN PENDAFTAR'], ';');
+        fputcsv($handle, ['Keterangan', 'Jumlah'], ';');
+        fputcsv($handle, ['Total Lamaran', $d['totalLamaran']], ';');
+        fputcsv($handle, ['Pelamar Unik', $d['pelamarUnik']], ';');
+        fputcsv($handle, ['Pendaftar Magang', $d['totalMagang']], ';');
+        fputcsv($handle, ['Pendaftar Kerja', $d['totalKerja']], ';');
+        fputcsv($handle, [], ';');
+
+        // 2. STATUS LAMARAN
+        fputcsv($handle, ['STATUS LAMARAN'], ';');
+        fputcsv($handle, ['Status', 'Jumlah'], ';');
+
+        foreach ($d['perStatus'] as $status => $jumlah) {
+            fputcsv($handle, [ucfirst($status), $jumlah], ';');
+        }
+
+        fputcsv($handle, [], ';');
+
+        // 3. PERSENTASE DITERIMA
+        fputcsv($handle, ['PERSENTASE DITERIMA'], ';');
+        fputcsv($handle, ['Keterangan', 'Jumlah'], ';');
+        fputcsv($handle, ['Diterima', $d['diterima']], ';');
+        fputcsv($handle, ['Ditolak', $d['ditolak']], ';');
+        fputcsv($handle, ['Sudah Diputuskan', $d['diputuskan']], ';');
+        fputcsv($handle, [
+            'Persentase Diterima',
+            $d['persenDiterima'] !== null ? $d['persenDiterima'] . '%' : '-'
+        ], ';');
+        fputcsv($handle, ['Belum Diputuskan', $d['belumDiputuskan']], ';');
+        fputcsv($handle, ['Melewati SLA', $d['lewatSla']], ';');
+        fputcsv($handle, [], ';');
+
+        // 4. WAKTU PROSES
+        fputcsv($handle, ['WAKTU PROSES'], ';');
+        fputcsv($handle, ['Keterangan', 'Nilai'], ';');
+        fputcsv($handle, ['Jumlah Lamaran Diputuskan', $d['waktu']['jumlah']], ';');
+        fputcsv($handle, ['Rata-rata (hari)', $d['waktu']['rata'] ?? '-'], ';');
+        fputcsv($handle, ['Median (hari)', $d['waktu']['median'] ?? '-'], ';');
+        fputcsv($handle, ['Tercepat (hari)', $d['waktu']['min'] ?? '-'], ';');
+        fputcsv($handle, ['Terlama (hari)', $d['waktu']['max'] ?? '-'], ';');
+        fputcsv($handle, [], ';');
+
+        // 5. TREN PENDAFTAR
+        fputcsv($handle, ['TREN PENDAFTAR - 6 BULAN TERAKHIR'], ';');
+        fputcsv($handle, ['Bulan', 'Total', 'Magang', 'Kerja'], ';');
+
+        foreach ($d['tren'] as $tren) {
+            fputcsv($handle, [
+                $tren['bulan'],
+                $tren['total'],
+                $tren['magang'],
+                $tren['kerja'],
+            ], ';');
+        }
+
+        fputcsv($handle, [], ';');
+
+        // 6. SURAT PENERIMAAN
+        fputcsv($handle, ['SURAT PENERIMAAN'], ';');
+        fputcsv($handle, ['Keterangan', 'Jumlah'], ';');
+        fputcsv($handle, ['Total Surat', $d['surat']['total']], ';');
+        fputcsv($handle, ['Surat Terbit', $d['surat']['terbit']], ';');
+        fputcsv($handle, ['Surat Draft', $d['surat']['draft']], ';');
+        fputcsv($handle, [
+            'Pelamar Diterima Belum Memiliki Surat Terbit',
+            $d['surat']['diterimaBelumSurat'],
+        ], ';');
+
+        fputcsv($handle, [], ';');
+        fputcsv($handle, ['Rincian Status Surat'], ';');
+        fputcsv($handle, ['Status', 'Jumlah'], ';');
+
+        foreach ($d['surat']['perStatus'] as $surat) {
+            fputcsv($handle, [$surat['status'], $surat['n']], ';');
+        }
+
+        fputcsv($handle, [], ';');
+
+        // 7. PENGIRIMAN
+        fputcsv($handle, ['PENGIRIMAN'], ';');
+        fputcsv($handle, ['Keterangan', 'Jumlah'], ';');
+        fputcsv($handle, ['Total Pengiriman', $d['kirim']['total']], ';');
+        fputcsv($handle, ['Berhasil', $d['kirim']['berhasil']], ';');
+        fputcsv($handle, ['Gagal', $d['kirim']['gagal']], ';');
+        fputcsv($handle, ['Menunggu', $d['kirim']['menunggu']], ';');
+        fputcsv($handle, [
+            'Persentase Berhasil',
+            $d['kirim']['persenBerhasil'] !== null
+                ? $d['kirim']['persenBerhasil'] . '%'
+                : '-',
+        ], ';');
+
+        fputcsv($handle, [], ';');
+        fputcsv($handle, ['Rincian Status Pengiriman'], ';');
+        fputcsv($handle, ['Status', 'Kategori', 'Jumlah'], ';');
+
+        foreach ($d['kirim']['perStatus'] as $kirim) {
+            fputcsv($handle, [
+                $kirim['status'],
+                ucfirst($kirim['kategori']),
+                $kirim['n'],
+            ], ';');
+        }
+
+        fputcsv($handle, [], ';');
+        fputcsv($handle, ['Rincian Kanal Pengiriman'], ';');
+        fputcsv($handle, ['Kanal', 'Jumlah'], ';');
+
+        foreach ($d['kirim']['perKanal'] as $kanal) {
+            fputcsv($handle, [$kanal['kanal'], $kanal['n']], ';');
+        }
+
+        fclose($handle);
+
+    }, $namaFile, [
+        'Content-Type' => 'text/csv; charset=UTF-8',
+    ]);
+}
+
+
+// ==========================================
+// EKSPOR LAPORAN DASHBOARD KE PDF
+// ==========================================
+public function exportPdf(Request $request)
+{
+    // Ambil data dashboard sesuai periode yang dipilih
+    $view = $this->index($request);
+    $viewData = $view->getData();
+
+    $pdf = Pdf::loadView('pimpinan.laporan-pdf', [
+        'd' => $viewData['d'],
+        'periodeLabel' => self::OPSI_PERIODE[$viewData['periode']],
+        'tanggalEkspor' => now(),
+    ])->setPaper('a4', 'portrait');
+
+    return $pdf->download(
+        'laporan-dashboard-pimpinan-' . now()->format('Ymd-His') . '.pdf'
+    );
+}
 
     // Kelompokkan status_kirim menjadi berhasil / gagal / menunggu
     private function kategoriKirim(string $status): string

@@ -46,7 +46,7 @@
       ]],
       ['title' => 'Pengaturan & Sistem', 'roles' => null, 'items' => [
         ['Konten Website', 'admin.konten.index', 'admin.konten*', 'globe'],
-        ['Log Aktivitas',  'admin.log.index',    'admin.log*',    'clock'],
+        ['Log Aktivitas',  'admin.log',    'admin.log*',    'clock'],
       ]],
     ];
   }
