@@ -101,7 +101,7 @@
            x-data="lowonganIndex(@js($dataFilter))">
 
         <!-- HEADER HALAMAN -->
-        <div class="scroll-rv flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 min-w-0">
+        <div class="scroll-rv relative z-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 min-w-0">
           <div>
             <span class="text-[10px] tracking-[.2em] font-bold text-ewforange bg-orange-50 px-3 py-1 rounded-full uppercase">PANEL ADMINISTRATOR</span>
             <h1 class="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight mt-2 break-words">Kelola Lowongan</h1>
@@ -109,7 +109,7 @@
           </div>
 
           <!-- Tombol tambah dengan pilihan jenis -->
-          <div class="relative self-start sm:self-auto" @click.outside="addOpen = false">
+          <div class="relative z-[100] self-start sm:self-auto" @click.outside="addOpen = false">
             <button type="button" @click="addOpen = !addOpen"
                     class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-ewforange hover:bg-orange-600 text-white text-xs font-semibold rounded-full shadow-lg shadow-orange-500/30 transition hover:scale-105">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/></svg>
@@ -118,7 +118,7 @@
             </button>
 
             <div x-show="addOpen" x-cloak x-transition.origin.top.right
-                 class="absolute right-0 mt-2 w-64 rounded-2xl bg-white border border-black/10 shadow-xl p-2 z-20">
+                 class="absolute right-0 mt-2 w-64 rounded-2xl bg-white border border-black/10 shadow-xl p-2 z-[110]">
               <a href="{{ $createMagang }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-orange-50 transition">
                 <span class="text-lg">🎓</span>
                 <span><span class="block text-xs font-bold">Program Magang</span><span class="block text-[11px] text-zinc-500">Dengan silabus &amp; periode magang</span></span>

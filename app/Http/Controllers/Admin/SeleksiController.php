@@ -9,6 +9,8 @@ use App\Models\Lamaran;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class SeleksiController extends Controller
 {
@@ -51,6 +53,7 @@ class SeleksiController extends Controller
         ])->findOrFail($id);
 
         $profil = $lamaran->pelamar?->profilPelamar;
+        $cv = $profil?->cv;
 
         // Riwayat pendidikan dari CV
         $idCv     = $profil?->cv?->id_cv;
@@ -76,12 +79,104 @@ class SeleksiController extends Controller
         return view('admin.seleksi.show', [
             'lamaran'      => $lamaran,
             'profil'       => $profil,
+            'cv'           => $cv,
             'akademik'     => $akademik,
             'daftarBerkas' => $daftarBerkas,
             'berkasLain'   => $berkasLain,
             'jadwal'       => $lamaran->jadwal,
         ]);
     }
+
+    // ---------- LIHAT CV PELAMAR ----------
+public function lihatCv(int $id)
+{
+    // Ambil lamaran beserta profil dan CV pelamar
+    $lamaran = Lamaran::with([
+        'pelamar.profilPelamar.cv',
+    ])->findOrFail($id);
+
+    $user = $lamaran->pelamar;
+    $profil = $user?->profilPelamar;
+    $cv = $profil?->cv;
+
+    // Pastikan pelamar memiliki CV
+    abort_unless($user && $profil && $cv, 404, 'CV pelamar belum tersedia.');
+
+    // Ambil data CV, sama seperti CvController milik pelamar
+    $data = [
+        'user'        => $user,
+        'profil'      => $profil,
+        'cv'          => $cv,
+        'kelengkapan' => $profil->kelengkapan(),
+
+        'akademik' => $cv->dataAkademik()
+            ->orderByDesc('tahun_masuk')
+            ->get(),
+
+        'profesional' => $cv->pengalamanProfesional()
+            ->orderByDesc('tgl_mulai')
+            ->get(),
+
+        'organisasi' => $cv->pengalamanOrganisasi()
+            ->orderByDesc('tgl_mulai')
+            ->get(),
+
+        'proyek' => $cv->proyek()
+            ->orderByDesc('id_proyek')
+            ->get(),
+
+        'hard' => $cv->skill()
+            ->where('kategori_skill', 'hard')
+            ->orderBy('nama_skill')
+            ->get(),
+
+        'soft' => $cv->skill()
+            ->where('kategori_skill', 'soft')
+            ->orderBy('nama_skill')
+            ->get(),
+
+        'tools' => $cv->skill()
+            ->where('kategori_skill', 'tools')
+            ->orderBy('nama_skill')
+            ->get(),
+
+        'fotoData' => $this->fotoCvBase64($profil),
+    ];
+
+    // Buat PDF menggunakan template CV yang sama
+    $pdf = Pdf::loadView('pelamar.profil.cv-pdf', $data)
+        ->setPaper('a4', 'portrait');
+
+    $namaFile = 'CV_' . str_replace(
+        ' ',
+        '_',
+        trim(preg_replace('/[^A-Za-z0-9 ]/', '', $user->name))
+    ) . '.pdf';
+
+    return $pdf->stream($namaFile);
+}
+
+// Foto menjadi base64 agar DomPDF dapat membacanya
+private function fotoCvBase64($profil): ?string
+{
+    if (
+        blank($profil->foto) ||
+        !Storage::disk('public')->exists($profil->foto)
+    ) {
+        return null;
+    }
+
+    $path = Storage::disk('public')->path($profil->foto);
+    $mime = mime_content_type($path);
+
+    if (!in_array($mime, ['image/jpeg', 'image/png'], true)) {
+        return null;
+    }
+
+    return 'data:' . $mime . ';base64,' . base64_encode(
+        file_get_contents($path)
+    );
+}
 
     // ---------- UBAH STATUS LAMARAN ----------
     public function updateStatus(Request $request, int $id)

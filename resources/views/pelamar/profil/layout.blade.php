@@ -409,6 +409,18 @@
         Skill &amp; Keahlian
       </a>
 
+      <a href="{{ route('pelamar.profil.lamaran') }}"
+    class="nav-item {{ request()->routeIs('pelamar.profil.lamaran*') ? 'active' : '' }}">
+    <span class="ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 6h13M8 12h13M8 18h13"/>
+            <path d="M3 6h.01M3 12h.01M3 18h.01"/>
+        </svg>
+    </span>
+    Riwayat Lamaran
+</a>
+
       <div class="nav-label">Dokumen</div>
       <a href="{{ route('pelamar.profil.cv') }}" class="nav-item {{ request()->routeIs('pelamar.profil.cv*') ? 'active' : '' }}">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></span>

@@ -253,6 +253,79 @@
               @endforelse
             </section>
 
+            {{-- CV PROFIL PELAMAR --}}
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+        <div class="flex items-start gap-3">
+            <div class="w-11 h-11 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    class="w-6 h-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="1.8">
+                    <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M7 3.75h7l5 5v11.5A1.75 1.75 0 0 1 17.25 22h-10.5A1.75 1.75 0 0 1 5 20.25V5.5A1.75 1.75 0 0 1 6.75 3.75Z" />
+                    <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M14 4v5h5M8 14h8M8 17h8" />
+                </svg>
+            </div>
+
+            <div>
+                <h3 class="font-bold text-gray-800 text-sm sm:text-base">
+                    Curriculum Vitae
+                </h3>
+
+                <p class="text-xs text-gray-500 mt-1">
+                    CV yang dibuat oleh pelamar melalui halaman profil.
+                </p>
+
+                @if($cv)
+                    <span class="inline-flex items-center gap-1.5 mt-2 text-[11px] font-semibold text-emerald-600">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        CV tersedia
+                    </span>
+                @else
+                    <span class="inline-flex items-center gap-1.5 mt-2 text-[11px] font-semibold text-amber-600">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        CV belum tersedia
+                    </span>
+                @endif
+            </div>
+        </div>
+
+        @if($cv)
+            <a href="{{ route('admin.pelamar.cv', $lamaran->id_lamaran) }}"
+                target="_blank"
+                rel="noopener"
+                class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold transition shadow-sm shrink-0">
+
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    class="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2">
+                    <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M2.25 12s3.5-7 9.75-7 9.75 7 9.75 7-3.5 7-9.75 7-9.75-7-9.75-7Z" />
+                    <circle cx="12" cy="12" r="3" />
+                </svg>
+
+                Lihat CV
+            </a>
+        @else
+            <span class="text-xs text-gray-400 font-medium">
+                Belum ada CV
+            </span>
+        @endif
+
+    </div>
+</div>
+
             <!-- BERKAS PERSYARATAN -->
             <section class="scroll-rv bg-white rounded-2xl sm:rounded-3xl border border-black/5 p-4 sm:p-6 md:p-8 shadow-sm space-y-4">
               <h3 class="text-sm font-bold tracking-wide text-zinc-900 uppercase pb-3 border-b border-black/5">Berkas Persyaratan</h3>
@@ -279,10 +352,36 @@
                   </div>
 
                   @if($b)
-                    <span class="self-start sm:self-auto shrink-0 px-2.5 py-1 rounded-full font-semibold text-[10px] capitalize {{ $verifClass($b->status_verifikasi) }}">
-                      {{ $b->status_verifikasi }}
-                    </span>
-                  @else
+    <div class="flex items-center gap-2 shrink-0 flex-wrap">
+
+        {{-- Tombol membuka dokumen --}}
+        @if(filled($b->path_file) && \Illuminate\Support\Facades\Storage::disk('public')->exists($b->path_file))
+            <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($b->path_file) }}"
+               target="_blank"
+               rel="noopener"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 text-ewforange hover:bg-orange-100 text-[10px] font-bold transition">
+
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                    stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                </svg>
+
+                Lihat Dokumen
+            </a>
+        @else
+            <span class="text-[10px] text-rose-500 font-semibold">
+                File tidak ditemukan
+            </span>
+        @endif
+
+        {{-- Status verifikasi --}}
+        <span class="px-2.5 py-1 rounded-full font-semibold text-[10px] capitalize {{ $verifClass($b->status_verifikasi) }}">
+            {{ $b->status_verifikasi }}
+        </span>
+
+    </div>
+@else
                     <span class="self-start sm:self-auto shrink-0 px-2.5 py-1 rounded-full font-semibold text-[10px] {{ $s->wajib ? 'bg-rose-50 text-rose-500' : 'bg-zinc-100 text-zinc-500' }}">
                       {{ $s->wajib ? 'Belum diunggah' : 'Opsional' }}
                     </span>
@@ -299,9 +398,33 @@
                       <p class="text-[11px] text-green-600 font-semibold truncate" title="{{ $b->nama_file }}">✔ {{ $b->nama_file }}</p>
                     </div>
                   </div>
-                  <span class="self-start sm:self-auto shrink-0 px-2.5 py-1 rounded-full font-semibold text-[10px] capitalize {{ $verifClass($b->status_verifikasi) }}">
-                    {{ $b->status_verifikasi }}
-                  </span>
+                  <div class="flex items-center gap-2 shrink-0 flex-wrap">
+
+    @if(filled($b->path_file) && \Illuminate\Support\Facades\Storage::disk('public')->exists($b->path_file))
+        <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($b->path_file) }}"
+           target="_blank"
+           rel="noopener"
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 text-ewforange hover:bg-orange-100 text-[10px] font-bold transition">
+
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+            </svg>
+
+            Lihat Dokumen
+        </a>
+    @else
+        <span class="text-[10px] text-rose-500 font-semibold">
+            File tidak ditemukan
+        </span>
+    @endif
+
+    <span class="px-2.5 py-1 rounded-full font-semibold text-[10px] capitalize {{ $verifClass($b->status_verifikasi) }}">
+        {{ $b->status_verifikasi }}
+    </span>
+
+</div>
                 </div>
               @endforeach
 

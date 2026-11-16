@@ -22,7 +22,6 @@
     'logout'    => 'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1',
   ];
 
-<<<<<<< HEAD
   // Struktur Menu: [label, nama route, pola route aktif, ikon]
   if ($isPimpinan) {
     // Menu Pimpinan
@@ -50,24 +49,6 @@
       ]],
     ];
   }
-=======
-  // Struktur Menu Admin
-  $groups = [
-    ['title' => null, 'roles' => null, 'items' => [
-      ['Home',   'admin.dashboard',   'admin.dashboard*', 'home'],
-      ['Profil', 'admin.profil','admin.profil*',    'profile'],
-    ]],
-    ['title' => 'Rekrutmen', 'roles' => null, 'items' => [
-      ['Kelola Lowongan',   'admin.lowongan.index', 'admin.lowongan*', 'briefcase'],
-      ['Daftar Pelamar',    'admin.pelamar.index',  'admin.pelamar*',  'users'],
-      ['Jadwal Interview',  'admin.jadwal.index',   'admin.jadwal*',   'calendar'],
-    ]],
-    ['title' => 'Pengaturan & Sistem', 'roles' => null, 'items' => [
-      ['Konten Perusahaan', 'admin.konten.index', 'admin.konten*', 'globe'],
-      ['Log Aktivitas',     'admin.log.index',    'admin.log*',    'clock'],
-    ]],
-  ];
->>>>>>> vina
 
   $show = fn ($roles) => !$roles || !$role || in_array($role, $roles, true);
 @endphp

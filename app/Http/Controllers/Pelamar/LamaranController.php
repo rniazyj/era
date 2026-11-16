@@ -3,22 +3,71 @@
 namespace App\Http\Controllers\Pelamar;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Pelamar\Concerns\MemuatProfil;
+use App\Models\Lamaran;
 use Illuminate\Http\Request;
 
 class LamaranController extends Controller
 {
-    // Menampilkan halaman form lamaran
-    public function create()
+    use MemuatProfil;
+
+    /**
+     * Menampilkan seluruh riwayat lamaran milik pelamar.
+     */
+    public function index(Request $request)
     {
-        return view('pages.program.form'); // Memanggil file view yang kita buat di folder views/pelamar/
+        $jenis = $request->query('jenis', 'semua');
+
+        // Batasi pilihan filter yang diperbolehkan.
+        if (! in_array($jenis, ['semua', 'kerja', 'magang'], true)) {
+            $jenis = 'semua';
+        }
+
+        $query = Lamaran::with(['lowongan', 'program'])
+            ->where('id_pelamar', $request->user()->id);
+
+        // Filter berdasarkan jenis lamaran.
+        if ($jenis === 'kerja') {
+            $query->whereNull('id_program');
+        } elseif ($jenis === 'magang') {
+            $query->whereNotNull('id_program');
+        }
+
+        $daftar = $query
+            ->orderByDesc('tgl_pengajuan')
+            ->orderByDesc('id_lamaran')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('pelamar.profil.lamaran-index', array_merge(
+            $this->dataDasar($request),
+            [
+                'daftar' => $daftar,
+                'jenis'  => $jenis,
+            ]
+        ));
     }
 
-    // Menyimpan data lamaran yang dikirim dari form
-    public function store(Request $request)
+    /**
+     * Menampilkan detail salah satu lamaran milik pelamar.
+     */
+    public function show(Request $request, $id)
     {
-        // Validasi dan proses simpan data berkas ke database di sini
-        // ...
-        
-        return redirect()->route('pelamar.dashboard')->with('success', 'Lamaran berhasil dikirim!');
+        $lamaran = Lamaran::with([
+            'lowongan',
+            'program',
+            'berkas',
+            'jadwal',
+            'surat',
+        ])
+            ->where('id_pelamar', $request->user()->id)
+            ->findOrFail($id);
+
+        return view('pelamar.profil.lamaran-show', array_merge(
+            $this->dataDasar($request),
+            [
+                'lamaran' => $lamaran,
+            ]
+        ));
     }
 }

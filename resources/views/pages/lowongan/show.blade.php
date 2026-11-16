@@ -8,6 +8,11 @@
   $ceklis = '<svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>';
   $silang = '<svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
   $user = auth()->user();
+
+  // Daftar ekstensi berkas; menerima format_list berupa array maupun teks "pdf,doc"
+  $formatList = fn ($p) => is_array($p->format_list)
+      ? $p->format_list
+      : array_values(array_filter(array_map('trim', explode(',', (string) $p->format_list))));
 @endphp
 <!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
@@ -99,7 +104,7 @@
                     <span class="rounded-full px-2 py-0.5 text-[10px] font-bold {{ $p->wajib ? 'bg-ink text-ewforange' : 'bg-sand text-zinc-500' }}">{{ $p->wajib ? 'WAJIB' : 'OPSIONAL' }}</span>
                   </div>
                   <p class="mt-1 text-xs text-zinc-500">
-                    {{ $p->keterangan ?: 'Format ' . strtoupper(str_replace(',', ', ', $p->format_list)) }} · maks {{ number_format($p->maks_kb_attr / 1024, 1, ',', '.') }} MB
+                    {{ $p->keterangan ?: 'Format ' . strtoupper(implode(', ', $formatList($p))) }} · maks {{ number_format($p->maks_kb_attr / 1024, 1, ',', '.') }} MB
                   </p>
                 </div>
               @endforeach
@@ -127,7 +132,7 @@
 
             {{-- 2. Guest --}}
             @elseif(! $user)
-              <a href="{{ route('lowongan.apply', $lowongan->id_lowongan) }}" class="press flex items-center justify-center gap-2 rounded-full bg-ewforange px-8 py-3.5 text-sm font-semibold text-ink">Masuk untuk melamar {!! $panah !!}</a>
+              <a href="{{ route('pages.apply', $lowongan->id_lowongan) }}" class="press flex items-center justify-center gap-2 rounded-full bg-ewforange px-8 py-3.5 text-sm font-semibold text-ink">Masuk untuk melamar {!! $panah !!}</a>
               <p class="mt-3 text-xs leading-relaxed text-zinc-500">Untuk melamar kamu wajib punya akun dan melengkapi profil serta berkas persyaratan.</p>
               <a href="{{ route('register') }}" class="press dk mt-3 flex items-center justify-center rounded-full border border-ink/20 bg-white px-8 py-3 text-sm font-semibold">Belum punya akun? Daftar</a>
 
@@ -155,7 +160,7 @@
             {{-- 6. Siap melamar --}}
             @else
               <p class="mb-3 flex items-center gap-2 text-xs font-semibold text-green-700"><span class="grid h-5 w-5 place-items-center rounded-full bg-green-100">{!! $ceklis !!}</span>Profilmu sudah lengkap</p>
-              <a href="{{ route('lowongan.apply', $lowongan->id_lowongan) }}" class="press flex items-center justify-center gap-2 rounded-full bg-ewforange px-8 py-3.5 text-sm font-semibold text-ink">Lamar sekarang {!! $panah !!}</a>
+              <a href="{{ route('pages.apply', $lowongan->id_lowongan) }}" class="press flex items-center justify-center gap-2 rounded-full bg-ewforange px-8 py-3.5 text-sm font-semibold text-ink">Lamar sekarang {!! $panah !!}</a>
             @endif
           </div>
         </div>

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Pelamar;
 
+use App\Http\Controllers\Controller;
 use App\Models\BerkasLamaran;
 use App\Models\Lamaran;
 use App\Models\LowonganKerja;
@@ -23,6 +24,8 @@ class LowonganController extends Controller
         'Jenis kelamin', 'Tempat lahir', 'Tanggal lahir', 'Kota', 'Alamat',
         'Pendidikan',
     ];
+
+    private const MAX_BERKAS_KB = 5120;
 
     /* ===================== PUBLIK ===================== */
 
@@ -82,7 +85,7 @@ class LowonganController extends Controller
 
         $kelayakan = $this->kelayakan($user, $lowongan);
 
-        return view('pages.lowongan.apply', [
+        return view('pages.apply', [
             'lowongan'   => $lowongan,
             'kelayakan'  => $kelayakan,
             'user'       => $user,
@@ -101,7 +104,7 @@ class LowonganController extends Controller
 
         $kelayakan = $this->kelayakan($user, $lowongan);
         if (! $kelayakan['profil_lengkap']) {
-            return redirect()->route('lowongan.apply', $id)
+            return redirect()->route('pages.apply', $id)
                 ->with('error', 'Lengkapi profilmu terlebih dahulu sebelum melamar.');
         }
 
@@ -110,15 +113,17 @@ class LowonganController extends Controller
         $names = ['pernyataan' => 'pernyataan'];
 
         foreach ($lowongan->persyaratan as $p) {
-            $key = 'berkas.' . $p->id_persyaratan;
-            $rules[$key] = [
-                $p->wajib ? 'required' : 'nullable',
-                'file',
-                'mimes:' . $p->format_list,
-                'max:' . $p->maks_kb_attr,
-            ];
-            $names[$key] = $p->nama_berkas;
-        }
+    $key = 'berkas.' . $p->id_persyaratan;
+
+    $rules[$key] = [
+        $p->wajib ? 'required' : 'nullable',
+        'file',
+        'mimes:' . implode(',', $p->format_list),
+        'max:5120',
+    ];
+
+    $names[$key] = $p->nama_berkas;
+}
 
         $request->validate($rules, [
             'pernyataan.accepted' => 'Kamu harus menyetujui pernyataan kebenaran data.',

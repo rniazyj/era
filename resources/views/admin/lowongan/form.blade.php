@@ -37,15 +37,8 @@
     'statusList'   => array_values($statusList),
     'serverErrors' => $serverErrors,
 
-<<<<<<< HEAD
-    'statusOptions' => array_values($statusList),
-
-    'hasExisting' => (bool) $silabusUrl,
-    'existingUrl' => $silabusUrl,
-=======
     'hasExisting'  => (bool) $silabusUrl,
     'existingUrl'  => $silabusUrl,
->>>>>>> vina
     'existingName' => $silabusNama,
 
     'persyaratan'  => $persyaratanAwal,
@@ -55,6 +48,9 @@
       'deskripsi'   => (string) $val('deskripsi'),
       'kualifikasi' => (string) $val('kualifikasi'),
       'kuota'       => (string) $val('kuota', 1),
+      'gaji_min'    => (string) $val('gaji_min'),
+      'gaji_max'    => (string) $val('gaji_max'),
+      'urgent'      => (int) $val('urgent', 0) === 1,
       'status'      => (string) $val('status', 'draft'),
       'tgl_buka'    => (string) $val('tgl_buka'),
       'tgl_tutup'   => (string) $val('tgl_tutup'),
@@ -82,59 +78,6 @@
     [x-cloak] { display: none !important; }
     .field { width: 100%; border-radius: .75rem; border: 1px solid rgba(0,0,0,.12); background: #fff; padding: .7rem .95rem; font-size: .85rem; outline: none; transition: border-color .2s, box-shadow .2s; }
     .field:focus { border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,.15); }
-<<<<<<< HEAD
-
-/* CUSTOM ANIMATED DROPDOWN */
-.custom-dropdown-panel {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  z-index: 50;
-  width: 100%;
-  padding: 7px;
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, .08);
-  border-radius: 15px;
-  box-shadow: 0 16px 40px rgba(24, 24, 27, .13);
-  transform-origin: top center;
-}
-
-.custom-dropdown-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  width: 100%;
-  padding: 10px 12px;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  color: #52525b;
-  font-size: 12px;
-  font-weight: 600;
-  text-align: left;
-  cursor: pointer;
-  transition: background .2s ease, color .2s ease, transform .2s ease;
-}
-
-.custom-dropdown-option:hover {
-  background: #fff7ed;
-  color: #ea580c;
-  transform: translateX(2px);
-}
-
-.custom-dropdown-option.selected {
-  background: #fff1e6;
-  color: #ea580c;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .custom-dropdown-option {
-    transition: none;
-  }
-}
-
-=======
     .field::placeholder { color: #a1a1aa; }
     .card { background: #fff; border: 1px solid rgba(0,0,0,.06); border-radius: 1.25rem; box-shadow: 0 1px 2px rgba(0,0,0,.03); }
     .card-head { padding: 1.1rem 1.4rem; border-bottom: 1px solid rgba(0,0,0,.06); }
@@ -149,7 +92,29 @@
     .pill.on { background: #18181b; border-color: #18181b; color: #fff; }
     .step-btn { display: grid; place-items: center; width: 2.6rem; border-radius: .75rem; border: 1px solid rgba(0,0,0,.12); background: #fff; font-size: 1.1rem; font-weight: 600; color: #52525b; transition: all .2s; }
     .step-btn:hover { border-color: #f97316; color: #f97316; background: #fff7ed; }
->>>>>>> vina
+    /* ANIMASI TOGGLE */
+.toggle-track {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: #FF9E0F;
+  transition: background-color .35s ease;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, .20);
+  transition: transform .45s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+.toggle-track.is-on {
+  background: #FF9E0F;
+}
   </style>
 </head>
 
@@ -210,157 +175,6 @@
                     {{ $isEdit ? 'Jenis tidak bisa diubah setelah data dibuat.' : 'Pilih dulu apakah ini lowongan pekerjaan atau program magang.' }}
                   </p>
                 </div>
-<<<<<<< HEAD
-              @else
-                <div>
-                  <label class="block text-[11px] font-semibold text-zinc-500 mb-1.5">Jenis <span class="text-rose-500">*</span></label>
-                  
-<div class="relative w-full sm:max-w-xs"
-     x-data="{ open: false }"
-     @click.outside="open = false"
-     @keydown.escape.window="open = false">
-
-  <input type="hidden" name="jenis" :value="jenis">
-
-  <button type="button"
-          @click="open = !open"
-          :aria-expanded="open.toString()"
-          class="field flex items-center justify-between gap-3 text-left cursor-pointer">
-
-    <span x-text="jenis === 'Magang' ? 'Magang (Program)' : 'Kerja (Lowongan)'"></span>
-
-    <svg class="w-4 h-4 shrink-0 text-zinc-400 transition-transform duration-300"
-         :class="{ 'rotate-180': open }"
-         viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="m6 9 6 6 6-6"/>
-    </svg>
-  </button>
-
-  <div x-cloak
-       x-show="open"
-       x-transition:enter="transition ease-out duration-200"
-       x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
-       x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-       x-transition:leave="transition ease-in duration-150"
-       x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-       x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
-       class="custom-dropdown-panel">
-
-    <button type="button"
-            @click="jenis = 'Magang'; open = false"
-            class="custom-dropdown-option"
-            :class="{ 'selected': jenis === 'Magang' }">
-
-      <span>Magang (Program)</span>
-
-      <svg x-show="jenis === 'Magang'"
-           class="w-4 h-4 text-orange-600"
-           viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="m5 12 4 4L19 6"/>
-      </svg>
-    </button>
-
-    <button type="button"
-            @click="jenis = 'Kerja'; open = false"
-            class="custom-dropdown-option"
-            :class="{ 'selected': jenis === 'Kerja' }">
-
-      <span>Kerja (Lowongan)</span>
-
-      <svg x-show="jenis === 'Kerja'"
-           class="w-4 h-4 text-orange-600"
-           viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="m5 12 4 4L19 6"/>
-      </svg>
-    </button>
-
-  </div>
-</div>
-
-                </div>
-              @endif
-
-              <!-- Judul / Nama Program (maks 100 karakter) -->
-              <div>
-                <div class="flex items-center justify-between mb-1.5">
-                  <label for="field-judul" class="block text-[11px] font-semibold text-zinc-500">
-                    <span x-text="jenis === 'Magang' ? 'Nama Program Magang' : 'Judul Lowongan'"></span>
-                    <span class="text-rose-500">*</span>
-                  </label>
-                  <span class="text-[11px] text-zinc-400"><span x-text="f.judul.length"></span>/100</span>
-                </div>
-                <input type="text" id="field-judul" name="judul" x-model="f.judul" maxlength="100"
-                       :placeholder="jenis === 'Magang' ? 'Contoh: Konsultan Bisnis Intern' : 'Contoh: UI/UX Designer'"
-                       :class="{ '!border-rose-400': errors.judul }"
-                       class="field">
-                <p x-show="errors.judul" x-cloak x-text="errors.judul" class="text-[11px] font-medium text-rose-500 mt-1.5"></p>
-              </div>
-
-              <!-- Deskripsi -->
-              <div>
-                <label for="field-deskripsi" class="block text-[11px] font-semibold text-zinc-500 mb-1.5">Deskripsi <span class="text-rose-500">*</span></label>
-                <textarea id="field-deskripsi" name="deskripsi" x-model="f.deskripsi" rows="4"
-                          placeholder="Jelaskan tugas dan tanggung jawab..."
-                          :class="{ '!border-rose-400': errors.deskripsi }"
-                          class="field resize-y"></textarea>
-                <p x-show="errors.deskripsi" x-cloak x-text="errors.deskripsi" class="text-[11px] font-medium text-rose-500 mt-1.5"></p>
-              </div>
-
-              <!-- Khusus Kerja: Kualifikasi -->
-              <div x-show="jenis === 'Kerja'">
-                <label for="field-kualifikasi" class="block text-[11px] font-semibold text-zinc-500 mb-1.5">Kualifikasi <span class="text-rose-500">*</span></label>
-                <textarea id="field-kualifikasi" name="kualifikasi" x-model="f.kualifikasi" rows="4"
-                          placeholder="Contoh: S1 semua jurusan, pengalaman 1 tahun..."
-                          :class="{ '!border-rose-400': errors.kualifikasi }"
-                          class="field resize-y"></textarea>
-                <p x-show="errors.kualifikasi" x-cloak x-text="errors.kualifikasi" class="text-[11px] font-medium text-rose-500 mt-1.5"></p>
-              </div>
-
-              <!-- Khusus Magang: Silabus (upload file, wajib) -->
-              <div x-show="jenis === 'Magang'">
-                <label for="field-silabus" class="block text-[11px] font-semibold text-zinc-500 mb-1.5">Silabus <span class="text-rose-500">*</span></label>
-                <div id="field-silabus" tabindex="-1"
-                     :class="{ '!border-rose-400': errors.silabus }"
-                     class="upload-item bg-paper rounded-2xl p-4 border border-black/5 flex flex-col md:flex-row items-center justify-between gap-4 outline-none">
-
-                  <div class="flex items-center gap-3.5 w-full md:w-1/2 min-w-0">
-                    <div class="w-10 h-10 rounded-xl bg-orange-50 text-ewforange flex items-center justify-center font-bold text-base shrink-0">📄</div>
-                    <div class="min-w-0">
-                      <p class="text-xs font-bold text-zinc-900">Silabus <span class="text-rose-500">*</span></p>
-
-                      <p x-show="uploadState === 'idle' || uploadState === 'uploading'"
-                         class="text-[10px] text-zinc-400 truncate">Format PDF/DOC/DOCX (Maks. 5MB)</p>
-
-                      <p x-show="uploadState === 'done'" x-cloak :title="fileName"
-                         class="text-[10px] text-green-600 font-semibold truncate">
-                        ✔ <span x-text="fileName"></span> (Siap disimpan)
-                      </p>
-
-                      <p x-show="uploadState === 'existing'" x-cloak
-                         class="text-[10px] text-green-600 font-semibold truncate">
-                        ✔ <a :href="existingUrl" target="_blank" class="underline hover:text-ewforange" x-text="existingName"></a> (File saat ini)
-                      </p>
-                    </div>
-                  </div>
-
-                  <div class="w-full md:w-1/2 flex items-center justify-end relative">
-                    <input type="file" id="input-silabus" name="silabus" accept=".pdf,.doc,.docx"
-                           x-ref="fileInput" @change="onFile($event)" class="hidden">
-
-                    <button type="button" x-ref="btnUpload"
-                            x-show="uploadState === 'idle' || uploadState === 'existing'"
-                            @click="$refs.fileInput.click()"
-                            class="px-6 py-2.5 bg-zinc-500 hover:bg-ewforange/80 text-white text-xs font-bold rounded-full shadow-md flex items-center gap-2 transition hover:scale-105">
-                      <span x-text="uploadState === 'existing' ? '☁️ GANTI FILE' : '☁️ UPLOAD'"></span>
-                    </button>
-
-                    <div x-ref="progressWrap" x-show="uploadState === 'uploading'" x-cloak class="w-full">
-                      <div class="w-full bg-zinc-200 h-3 rounded-full overflow-hidden shadow-inner">
-                        <div class="bg-ewforange h-full transition-all duration-300" :style="'width:' + progress + '%'"></div>
-=======
                 <div class="card-body">
                   @if($isEdit)
                     <div class="inline-flex items-center gap-3 rounded-2xl px-4 py-3 {{ $jenis === 'Magang' ? 'bg-orange-50 text-ewforange' : 'bg-zinc-100 text-zinc-800' }}">
@@ -368,7 +182,6 @@
                       <div>
                         <p class="text-sm font-bold">{{ $jenis === 'Magang' ? 'Program Magang' : 'Lowongan Kerja' }}</p>
                         <p class="text-[11px] opacity-70">{{ $jenis === 'Magang' ? 'Peserta magang, ada silabus & periode pelaksanaan' : 'Karyawan, ada kualifikasi' }}</p>
->>>>>>> vina
                       </div>
                     </div>
                   @else
@@ -441,7 +254,78 @@
                     <p class="hint">💡 Satu syarat per baris, tampil sebagai poin di halaman lowongan.</p>
                     <p x-show="errors.kualifikasi" x-cloak x-text="errors.kualifikasi" class="err"></p>
                   </div>
-                </div>
+
+                  <!-- Rentang gaji (Kerja) -->
+                  <div x-show="jenis === 'Kerja'" x-cloak class="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <label for="field-gaji_min" class="lbl">Gaji minimum (Rp) <span class="text-rose-500">*</span></label>
+                      <input type="text" id="field-gaji_min" name="gaji_min" x-model="f.gaji_min"
+                             inputmode="numeric" maxlength="15" placeholder="Contoh: 5000000"
+                             @keydown="if (['-', '+', 'e', 'E', '.', ','].includes($event.key)) $event.preventDefault()"
+                             @input="onGajiInput($event, 'gaji_min')"
+                             :class="{ '!border-rose-400': errors.gaji_min }" class="field">
+                      <p class="hint">Masukkan angka lebih dari 0.</p>
+                      <p x-show="errors.gaji_min" x-cloak x-text="errors.gaji_min" class="err"></p>
+                    </div>
+                    <div>
+                      <label for="field-gaji_max" class="lbl">Gaji maksimum (Rp) <span class="text-rose-500">*</span></label>
+                      <input type="text" id="field-gaji_max" name="gaji_max" x-model="f.gaji_max"
+                             inputmode="numeric" maxlength="15" placeholder="Contoh: 8000000"
+                             @keydown="if (['-', '+', 'e', 'E', '.', ','].includes($event.key)) $event.preventDefault()"
+                             @input="onGajiInput($event, 'gaji_max')"
+                             :class="{ '!border-rose-400': errors.gaji_max }" class="field">
+                      <p class="hint">Harus sama dengan atau lebih besar dari gaji minimum.</p>
+                      <p x-show="errors.gaji_max" x-cloak x-text="errors.gaji_max" class="err"></p>
+                    </div>
+                  </div>
+
+                  <!-- Prioritas lowongan (Kerja) -->
+                  <!-- Prioritas lowongan (Kerja) -->
+<div x-show="jenis === 'Kerja'" x-cloak
+     class="mt-5 rounded-2xl border border-orange-100 bg-orange-50/50 p-4 sm:p-5">
+
+  <div class="flex items-center justify-between gap-4">
+    <div class="min-w-0">
+      <p class="text-sm font-bold text-zinc-900">
+        Tandai sebagai lowongan urgent
+      </p>
+      <p class="text-[11px] text-zinc-500 mt-1">
+        Aktifkan jika lowongan perlu mendapat perhatian khusus.
+      </p>
+    </div>
+
+    <label class="relative inline-flex shrink-0 cursor-pointer items-center"
+           aria-label="Tandai lowongan sebagai urgent">
+
+      <input type="hidden" name="urgent" value="0">
+
+      <input type="checkbox"
+             name="urgent"
+             value="1"
+             x-model="f.urgent"
+             class="peer sr-only">
+
+      <span class="toggle-track w-12 h-7"
+            :class="{ 'is-on': f.urgent }">
+        <span class="toggle-thumb w-5 h-5"
+              :class="f.urgent ? 'translate-x-5' : ''">
+        </span>
+      </span>
+    </label>
+  </div>
+
+  <div class="mt-3 flex items-center gap-2">
+    <span x-show="f.urgent" x-cloak
+          class="rounded-full bg-orange-100 px-2.5 py-1 text-[10px] font-extrabold tracking-wide text-orange-600">
+      URGENT AKTIF
+    </span>
+
+    <span x-show="!f.urgent"
+          class="text-[11px] text-zinc-400">
+      Status: Tidak urgent
+    </span>
+  </div>
+</div>
               </section>
 
               <!-- 3. SILABUS (Magang) -->
@@ -520,292 +404,6 @@
 
                 <div class="card-body space-y-4">
 
-<<<<<<< HEAD
-  <!-- Error jumlah persyaratan -->
-  <p
-    x-show="errors.persyaratan"
-    x-cloak
-    x-text="errors.persyaratan"
-    class="text-[11px] font-medium text-rose-500"
-  ></p>
-
-  <!-- Daftar persyaratan -->
-  <div class="space-y-3">
-
-    <template x-for="(item, index) in persyaratan" :key="index">
-
-      <div
-        class="rounded-2xl border border-black/5 bg-paper p-4 sm:p-5 space-y-4"
-      >
-
-        <!-- Header baris -->
-        <div class="flex items-center justify-between gap-3">
-
-          <div class="flex items-center gap-2">
-
-            <span
-              class="w-7 h-7 rounded-lg bg-orange-50 text-ewforange flex items-center justify-center text-xs font-bold"
-              x-text="index + 1"
-            ></span>
-
-            <span class="text-xs font-bold text-zinc-800">
-              Dokumen Persyaratan
-            </span>
-
-          </div>
-
-          <button
-            type="button"
-            @click="hapusPersyaratan(index)"
-            :disabled="persyaratan.length <= 1"
-            :class="persyaratan.length <= 1
-              ? 'text-zinc-300 cursor-not-allowed'
-              : 'text-zinc-400 hover:text-rose-500'"
-            class="text-xs font-bold transition"
-            aria-label="Hapus persyaratan"
-          >
-            <svg
-              class="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"
-              />
-            </svg>
-          </button>
-
-        </div>
-
-        <!-- Nama berkas -->
-        <div>
-
-          <label
-            class="block text-[11px] font-semibold text-zinc-500 mb-1.5"
-          >
-            Nama Berkas
-            <span class="text-rose-500">*</span>
-          </label>
-
-          <input
-            type="text"
-            :name="'persyaratan[' + index + '][nama_berkas]'"
-            x-model="item.nama_berkas"
-            maxlength="255"
-            placeholder="Contoh: Curriculum Vitae (CV)"
-            class="field"
-            :class="{
-              '!border-rose-400':
-                errors['persyaratan_' + index]
-            }"
-          >
-
-          <p
-            x-show="errors['persyaratan_' + index]"
-            x-cloak
-            x-text="errors['persyaratan_' + index]"
-            class="text-[11px] font-medium text-rose-500 mt-1.5"
-          ></p>
-
-        </div>
-
-        <!-- Format file dan wajib -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-          <!-- Format file -->
-          <div>
-
-            <label
-              class="block text-[11px] font-semibold text-zinc-500 mb-1.5"
-            >
-              Format File
-              <span class="text-rose-500">*</span>
-            </label>
-
-            
-<div class="relative"
-     x-data="{ open: false }"
-     @click.outside="open = false"
-     @keydown.escape.window="open = false">
-
-  <input type="hidden"
-         :name="'persyaratan[' + index + '][format_file]'"
-         :value="item.format_file">
-
-  <button type="button"
-          @click="open = !open"
-          :aria-expanded="open.toString()"
-          class="field flex items-center justify-between gap-3 text-left cursor-pointer">
-
-    <span class="uppercase" x-text="item.format_file"></span>
-
-    <svg class="w-4 h-4 shrink-0 text-zinc-400 transition-transform duration-300"
-         :class="{ 'rotate-180': open }"
-         viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="m6 9 6 6 6-6"/>
-    </svg>
-  </button>
-
-  <div x-cloak
-       x-show="open"
-       x-transition:enter="transition ease-out duration-200"
-       x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
-       x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-       x-transition:leave="transition ease-in duration-150"
-       x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-       x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
-       class="custom-dropdown-panel">
-
-    <template x-for="format in ['pdf', 'doc', 'docx']" :key="format">
-      <button type="button"
-              @click="item.format_file = format; open = false"
-              class="custom-dropdown-option"
-              :class="{ 'selected': item.format_file === format }">
-
-        <span class="uppercase" x-text="format"></span>
-
-        <svg x-show="item.format_file === format"
-             class="w-4 h-4 text-orange-600"
-             viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="m5 12 4 4L19 6"/>
-        </svg>
-      </button>
-    </template>
-
-  </div>
-</div>
-
-          </div>
-
-          <!-- Wajib -->
-          <div>
-
-            <label
-              class="block text-[11px] font-semibold text-zinc-500 mb-1.5"
-            >
-              Status Persyaratan
-            </label>
-
-            
-<div class="relative"
-     x-data="{ open: false }"
-     @click.outside="open = false"
-     @keydown.escape.window="open = false">
-
-  <input type="hidden"
-         :name="'persyaratan[' + index + '][wajib]'"
-         :value="item.wajib">
-
-  <button type="button"
-          @click="open = !open"
-          :aria-expanded="open.toString()"
-          class="field flex items-center justify-between gap-3 text-left cursor-pointer">
-
-    <span x-text="String(item.wajib) === '1' ? 'Wajib' : 'Opsional'"></span>
-
-    <svg class="w-4 h-4 shrink-0 text-zinc-400 transition-transform duration-300"
-         :class="{ 'rotate-180': open }"
-         viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="m6 9 6 6 6-6"/>
-    </svg>
-  </button>
-
-  <div x-cloak
-       x-show="open"
-       x-transition:enter="transition ease-out duration-200"
-       x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
-       x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-       x-transition:leave="transition ease-in duration-150"
-       x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-       x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
-       class="custom-dropdown-panel">
-
-    <button type="button"
-            @click="item.wajib = '1'; open = false"
-            class="custom-dropdown-option"
-            :class="{ 'selected': String(item.wajib) === '1' }">
-
-      <span>Wajib</span>
-
-      <svg x-show="String(item.wajib) === '1'"
-           class="w-4 h-4 text-orange-600"
-           viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="m5 12 4 4L19 6"/>
-      </svg>
-    </button>
-
-    <button type="button"
-            @click="item.wajib = '0'; open = false"
-            class="custom-dropdown-option"
-            :class="{ 'selected': String(item.wajib) === '0' }">
-
-      <span>Opsional</span>
-
-      <svg x-show="String(item.wajib) === '0'"
-           class="w-4 h-4 text-orange-600"
-           viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="m5 12 4 4L19 6"/>
-      </svg>
-    </button>
-
-  </div>
-</div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </template>
-
-  </div>
-
-  <p class="text-[11px] text-zinc-400">
-    Pelamar akan diminta mengunggah dokumen sesuai persyaratan
-    yang ditentukan. Format file mengikuti pilihan admin.
-  </p>
-
-</section>
-
-            <!-- SEKSI: KUOTA & STATUS -->
-            <section class="space-y-4">
-              <h3 class="text-sm font-bold tracking-wide text-zinc-900 uppercase pb-3 border-b border-black/5">Kuota & Status</h3>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <!-- Kuota (hanya angka positif, tidak boleh 0, ada panah atas/bawah) -->
-                <div>
-                  <label for="field-kuota" class="block text-[11px] font-semibold text-zinc-500 mb-1.5">Kuota <span class="text-rose-500">*</span></label>
-
-                  <div class="relative">
-                    <input type="text" id="field-kuota" name="kuota" x-model="f.kuota"
-                           inputmode="numeric" maxlength="5" placeholder="Contoh: 3"
-                           @keydown="if (['-', '+', 'e', 'E', '.', ','].includes($event.key)) $event.preventDefault()"
-                           @keydown.arrow-up.prevent="stepKuota(1)"
-                           @keydown.arrow-down.prevent="stepKuota(-1)"
-                           @input="onKuotaInput($event)"
-                           :class="{ '!border-rose-400': errors.kuota }"
-                           class="field !pr-10">
-
-                    <div class="absolute right-1.5 top-1/2 -translate-y-1/2 flex flex-col">
-                      <button type="button" tabindex="-1" @click="stepKuota(1)" aria-label="Tambah kuota"
-                              class="h-4 w-6 flex items-center justify-center text-zinc-400 hover:text-ewforange transition">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
-                      </button>
-                      <button type="button" tabindex="-1" @click="stepKuota(-1)" aria-label="Kurangi kuota"
-                              class="h-4 w-6 flex items-center justify-center text-zinc-400 hover:text-ewforange transition">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                      </button>
-=======
                   <!-- Tambah cepat -->
                   <div>
                     <p class="text-[11px] font-semibold text-zinc-500 mb-2">Tambah cepat:</p>
@@ -815,81 +413,16 @@
                           <span x-text="sudahAda(p) ? '✓' : '+'"></span> <span x-text="p"></span>
                         </button>
                       </template>
->>>>>>> vina
                     </div>
                   </div>
 
                   <p x-show="errors.persyaratan" x-cloak x-text="errors.persyaratan" class="err"></p>
 
-<<<<<<< HEAD
-                <div>
-                  <label for="field-status" class="block text-[11px] font-semibold text-zinc-500 mb-1.5">Status <span class="text-rose-500">*</span></label>
-                  
-<div class="relative"
-     x-data="{ open: false }"
-     @click.outside="open = false"
-     @keydown.escape.window="open = false">
-
-  <input type="hidden" id="field-status"
-         name="status" :value="f.status">
-
-  <button type="button"
-          @click="open = !open"
-          :aria-expanded="open.toString()"
-          :class="{ '!border-rose-400': errors.status }"
-          class="field flex items-center justify-between gap-3 text-left cursor-pointer capitalize">
-
-    <span x-text="f.status"></span>
-
-    <svg class="w-4 h-4 shrink-0 text-zinc-400 transition-transform duration-300"
-         :class="{ 'rotate-180': open }"
-         viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="m6 9 6 6 6-6"/>
-    </svg>
-  </button>
-
-  <div x-cloak
-       x-show="open"
-       x-transition:enter="transition ease-out duration-200"
-       x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
-       x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-       x-transition:leave="transition ease-in duration-150"
-       x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-       x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
-       class="custom-dropdown-panel">
-
-    <template x-for="statusOption in statusOptions" :key="statusOption">
-      <button type="button"
-              @click="f.status = statusOption; open = false; revalidate()"
-              class="custom-dropdown-option capitalize"
-              :class="{ 'selected': f.status === statusOption }">
-
-        <span x-text="statusOption"></span>
-
-        <svg x-show="f.status === statusOption"
-             class="w-4 h-4 text-orange-600"
-             viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="m5 12 4 4L19 6"/>
-        </svg>
-      </button>
-    </template>
-
-  </div>
-</div>
-
-                  <p x-show="errors.status" x-cloak x-text="errors.status" class="text-[11px] font-medium text-rose-500 mt-1.5"></p>
-                </div>
-              </div>
-            </section>
-=======
                   <!-- Daftar -->
                   <div class="space-y-3">
                     <template x-for="(item, index) in persyaratan" :key="item._k">
                       <div class="rounded-2xl border bg-paper p-4"
                            :class="errors['persyaratan_' + index] ? 'border-rose-300' : 'border-black/5'">
->>>>>>> vina
 
                         <input type="hidden" :name="'persyaratan[' + index + '][id_persyaratan]'" :value="item.id ?? ''">
                         <input type="hidden" :name="'persyaratan[' + index + '][format_file]'" :value="item.format_file">
@@ -915,13 +448,24 @@
                               </div>
 
                               <!-- Wajib / opsional -->
-                              <button type="button" role="switch" :aria-checked="item.wajib" @click="item.wajib = !item.wajib"
-                                      class="flex items-center gap-2 text-[11px] font-semibold text-zinc-600">
-                                <span class="relative inline-block w-9 h-5 rounded-full transition" :class="item.wajib ? 'bg-ewforange' : 'bg-zinc-300'">
-                                  <span class="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform" :class="item.wajib ? 'translate-x-4' : ''"></span>
-                                </span>
-                                <span x-text="item.wajib ? 'Wajib' : 'Opsional'"></span>
-                              </button>
+                              <!-- Wajib / opsional -->
+<button type="button"
+        role="switch"
+        :aria-checked="item.wajib"
+        @click="item.wajib = !item.wajib"
+        class="flex items-center gap-2 text-[11px] font-semibold text-zinc-600">
+
+  <span class="toggle-track w-9 h-5"
+        :class="{ 'is-on': item.wajib }">
+
+    <span class="toggle-thumb w-3.5 h-3.5"
+          style="top: 3px; left: 3px;"
+          :class="item.wajib ? 'translate-x-4' : ''">
+    </span>
+  </span>
+
+  <span x-text="item.wajib ? 'Wajib' : 'Opsional'"></span>
+</button>
                             </div>
 
                             <p x-show="errors['persyaratan_' + index]" x-cloak x-text="errors['persyaratan_' + index]" class="err !mt-0"></p>
@@ -1135,12 +679,6 @@
         persyaratan: [],
         uid: 0,
 
-<<<<<<< HEAD
-        statusOptions: init.statusOptions || [],
-
-        // Persyaratan berkas
-        persyaratan: init.persyaratan || [],
-=======
         presets: [
           'Curriculum Vitae (CV)', 'Surat Lamaran', 'KTP', 'Ijazah / Transkrip Nilai',
           'Pas Foto', 'Portofolio', 'Sertifikat Pendukung', 'Surat Keterangan Aktif Kuliah',
@@ -1150,7 +688,6 @@
           dibuka:  { label: 'Dibuka',  desc: 'Tampil di situs dan bisa dilamar.',      dot: 'bg-emerald-500' },
           ditutup: { label: 'Ditutup', desc: 'Tidak menerima lamaran lagi.',           dot: 'bg-zinc-400' },
         },
->>>>>>> vina
 
         // Silabus
         hasExisting: cfg.hasExisting,
@@ -1168,7 +705,7 @@
         saving: false,
         dirty: false,
 
-        order: ['judul', 'deskripsi', 'kualifikasi', 'silabus', 'persyaratan', 'kuota', 'status',
+        order: ['judul', 'deskripsi', 'kualifikasi', 'gaji_min', 'gaji_max', 'silabus', 'persyaratan', 'kuota', 'status',
                 'tgl_buka', 'tgl_tutup', 'tgl_mulai', 'tgl_selesai'],
 
         init() {
@@ -1231,6 +768,18 @@
         },
         get mulaiSebelumTutup() {
           return this.jenis === 'Magang' && this.f.tgl_mulai && this.f.tgl_tutup && this.f.tgl_mulai < this.f.tgl_tutup;
+        },
+
+        // ---------- GAJI ----------
+        onGajiInput(e, key) {
+          const bersih = e.target.value.replace(/[^0-9]/g, '').replace(/^0+/, '');
+          e.target.value = bersih;
+          this.f[key] = bersih;
+          if (this.submitted) this.validate();
+          else {
+            const { [key]: _hapus, ...sisa } = this.errors;
+            this.errors = sisa;
+          }
         },
 
         // ---------- KUOTA ----------
@@ -1348,7 +897,11 @@
             { key: 'judul', label: m ? 'Nama program' : 'Judul lowongan', ok: ok(f.judul) },
             { key: 'deskripsi', label: 'Deskripsi', ok: ok(f.deskripsi) },
           ];
-          if (!m) list.push({ key: 'kualifikasi', label: 'Kualifikasi', ok: ok(f.kualifikasi) });
+          if (!m) {
+            list.push({ key: 'kualifikasi', label: 'Kualifikasi', ok: ok(f.kualifikasi) });
+            list.push({ key: 'gaji_min', label: 'Gaji minimum', ok: /^[0-9]+$/.test(String(f.gaji_min)) && Number(f.gaji_min) > 0 });
+            list.push({ key: 'gaji_max', label: 'Gaji maksimum', ok: /^[0-9]+$/.test(String(f.gaji_max)) && Number(f.gaji_max) > 0 && Number(f.gaji_max) >= Number(f.gaji_min) });
+          }
           if (m) list.push({ key: 'silabus', label: 'Silabus', ok: !!this.file || this.hasExisting });
           list.push({ key: 'persyaratan', label: 'Persyaratan berkas', ok: this.persyaratan.length > 0 && this.persyaratan.every((p) => ok(p.nama_berkas)) });
           list.push({ key: 'kuota', label: 'Kuota', ok: /^[0-9]+$/.test(String(f.kuota)) && parseInt(f.kuota, 10) >= 1 });
@@ -1382,6 +935,16 @@
 
           if (kosong(f.deskripsi)) e.deskripsi = 'Deskripsi wajib diisi.';
           if (!magang && kosong(f.kualifikasi)) e.kualifikasi = 'Kualifikasi wajib diisi.';
+          if (!magang) {
+            const angkaPositif = (v) => /^[0-9]+$/.test(String(v)) && Number(v) > 0;
+            if (kosong(f.gaji_min)) e.gaji_min = 'Gaji minimum wajib diisi.';
+            else if (!angkaPositif(f.gaji_min)) e.gaji_min = 'Gaji minimum harus berupa angka lebih dari 0.';
+            if (kosong(f.gaji_max)) e.gaji_max = 'Gaji maksimum wajib diisi.';
+            else if (!angkaPositif(f.gaji_max)) e.gaji_max = 'Gaji maksimum harus berupa angka lebih dari 0.';
+            else if (!kosong(f.gaji_min) && angkaPositif(f.gaji_min) && Number(f.gaji_max) < Number(f.gaji_min)) {
+              e.gaji_max = 'Gaji maksimum tidak boleh lebih kecil dari gaji minimum.';
+            }
+          }
           if (magang && !this.file && !this.hasExisting) e.silabus = 'Silabus wajib diunggah.';
 
           if (kosong(f.kuota)) {

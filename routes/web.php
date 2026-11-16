@@ -16,7 +16,9 @@ use App\Http\Controllers\Pelamar\PengalamanController;
 use App\Http\Controllers\Pelamar\SkillController;
 use App\Http\Controllers\Pelamar\CvController;
 use App\Http\Controllers\Pelamar\PelamarDashboardController;
-use App\Http\Controllers\Pelamar\LamaranController;
+use App\Http\Controllers\Pelamar\ProgramController as PelamarProgramController;
+use App\Http\Controllers\Pelamar\LowonganController as PelamarLowonganController;
+use App\Http\Controllers\Pelamar\LamaranController as PelamarLamaranController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminLowonganController;
 use App\Http\Controllers\Admin\AdminKontenController;
@@ -50,8 +52,12 @@ Route::get('/lowongan/{id}', [LowonganController::class, 'show'])->whereNumber('
 // Guest yang klik "Lamar" dilempar ke login, lalu kembali ke form (lihat catatan intended() di LoginController).
 // Cek role pelamar & kelengkapan profil ditangani LowonganController agar pesannya ramah.
 Route::middleware('auth')->group(function () {
-    Route::get('/lowongan/{id}/lamar', [LowonganController::class, 'apply'])->whereNumber('id')->name('lowongan.apply');
-    Route::post('/lowongan/{id}/lamar', [LowonganController::class, 'store'])->whereNumber('id')->name('lowongan.store');
+    Route::get('/lowongan/{id}/lamar', [PelamarLowonganController::class, 'apply'])
+    ->whereNumber('id')
+    ->name('lowongan.apply');
+    Route::post('/lowongan/{id}/lamar', [PelamarLowonganController::class, 'store'])
+    ->whereNumber('id')
+    ->name('lowongan.store');
 });
 
 Route::get('/internship', [ProgramController::class, 'index'])
@@ -124,9 +130,21 @@ Route::middleware(['auth', 'catat.aktivitas', 'role:admin_hr'])->prefix('admin')
     });
 
     // Seleksi pelamar
-    Route::get('/pelamar', [SeleksiController::class, 'index'])->name('pelamar.index');
-    Route::get('/pelamar/{id}', [SeleksiController::class, 'show'])->whereNumber('id')->name('pelamar.show');
-    Route::patch('/pelamar/{id}/status', [SeleksiController::class, 'updateStatus'])->whereNumber('id')->name('pelamar.status');
+Route::get('/pelamar', [SeleksiController::class, 'index'])
+    ->name('pelamar.index');
+
+Route::get('/pelamar/{id}', [SeleksiController::class, 'show'])
+    ->whereNumber('id')
+    ->name('pelamar.show');
+
+// Lihat CV profil pelamar
+Route::get('/pelamar/{id}/cv', [SeleksiController::class, 'lihatCv'])
+    ->whereNumber('id')
+    ->name('pelamar.cv');
+
+Route::patch('/pelamar/{id}/status', [SeleksiController::class, 'updateStatus'])
+    ->whereNumber('id')
+    ->name('pelamar.status');
 
     // Jadwal interview (menggantikan SeleksiController@simpanJadwal; nama route admin.pelamar.jadwal tetap sama)
     Route::post('/pelamar/{id}/jadwal', [AdminJadwalController::class, 'simpanUntukLamaran'])->whereNumber('id')->name('pelamar.jadwal');
@@ -134,7 +152,6 @@ Route::middleware(['auth', 'catat.aktivitas', 'role:admin_hr'])->prefix('admin')
     Route::post('/jadwal', [AdminJadwalController::class, 'simpan'])->name('jadwal.store');
     Route::patch('/jadwal/{id}/status', [AdminJadwalController::class, 'updateStatus'])->whereNumber('id')->name('jadwal.status');
     Route::delete('/jadwal/{id}', [AdminJadwalController::class, 'destroy'])->whereNumber('id')->name('jadwal.destroy');
-    Route::post('/pelamar/{id}/jadwal', [SeleksiController::class, 'simpanJadwal'])->whereNumber('id')->name('pelamar.jadwal');
 
     // Log aktivitas (hanya-baca, khusus admin)
     Route::get('/log-aktivitas', [LogAktivitasController::class, 'index'])
@@ -181,9 +198,13 @@ Route::middleware(['auth', 'catat.aktivitas', 'role:pimpinan'])
 Route::middleware(['auth', 'catat.aktivitas', 'role:pelamar'])->group(function () {
     Route::get('/dashboard', [PelamarDashboardController::class, 'index'])->name('pelamar.dashboard');
 
-    // Pendaftaran program magang (lowongan kerja memakai route lowongan.apply di atas)
-    Route::get('/lamaran/create', [LamaranController::class, 'create'])->name('pelamar.lamaran.create');
-    Route::post('/lamaran', [LamaranController::class, 'store'])->name('pelamar.lamaran.store');
+    // Pendaftaran program magang
+    Route::get('/lamaran/create', [PelamarProgramController::class, 'create'])
+        ->name('pelamar.lamaran.create');
+
+    Route::post('/lamaran', [PelamarProgramController::class, 'store'])
+        ->name('pelamar.lamaran.store');
+
 
     Route::prefix('profil')->group(function () {
         // Data diri & profil (index.blade.php) -> URL: /profil
@@ -214,5 +235,13 @@ Route::middleware(['auth', 'catat.aktivitas', 'role:pelamar'])->group(function (
         // Curriculum Vitae + PDF
         Route::get('/cv', [CvController::class, 'show'])->name('pelamar.profil.cv');
         Route::get('/cv/pdf', [CvController::class, 'pdf'])->name('pelamar.profil.cv.pdf');
+
+        // Riwayat Lamaran
+Route::get('/lamaran', [PelamarLamaranController::class, 'index'])
+    ->name('pelamar.profil.lamaran');
+
+Route::get('/lamaran/{id}', [PelamarLamaranController::class, 'show'])
+    ->whereNumber('id')
+    ->name('pelamar.profil.lamaran.show');
     });
 });

@@ -8,13 +8,13 @@ class ProgramController extends Controller
 {
     // Menampilkan daftar program magang
     public function index()
-    {
-        $programs = ProgramMagang::whereIn('status', ['aktif', 'dibuka'])
-            ->latest()
-            ->paginate(9);
+{
+    $programs = ProgramMagang::where('status', 'dibuka')
+        ->latest()
+        ->get();
 
-        return view('pages.program.index', compact('programs'));
-    }
+    return view('pages.program.index', compact('programs'));
+}
 
     // Menampilkan detail program magang
     public function show($id)

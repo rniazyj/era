@@ -11,21 +11,36 @@
 @php
   use Illuminate\Support\Str;
 
-  $daftarProgram = [
-    ['id' => 1, 'judul' => 'Data Analyst',            'huruf' => 'D', 'kategori' => 'Teknologi Informasi', 'posisi' => 2, 'urgent' => true,  'status' => 'Ditutup 3 hari lagi',  'deskripsi' => 'Menganalisa tren pasar derivatif dan data transaksi harian menggunakan Python dan alat visualisasi data.'],
-    ['id' => 2, 'judul' => 'Administrasi Bisnis',     'huruf' => 'A', 'kategori' => 'Bisnis & Sosial',     'posisi' => 5, 'urgent' => false, 'status' => 'Tayang 2 hari lalu', 'deskripsi' => 'Praktik tata kelola dokumen operasional pialang, input data nasabah ke CRM, dan dukung layanan kantor.'],
-    ['id' => 3, 'judul' => 'Full-Stack Developer',    'huruf' => 'F', 'kategori' => 'Teknologi Informasi', 'posisi' => 1, 'urgent' => false, 'status' => 'Tayang 4 hari lalu', 'deskripsi' => 'Membantu tim IT internal merancang sistem registrasi nasabah online berbasis Laravel dan React.'],
-    ['id' => 4, 'judul' => 'Akuntansi',               'huruf' => 'A', 'kategori' => 'Bisnis & Sosial',     'posisi' => 4, 'urgent' => false, 'status' => 'Tayang 5 hari lalu', 'deskripsi' => 'Membantu penyusunan laporan harian kas, input mutasi segregated account, dan rekonsiliasi keuangan cabang.'],
-    ['id' => 5, 'judul' => 'Manajemen',               'huruf' => 'M', 'kategori' => 'Bisnis & Sosial',     'posisi' => 6, 'urgent' => false, 'status' => 'Tayang 2 hari lalu', 'deskripsi' => 'Mempelajari alur manajerial divisi pemasaran derivatif, riset kompetitor, dan pengembangan strategi akuisisi klien.'],
-    ['id' => 6, 'judul' => 'Hubungan Internasional',  'huruf' => 'H', 'kategori' => 'Bisnis & Sosial',     'posisi' => 2, 'urgent' => false, 'status' => 'Tayang hari ini',    'deskripsi' => 'Mempelajari dampak isu makroekonomi global terhadap pergerakan komoditas dan valuta asing (Forex).'],
-  ];
+  // Mengubah data database ke format yang digunakan desain kartu
+  $daftarProgram = $programs->map(function ($program) {
+      return [
+          'id'        => $program->id_program,
+          'judul'     => $program->nama_program,
+          'huruf'     => mb_strtoupper(mb_substr($program->nama_program, 0, 1)),
+          'kategori'  => 'Program Magang',
+          'posisi'    => (int) $program->kuota,
+          'urgent'    => false,
+          'status'    => 'Pendaftaran dibuka',
+          'deskripsi' => $program->deskripsi ?? '',
+      ];
+  })->values()->all();
 
-  $totalPosisi    = array_sum(array_column($daftarProgram, 'posisi'));
-  $maxPosisi      = max(array_column($daftarProgram, 'posisi'));
-  $kategoriHitung = collect($daftarProgram)->groupBy('kategori')->map->count();
+  // Menghitung total posisi yang tersedia
+  $totalPosisi = array_sum(array_column($daftarProgram, 'posisi'));
+
+  // Menghindari error jika belum ada program atau semua kuota bernilai 0
+  $maxPosisi = max(1, count($daftarProgram)
+      ? max(array_column($daftarProgram, 'posisi'))
+      : 1);
+
+  // Menghitung jumlah program berdasarkan kategori
+  $kategoriHitung = collect($daftarProgram)
+      ->groupBy('kategori')
+      ->map->count();
 
   $panah = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="M7 17 17 7M8 7h9v9"/></svg>';
-  $cek   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="m5 12 5 5 9-10"/></svg>';
+
+  $cek = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="m5 12 5 5 9-10"/></svg>';
 @endphp
 <!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
@@ -368,9 +383,16 @@
       <h2 class="relative mx-auto max-w-2xl font-head text-3xl font-light leading-tight tracking-tight md:text-5xl">Siap mengambil langkah baru <strong class="font-semibold text-ewforange">dalam kariermu?</strong></h2>
       <p class="relative mx-auto mt-4 max-w-md text-sm text-white/60">Bergabunglah bersama talenta berbakat yang mewujudkan impian karier profesional di PT Equityworld Futures.</p>
       <div class="relative mt-9 flex flex-wrap justify-center gap-3">
-        <a href="{{ route('register') }}" class="press rounded-full bg-ewforange px-8 py-3.5 text-sm font-semibold text-ink">Daftar Akun</a>
-        <a href="{{ route('lowongan.index') }}" class="press dk rounded-full border border-white/25 px-8 py-3.5 text-sm font-semibold text-white">Lihat Lowongan Kerja</a>
-      </div>
+  @guest
+    <a href="{{ route('register') }}" class="press rounded-full bg-ewforange px-8 py-3.5 text-sm font-semibold text-ink">
+      Daftar Akun
+    </a>
+  @endguest
+
+  <a href="{{ route('lowongan.index') }}" class="press dk rounded-full border border-white/25 px-8 py-3.5 text-sm font-semibold text-white">
+    Lihat Lowongan Kerja
+  </a>
+</div>
     </div>
   </section>
 </main>

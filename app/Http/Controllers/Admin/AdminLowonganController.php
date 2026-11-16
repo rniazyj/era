@@ -94,7 +94,12 @@ class AdminLowonganController extends Controller
 
         if ($jenis === 'Kerja') {
             $data = $request->validate(
-                $common + ['kualifikasi' => ['required', 'string']],
+                $common + [
+                    'kualifikasi' => ['required', 'string'],
+                    'gaji_min'    => ['required', 'integer', 'min:1'],
+                    'gaji_max'    => ['required', 'integer', 'min:1', 'gte:gaji_min'],
+                    'urgent'      => ['required', 'boolean'],
+                ],
                 $this->messages(),
                 $this->attributes($jenis)
             );
@@ -246,6 +251,9 @@ class AdminLowonganController extends Controller
             'judul'          => $l->judul,
             'deskripsi'      => $l->deskripsi,
             'kualifikasi'    => $l->kualifikasi,
+            'gaji_min'       => $l->gaji_min,
+            'gaji_max'       => $l->gaji_max,
+            'urgent'         => (int) ($l->urgent ?? 0),
             'silabus'        => '',
             'silabus_url'    => null,
             'silabus_nama'   => '',
@@ -324,6 +332,15 @@ class AdminLowonganController extends Controller
             'kuota.integer'              => 'Kuota harus berupa angka bulat.',
             'kuota.min'                  => 'Kuota harus berupa angka positif (minimal 1).',
             'kuota.max'                  => 'Kuota maksimal :max.',
+            'gaji_min.required'          => 'Gaji minimum wajib diisi.',
+            'gaji_min.integer'           => 'Gaji minimum harus berupa angka bulat.',
+            'gaji_min.min'               => 'Gaji minimum harus lebih dari 0.',
+            'gaji_max.required'          => 'Gaji maksimum wajib diisi.',
+            'gaji_max.integer'           => 'Gaji maksimum harus berupa angka bulat.',
+            'gaji_max.min'               => 'Gaji maksimum harus lebih dari 0.',
+            'gaji_max.gte'               => 'Gaji maksimum tidak boleh lebih kecil dari gaji minimum.',
+            'urgent.required'            => 'Pengaturan urgent wajib dikirim.',
+            'urgent.boolean'             => 'Pengaturan urgent tidak valid.',
             'tgl_tutup.after_or_equal'   => 'Tanggal tutup tidak boleh sebelum tanggal buka.',
             'tgl_selesai.after_or_equal' => 'Tanggal selesai magang tidak boleh sebelum tanggal mulai.',
             'silabus.file'               => 'Silabus harus berupa file.',
@@ -348,6 +365,8 @@ class AdminLowonganController extends Controller
             'judul'       => $jenis === 'Magang' ? 'Nama program magang' : 'Judul lowongan',
             'deskripsi'   => 'Deskripsi',
             'kualifikasi' => 'Kualifikasi',
+            'gaji_min'    => 'Gaji minimum',
+            'gaji_max'    => 'Gaji maksimum',
             'silabus'     => 'Silabus',
             'kuota'       => 'Kuota',
             'status'      => 'Status',
