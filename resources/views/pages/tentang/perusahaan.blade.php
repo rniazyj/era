@@ -1,9 +1,32 @@
+{{-- resources/views/pages/tentang/perusahaan.blade.php --}}
 @extends('pages.tentang.layout')
 
 @section('title', 'Tentang Perusahaan')
 
 {{-- Hero foto penuh sampai ke atas layar, jadi padding atas main dimatikan --}}
 @section('main_class', 'no-pad')
+
+@push('styles')
+<style>
+  /* Tambahan khusus foto (desain lain tidak diubah) */
+  .ab-profil-foto { margin: 2.4rem 0 0; height: clamp(14rem, 32vw, 24rem); border-radius: 22px; overflow: hidden; background: var(--card-dark); }
+  .ab-profil-foto img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s; }
+  .ab-profil-foto:hover img { transform: scale(1.04); }
+
+  /* Logo instansi di kartu legalitas */
+  .ab-legal-ico.logo { width: 3.6rem; height: 3.6rem; padding: .4rem; background: #fff; border: 1px solid var(--line); }
+  .ab-legal-ico.logo img { width: 100%; height: 100%; object-fit: contain; }
+
+  .ab-cabang-foto { margin: -1.5rem -1.5rem 1.2rem; height: 9rem; overflow: hidden; background: var(--card-dark); }
+  .ab-cabang-foto img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s; }
+  .ab-card:hover .ab-cabang-foto img { transform: scale(1.06); }
+
+  .ab-city { position: relative; overflow: hidden; }
+  .ab-city img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .ab-city::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(8,8,9,.45), rgba(8,8,9,.05) 60%); }
+  .ab-city span { position: relative; z-index: 1; color: #fff; text-shadow: 0 2px 24px rgba(0,0,0,.35); }
+</style>
+@endpush
 
 @section('konten')
 
@@ -22,15 +45,15 @@
   if ($cabang->isNotEmpty())    $tiles[] = ['Kantor Cabang', '#cabang'];
 @endphp
 
-{{-- ============ HERO FOTO PENUH ============ --}}
-{{-- Foto: public/images/tentang/hero.jpg (atau kirim $heroFoto dari controller). --}}
+{{-- ============ HERO FOTO PENUH (judul & foto dari admin) ============ --}}
 @include('pages.tentang.partials.hero-foto', [
-  'baris1' => 'Mitra Tepercaya',
-  'baris2' => 'Investasi <em>Berjangka</em>',
-  'tombol' => 'Kenali Kami',
-  'href'   => '#profil',
-  'tiles'  => $tiles,
-  'gambar' => 'hero.jpg',
+  'baris1'  => $hero['baris1'],
+  'baris2'  => $hero['baris2'],
+  'tombol'  => 'Kenali Kami',
+  'href'    => '#profil',
+  'tiles'   => $tiles,
+  'gambar'  => 'hero.jpg',
+  'fotoUrl' => $hero['foto'],
 ])
 
 {{-- ============ LAPISAN PUTIH (naik menimpa foto) ============ --}}
@@ -52,6 +75,12 @@
         </div>
       </div>
     </div>
+
+    @if($profilFoto)
+      <figure class="ab-profil-foto" data-reveal>
+        <img src="{{ $profilFoto }}" alt="Kantor PT Equityworld Futures" loading="lazy">
+      </figure>
+    @endif
   </section>
 
   {{-- ============ MARQUEE LEGALITAS ============ --}}
@@ -127,7 +156,7 @@
           <article class="ab-card">
             <div class="ab-num">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</div>
             <h4>{{ $n->judul }}</h4>
-            <p>{{ $n->isi_konten }}</p>
+            <p>{{ $n->deskripsi }}</p>
           </article>
         @endforeach
       </div>
@@ -173,7 +202,11 @@
         @foreach($legalitas as $l)
           <article class="ab-card">
             <div class="ab-legal-top">
-              <div class="ab-legal-ico">{{ \Illuminate\Support\Str::limit($l->singkatan, 4, '') }}</div>
+              @if($l->fotoUrl())
+                <div class="ab-legal-ico logo"><img src="{{ $l->fotoUrl() }}" alt="Logo {{ $l->lembaga }}" loading="lazy"></div>
+              @else
+                <div class="ab-legal-ico">{{ \Illuminate\Support\Str::limit($l->singkatan, 4, '') }}</div>
+              @endif
               <span class="ab-badge ok">✓ Terverifikasi</span>
             </div>
             <h4>{{ $l->lembaga }}</h4>
@@ -209,6 +242,8 @@
 
       <div class="ab-grid g3" id="cabangGrid" data-stagger>
         @foreach($cabang as $c)
+          @php $fotoKantor = $c->fotoUrl('kantor-' . $c->getKey(), 900, 700); @endphp
+
           @if($c->is_pusat)
             <article class="ab-card ab-cabang pusat" data-cat="{{ $c->kota }}">
               <div>
@@ -219,21 +254,23 @@
                   @if(filled($c->telepon)) <span>☎ {{ $c->telepon }}</span> @endif
                 </div>
                 <div class="ab-row">
-                  @if(filled($c->link_peta))
-                    <a class="ab-btn sm" href="{{ $c->link_peta }}" target="_blank" rel="noopener">Buka Google Maps</a>
-                  @endif
+                  <a class="ab-btn sm" href="{{ $c->link_peta }}" target="_blank" rel="noopener">Buka Google Maps</a>
                   <button type="button" class="ab-btn sm ghost" data-copy="{{ $c->nama_kantor }}, {{ $c->alamat }}">Salin alamat</button>
                 </div>
               </div>
-              <div class="ab-city" aria-hidden="true">{{ mb_strtoupper(mb_substr($c->kota, 0, 3)) }}</div>
+              <div class="ab-city" aria-hidden="true">
+                <img src="{{ $fotoKantor }}" alt="" loading="lazy">
+                <span>{{ mb_strtoupper(mb_substr((string) $c->kota, 0, 3)) }}</span>
+              </div>
             </article>
           @else
             <article class="ab-card ab-cabang" data-cat="{{ $c->kota }}">
+              <div class="ab-cabang-foto">
+                <img src="{{ $fotoKantor }}" alt="{{ $c->nama_kantor }}" loading="lazy">
+              </div>
               <div class="ab-cardtop">
                 <span class="ab-badge">{{ $c->kota }}</span>
-                @if(filled($c->link_peta))
-                  <a class="ab-arrow" href="{{ $c->link_peta }}" target="_blank" rel="noopener" aria-label="Buka peta {{ $c->nama_kantor }}">{!! $panah !!}</a>
-                @endif
+                <a class="ab-arrow" href="{{ $c->link_peta }}" target="_blank" rel="noopener" aria-label="Buka peta {{ $c->nama_kantor }}">{!! $panah !!}</a>
               </div>
               <h4>{{ $c->nama_kantor }}</h4>
               <p>{{ $c->alamat }}</p>
@@ -241,9 +278,7 @@
                 @if(filled($c->telepon)) <span>☎ {{ $c->telepon }}</span> @endif
               </div>
               <div class="ab-row">
-                @if(filled($c->link_peta))
-                  <a class="ab-btn sm" href="{{ $c->link_peta }}" target="_blank" rel="noopener">Maps</a>
-                @endif
+                <a class="ab-btn sm" href="{{ $c->link_peta }}" target="_blank" rel="noopener">Maps</a>
                 <button type="button" class="ab-btn sm ghost" data-copy="{{ $c->nama_kantor }}, {{ $c->alamat }}">Salin alamat</button>
               </div>
             </article>

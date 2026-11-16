@@ -42,4 +42,16 @@ class Lamaran extends Model
     {
         return $this->hasOne(SuratPenerimaan::class, 'id_lamaran', 'id_lamaran');
     }
+
+    // Nama posisi yang dilamar (judul lowongan kerja atau nama program magang)
+    public function getNamaPosisiAttribute(): string
+    {
+        return $this->lowongan->judul ?? $this->program->nama_program ?? '-';
+    }
+
+    // Magang kalau melamar program, selain itu Kerja
+    public function getJenisLamaranAttribute(): string
+    {
+        return $this->id_program ? 'Magang' : 'Kerja';
+    }
 }

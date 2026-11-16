@@ -10,6 +10,7 @@
     'briefcase' => 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
     'users'     => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
     'document'  => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+    'calendar'  => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
     'globe'     => 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9',
     'clock'     => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
     'profile'   => 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM4 21a8 8 0 0116 0',
@@ -23,9 +24,9 @@
       ['Profil', 'admin.profil','admin.profil*',    'profile'],
     ]],
     ['title' => 'Rekrutmen', 'roles' => null, 'items' => [
-      ['Kelola Lowongan', 'admin.lowongan.index', 'admin.lowongan*', 'briefcase'],
-      ['Daftar Pelamar',  'admin.pelamar.index',  'admin.pelamar*',  'users'],
-      ['Buat Surat LoA',  'admin.surat.create',   'admin.surat*',    'document'],
+      ['Kelola Lowongan',   'admin.lowongan.index', 'admin.lowongan*', 'briefcase'],
+      ['Daftar Pelamar',    'admin.pelamar.index',  'admin.pelamar*',  'users'],
+      ['Jadwal Interview',  'admin.jadwal.index',   'admin.jadwal*',   'calendar'],
     ]],
     ['title' => 'Pengaturan & Sistem', 'roles' => null, 'items' => [
       ['Konten Perusahaan', 'admin.konten.index', 'admin.konten*', 'globe'],

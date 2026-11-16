@@ -19,17 +19,24 @@ use App\Http\Controllers\Pelamar\PelamarDashboardController;
 use App\Http\Controllers\Pelamar\LamaranController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminLowonganController;
+use App\Http\Controllers\Admin\AdminKontenController;
+use App\Http\Controllers\Admin\AdminJadwalController;
 use App\Http\Controllers\Admin\SeleksiController;
 use App\Http\Controllers\Admin\AdminProfilController;
 use App\Http\Controllers\Pimpinan\PimpinanDashboardController;
 
 // 1. RUTE PUBLIK
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Halaman Tentang (isi dikelola admin di Admin > Konten Website, tabel profil_perusahaan)
 Route::get('/tentang', [TentangController::class, 'perusahaan'])->name('tentang');
 Route::get('/tentang/tim', [TentangController::class, 'tim'])->name('tentang.tim');
-Route::get('/tentang/legalitas', [TentangController::class, 'legalitas'])->name('tentang.legalitas');
-Route::get('/tentang/cabang', [TentangController::class, 'cabang'])->name('tentang.cabang');
 Route::get('/tentang/produk', [TentangController::class, 'produk'])->name('tentang.produk');
+
+// Legalitas & cabang kini menjadi bagian halaman /tentang (tidak ada method terpisah di controller).
+// Nama route lama dipertahankan sebagai pengalihan, supaya link di navbar/footer tidak error.
+Route::get('/tentang/legalitas', fn () => redirect(route('tentang') . '#legalitas'))->name('tentang.legalitas');
+Route::get('/tentang/cabang', fn () => redirect(route('tentang') . '#cabang'))->name('tentang.cabang');
 
 // Lowongan kerja: daftar & detail terbuka untuk semua orang (termasuk guest)
 Route::get('/lowongan', [LowonganController::class, 'index'])->name('lowongan.index');
@@ -97,11 +104,31 @@ Route::middleware(['auth', 'role:admin_hr'])->prefix('admin')->name('admin.')->g
         ->whereNumber('id')
         ->name('lowongan.update');
 
+    // Kelola konten website (halaman Tentang). {tipe} dibatasi ke jenis konten yang dikenal.
+    // Nama route: admin.konten.index | daftar | create | store | edit | update | destroy
+    Route::prefix('konten')->name('konten.')->controller(AdminKontenController::class)->group(function () {
+        $tipe = 'hero|profil|visi|misi|nilai|tonggak|legalitas|cabang|tim|produk';
+
+        Route::get('/', 'index')->name('index');
+        Route::get('/{tipe}', 'daftar')->where('tipe', $tipe)->name('daftar');
+        Route::get('/{tipe}/tambah', 'create')->where('tipe', $tipe)->name('create');
+        Route::post('/{tipe}', 'store')->where('tipe', $tipe)->name('store');
+        Route::get('/{tipe}/{id}/edit', 'edit')->where(['tipe' => $tipe, 'id' => '[0-9]+'])->name('edit');
+        Route::put('/{tipe}/{id}', 'update')->where(['tipe' => $tipe, 'id' => '[0-9]+'])->name('update');
+        Route::delete('/{tipe}/{id}', 'destroy')->where(['tipe' => $tipe, 'id' => '[0-9]+'])->name('destroy');
+    });
+
     // Seleksi pelamar
     Route::get('/pelamar', [SeleksiController::class, 'index'])->name('pelamar.index');
     Route::get('/pelamar/{id}', [SeleksiController::class, 'show'])->whereNumber('id')->name('pelamar.show');
     Route::patch('/pelamar/{id}/status', [SeleksiController::class, 'updateStatus'])->whereNumber('id')->name('pelamar.status');
-    Route::post('/pelamar/{id}/jadwal', [SeleksiController::class, 'simpanJadwal'])->whereNumber('id')->name('pelamar.jadwal');
+
+    // Jadwal interview (menggantikan SeleksiController@simpanJadwal; nama route admin.pelamar.jadwal tetap sama)
+    Route::post('/pelamar/{id}/jadwal', [AdminJadwalController::class, 'simpanUntukLamaran'])->whereNumber('id')->name('pelamar.jadwal');
+    Route::get('/jadwal', [AdminJadwalController::class, 'index'])->name('jadwal.index');
+    Route::post('/jadwal', [AdminJadwalController::class, 'simpan'])->name('jadwal.store');
+    Route::patch('/jadwal/{id}/status', [AdminJadwalController::class, 'updateStatus'])->whereNumber('id')->name('jadwal.status');
+    Route::delete('/jadwal/{id}', [AdminJadwalController::class, 'destroy'])->whereNumber('id')->name('jadwal.destroy');
 });
 
 // 4. RUTE ROLE: PIMPINAN

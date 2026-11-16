@@ -4,14 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\LowonganKerja;
+use App\Models\PersyaratanBerkas;
 use App\Models\ProgramMagang;
 use Carbon\Carbon;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use App\Models\PersyaratanBerkas;
-use Illuminate\Support\Facades\DB;
 
 class AdminLowonganController extends Controller
 {
@@ -20,8 +22,8 @@ class AdminLowonganController extends Controller
 
     public function index()
     {
-        $kerja  = LowonganKerja::get()->map(fn ($l) => $this->mapKerja($l));
-        $magang = ProgramMagang::get()->map(fn ($p) => $this->mapMagang($p));
+        $kerja  = LowonganKerja::withCount('lamaran')->get()->map(fn ($l) => $this->mapKerja($l));
+        $magang = ProgramMagang::withCount('lamaran')->get()->map(fn ($p) => $this->mapMagang($p));
 
         $items = $kerja->concat($magang)->sortByDesc('created_at')->values();
         $statusList = self::STATUS;
@@ -29,11 +31,15 @@ class AdminLowonganController extends Controller
         return view('admin.lowongan.index', compact('items', 'statusList'));
     }
 
-    public function create()
+    // /admin/lowongan/create?jenis=kerja|magang  -> jenis langsung terpilih
+    public function create(Request $request)
     {
+        $awal = ucfirst(strtolower((string) $request->query('jenis')));
+
         return view('admin.lowongan.form', [
             'item'       => null,
             'statusList' => self::STATUS,
+            'jenisAwal'  => in_array($awal, ['Kerja', 'Magang'], true) ? $awal : 'Magang',
         ]);
     }
 
@@ -43,16 +49,13 @@ class AdminLowonganController extends Controller
         abort_unless(in_array($jenis, ['Kerja', 'Magang'], true), 404);
 
         $item = $jenis === 'Kerja'
-    ? $this->mapKerja(
-        LowonganKerja::with('persyaratan')->findOrFail($id)
-    )
-    : $this->mapMagang(
-        ProgramMagang::with('persyaratan')->findOrFail($id)
-    );
+            ? $this->mapKerja(LowonganKerja::with('persyaratan')->findOrFail($id), true)
+            : $this->mapMagang(ProgramMagang::with('persyaratan')->findOrFail($id), true);
 
         return view('admin.lowongan.form', [
             'item'       => $item,
             'statusList' => self::STATUS,
+            'jenisAwal'  => $jenis,
         ]);
     }
 
@@ -81,24 +84,12 @@ class AdminLowonganController extends Controller
             'tgl_buka'  => ['required', 'date'],
             'tgl_tutup' => ['required', 'date', 'after_or_equal:tgl_buka'],
             'status'    => ['required', Rule::in(self::STATUS)],
-            'persyaratan' => ['required', 'array', 'min:1'],
 
-'persyaratan.*.nama_berkas' => [
-    'required',
-    'string',
-    'max:255',
-],
-
-'persyaratan.*.format_file' => [
-    'required',
-    'string',
-    Rule::in(['pdf', 'doc', 'docx']),
-],
-
-'persyaratan.*.wajib' => [
-    'required',
-    Rule::in(['0', '1', 0, 1]),
-],
+            'persyaratan'                       => ['required', 'array', 'min:1'],
+            'persyaratan.*.id_persyaratan'      => ['nullable', 'integer'],
+            'persyaratan.*.nama_berkas'         => ['required', 'string', 'max:255'],
+            'persyaratan.*.format_file'         => ['required', 'string', Rule::in(['pdf', 'doc', 'docx'])],
+            'persyaratan.*.wajib'               => ['required', Rule::in(['0', '1', 0, 1])],
         ];
 
         if ($jenis === 'Kerja') {
@@ -108,20 +99,20 @@ class AdminLowonganController extends Controller
                 $this->attributes($jenis)
             );
 
-            $model = $id ? LowonganKerja::findOrFail($id) : new LowonganKerja();
-            $model->fill($data);
+            $model = DB::transaction(function () use ($data, $id) {
+                $model = $id ? LowonganKerja::findOrFail($id) : new LowonganKerja();
+                $model->fill(Arr::except($data, ['persyaratan']));
 
-            if (! $id) {
-                $model->id_admin = auth()->id();
-            }
+                if (! $id) {
+                    $model->id_admin = auth()->id();
+                }
 
-            $model->save();
+                $model->save();
 
-            $this->simpanPersyaratan(
-    $data['persyaratan'],
-    'Kerja',
-    $model->id_lowongan
-);
+                return $model;
+            });
+
+            $gagal = $this->simpanPersyaratan($data['persyaratan'], 'Kerja', $model->id_lowongan);
         } else {
             $existing = $id ? ProgramMagang::findOrFail($id) : null;
 
@@ -158,99 +149,157 @@ class AdminLowonganController extends Controller
                 $silabusPath = $file->storeAs('silabus', $nama, 'public');
             }
 
-            $model = $existing ?? new ProgramMagang();
-            $model->fill([
-                'nama_program' => $data['judul'],
-                'deskripsi'    => $data['deskripsi'],
-                'silabus'      => $silabusPath,
-                'kuota'        => $data['kuota'],
-                'tgl_buka'     => $data['tgl_buka'],
-                'tgl_tutup'    => $data['tgl_tutup'],
-                'tgl_mulai'    => $data['tgl_mulai'],
-                'tgl_selesai'  => $data['tgl_selesai'],
-                'status'       => $data['status'],
-                // durasi dihitung otomatis dari tanggal mulai sampai selesai
-                'durasi_hari'  => (int) Carbon::parse($data['tgl_mulai'])->startOfDay()
-                                    ->diffInDays(Carbon::parse($data['tgl_selesai'])->startOfDay()) + 1,
-            ]);
+            $model = DB::transaction(function () use ($existing, $data, $silabusPath, $id) {
+                $model = $existing ?? new ProgramMagang();
+                $model->fill([
+                    'nama_program' => $data['judul'],
+                    'deskripsi'    => $data['deskripsi'],
+                    'silabus'      => $silabusPath,
+                    'kuota'        => $data['kuota'],
+                    'tgl_buka'     => $data['tgl_buka'],
+                    'tgl_tutup'    => $data['tgl_tutup'],
+                    'tgl_mulai'    => $data['tgl_mulai'],
+                    'tgl_selesai'  => $data['tgl_selesai'],
+                    'status'       => $data['status'],
+                    // durasi dihitung otomatis dari tanggal mulai sampai selesai
+                    'durasi_hari'  => (int) Carbon::parse($data['tgl_mulai'])->startOfDay()
+                                        ->diffInDays(Carbon::parse($data['tgl_selesai'])->startOfDay()) + 1,
+                ]);
 
-            if (! $id) {
-                $model->id_admin = auth()->id();
-            }
+                if (! $id) {
+                    $model->id_admin = auth()->id();
+                }
 
-            $model->save();
+                $model->save();
 
-            $this->simpanPersyaratan(
-    $data['persyaratan'],
-    'Magang',
-    $model->id_program
-);
+                return $model;
+            });
+
+            $gagal = $this->simpanPersyaratan($data['persyaratan'], 'Magang', $model->id_program);
         }
 
-        return redirect()->route('admin.lowongan.index')
+        $redirect = redirect()->route('admin.lowongan.index')
             ->with('success', $id ? 'Data berhasil diperbarui.' : 'Data berhasil ditambahkan.');
+
+        if (! empty($gagal)) {
+            $redirect->with('warning', 'Persyaratan "' . implode('", "', $gagal)
+                . '" tidak dihapus karena sudah dipakai oleh berkas pelamar. Data lainnya tersimpan.');
+        }
+
+        return $redirect;
     }
 
-    private function mapKerja($l): array
+    /**
+     * Sinkronkan persyaratan berkas: baris lama diperbarui (ID dipertahankan supaya berkas pelamar
+     * tetap terhubung), baris baru dibuat, baris yang dihapus admin dibuang.
+     * Mengembalikan daftar nama persyaratan yang gagal dihapus (karena sudah dipakai pelamar).
+     */
+    private function simpanPersyaratan(array $items, string $jenis, int $parentId): array
+    {
+        $kolom = $jenis === 'Kerja' ? 'id_lowongan' : 'id_program';
+
+        $lama = PersyaratanBerkas::where($kolom, $parentId)->get()->keyBy('id_persyaratan');
+        $dipertahankan = [];
+
+        DB::transaction(function () use ($items, $jenis, $parentId, $lama, &$dipertahankan) {
+            foreach ($items as $item) {
+                $attrs = [
+                    'nama_berkas' => trim($item['nama_berkas']),
+                    'format_file' => strtolower($item['format_file']),
+                    'wajib'       => (int) $item['wajib'],
+                ];
+
+                $idLama = isset($item['id_persyaratan']) ? (int) $item['id_persyaratan'] : 0;
+
+                if ($idLama && $lama->has($idLama)) {
+                    $lama[$idLama]->update($attrs);
+                    $dipertahankan[] = $idLama;
+                } else {
+                    PersyaratanBerkas::create($attrs + [
+                        'id_lowongan' => $jenis === 'Kerja' ? $parentId : null,
+                        'id_program'  => $jenis === 'Magang' ? $parentId : null,
+                    ]);
+                }
+            }
+        });
+
+        $gagal = [];
+        foreach ($lama as $idLama => $row) {
+            if (in_array((int) $idLama, $dipertahankan, true)) {
+                continue;
+            }
+            try {
+                $row->delete();
+            } catch (QueryException $e) {
+                $gagal[] = $row->nama_berkas;
+            }
+        }
+
+        return $gagal;
+    }
+
+    private function mapKerja($l, bool $detail = false): array
     {
         return [
-            'id'           => $l->id_lowongan,
-            'jenis'        => 'Kerja',
-            'judul'        => $l->judul,
-            'deskripsi'    => $l->deskripsi,
-            'kualifikasi'  => $l->kualifikasi,
-            'silabus'      => '',
-            'silabus_url'  => null,
-            'silabus_nama' => '',
-            'kuota'        => $l->kuota,
-            'tgl_buka'     => $this->tanggal($l->tgl_buka),
-            'tgl_tutup'    => $this->tanggal($l->tgl_tutup),
-            'tgl_mulai'    => '',
-            'tgl_selesai'  => '',
-            'durasi_hari'  => null,
-            'status'       => $l->status,
-            'created_at'   => $l->created_at?->timestamp ?? 0,
-            'persyaratan' => $l->persyaratan
-    ->map(fn ($p) => [
-        'nama_berkas' => $p->nama_berkas,
-        'format_file' => $p->format_file,
-        'wajib' => (int) $p->wajib,
-    ])
-    ->values()
-    ->toArray(),
+            'id'             => $l->id_lowongan,
+            'jenis'          => 'Kerja',
+            'judul'          => $l->judul,
+            'deskripsi'      => $l->deskripsi,
+            'kualifikasi'    => $l->kualifikasi,
+            'silabus'        => '',
+            'silabus_url'    => null,
+            'silabus_nama'   => '',
+            'kuota'          => $l->kuota,
+            'tgl_buka'       => $this->tanggal($l->tgl_buka),
+            'tgl_tutup'      => $this->tanggal($l->tgl_tutup),
+            'tgl_mulai'      => '',
+            'tgl_selesai'    => '',
+            'durasi_hari'    => null,
+            'status'         => $l->status,
+            'jumlah_pelamar' => (int) ($l->lamaran_count ?? 0),
+            'created_at'     => $l->created_at?->timestamp ?? 0,
+            'persyaratan'    => $detail ? $this->mapPersyaratan($l->persyaratan) : [],
         ];
     }
 
-    private function mapMagang($p): array
+    private function mapMagang($p, bool $detail = false): array
     {
         $ada = $this->silabusAda($p->silabus);
 
         return [
-            'id'           => $p->id_program,
-            'jenis'        => 'Magang',
-            'judul'        => $p->nama_program,
-            'deskripsi'    => $p->deskripsi,
-            'kualifikasi'  => '',
-            'silabus'      => $p->silabus ?? '',
-            'silabus_url'  => $ada ? Storage::disk('public')->url($p->silabus) : null,
-            'silabus_nama' => $ada ? basename($p->silabus) : '',
-            'kuota'        => $p->kuota,
-            'tgl_buka'     => $this->tanggal($p->tgl_buka),
-            'tgl_tutup'    => $this->tanggal($p->tgl_tutup),
-            'tgl_mulai'    => $this->tanggal($p->tgl_mulai),
-            'tgl_selesai'  => $this->tanggal($p->tgl_selesai),
-            'durasi_hari'  => $p->durasi_hari,
-            'status'       => $p->status,
-            'created_at'   => $p->created_at?->timestamp ?? 0,
-            'persyaratan' => $p->persyaratan
-    ->map(fn ($p) => [
-        'nama_berkas' => $p->nama_berkas,
-        'format_file' => $p->format_file,
-        'wajib' => (int) $p->wajib,
-    ])
-    ->values()
-    ->toArray(),
+            'id'             => $p->id_program,
+            'jenis'          => 'Magang',
+            'judul'          => $p->nama_program,
+            'deskripsi'      => $p->deskripsi,
+            'kualifikasi'    => '',
+            'silabus'        => $p->silabus ?? '',
+            'silabus_url'    => $ada ? Storage::disk('public')->url($p->silabus) : null,
+            'silabus_nama'   => $ada ? basename($p->silabus) : '',
+            'kuota'          => $p->kuota,
+            'tgl_buka'       => $this->tanggal($p->tgl_buka),
+            'tgl_tutup'      => $this->tanggal($p->tgl_tutup),
+            'tgl_mulai'      => $this->tanggal($p->tgl_mulai),
+            'tgl_selesai'    => $this->tanggal($p->tgl_selesai),
+            'durasi_hari'    => $p->durasi_hari,
+            'status'         => $p->status,
+            'jumlah_pelamar' => (int) ($p->lamaran_count ?? 0),
+            'created_at'     => $p->created_at?->timestamp ?? 0,
+            'persyaratan'    => $detail ? $this->mapPersyaratan($p->persyaratan) : [],
         ];
+    }
+
+    private function mapPersyaratan($daftar): array
+    {
+        return collect($daftar)
+            ->sortBy('id_persyaratan')
+            ->map(fn ($s) => [
+                'id_persyaratan' => $s->id_persyaratan,
+                'nama_berkas'    => $s->nama_berkas,
+                'format_file'    => $s->format_file,
+                'wajib'          => (int) $s->wajib,
+            ])
+            ->values()
+            ->all();
     }
 
     // Cek apakah kolom silabus berisi path file yang benar-benar ada di storage
@@ -259,7 +308,7 @@ class AdminLowonganController extends Controller
         return ! empty($path) && Storage::disk('public')->exists($path);
     }
 
-    // Model belum meng-cast kolom tanggal, jadi nilainya string; ini menyeragamkan formatnya
+    // Menyeragamkan format tanggal (Y-m-d) untuk input type="date"
     private function tanggal($value): string
     {
         return $value ? Carbon::parse($value)->format('Y-m-d') : '';
@@ -280,32 +329,16 @@ class AdminLowonganController extends Controller
             'silabus.file'               => 'Silabus harus berupa file.',
             'silabus.mimes'              => 'Silabus harus berupa file PDF, DOC, atau DOCX.',
             'silabus.max'                => 'Ukuran file silabus maksimal 5 MB.',
-            'persyaratan.required' =>
-    'Persyaratan berkas wajib diisi.',
 
-'persyaratan.array' =>
-    'Format persyaratan berkas tidak valid.',
-
-'persyaratan.min' =>
-    'Minimal harus ada satu persyaratan berkas.',
-
-'persyaratan.*.nama_berkas.required' =>
-    'Nama berkas persyaratan wajib diisi.',
-
-'persyaratan.*.nama_berkas.max' =>
-    'Nama berkas maksimal 255 karakter.',
-
-'persyaratan.*.format_file.required' =>
-    'Format file persyaratan wajib dipilih.',
-
-'persyaratan.*.format_file.in' =>
-    'Format file hanya boleh PDF, DOC, atau DOCX.',
-
-'persyaratan.*.wajib.required' =>
-    'Status persyaratan wajib dipilih.',
-
-'persyaratan.*.wajib.in' =>
-    'Status persyaratan tidak valid.',
+            'persyaratan.required'               => 'Persyaratan berkas wajib diisi.',
+            'persyaratan.array'                  => 'Format persyaratan berkas tidak valid.',
+            'persyaratan.min'                    => 'Minimal harus ada satu persyaratan berkas.',
+            'persyaratan.*.nama_berkas.required' => 'Nama berkas persyaratan wajib diisi.',
+            'persyaratan.*.nama_berkas.max'      => 'Nama berkas maksimal 255 karakter.',
+            'persyaratan.*.format_file.required' => 'Format file persyaratan wajib dipilih.',
+            'persyaratan.*.format_file.in'       => 'Format file hanya boleh PDF, DOC, atau DOCX.',
+            'persyaratan.*.wajib.required'       => 'Status persyaratan wajib dipilih.',
+            'persyaratan.*.wajib.in'             => 'Status persyaratan tidak valid.',
         ];
     }
 
@@ -322,41 +355,11 @@ class AdminLowonganController extends Controller
             'tgl_tutup'   => 'Tanggal tutup',
             'tgl_mulai'   => 'Tanggal mulai magang',
             'tgl_selesai' => 'Tanggal selesai magang',
-            'persyaratan' => 'Persyaratan berkas',
-'persyaratan.*.nama_berkas' => 'Nama berkas',
-'persyaratan.*.format_file' => 'Format file',
-'persyaratan.*.wajib' => 'Status persyaratan',
+
+            'persyaratan'               => 'Persyaratan berkas',
+            'persyaratan.*.nama_berkas' => 'Nama berkas',
+            'persyaratan.*.format_file' => 'Format file',
+            'persyaratan.*.wajib'       => 'Status persyaratan',
         ];
     }
-
-    /**
- * Simpan persyaratan berkas berdasarkan jenis lowongan.
- */
-private function simpanPersyaratan(
-    array $persyaratan,
-    string $jenis,
-    int $id
-): void {
-    // Hapus persyaratan lama untuk lowongan/program ini
-    if ($jenis === 'Kerja') {
-        PersyaratanBerkas::where('id_lowongan', $id)->delete();
-    } else {
-        PersyaratanBerkas::where('id_program', $id)->delete();
-    }
-
-    // Simpan persyaratan terbaru
-    foreach ($persyaratan as $item) {
-        PersyaratanBerkas::create([
-            'id_lowongan' => $jenis === 'Kerja' ? $id : null,
-
-            'id_program' => $jenis === 'Magang' ? $id : null,
-
-            'nama_berkas' => trim($item['nama_berkas']),
-
-            'format_file' => strtolower($item['format_file']),
-
-            'wajib' => (int) $item['wajib'],
-        ]);
-    }
-}
 }
