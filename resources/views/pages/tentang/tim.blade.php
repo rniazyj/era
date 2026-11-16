@@ -1,3 +1,4 @@
+{{-- resources/views/pages/tentang/tim.blade.php --}}
 @extends('pages.tentang.layout')
 
 @section('title', 'Tim Kami')
@@ -15,15 +16,15 @@
   }
 @endphp
 
-{{-- ============ HERO FOTO PENUH ============ --}}
-{{-- Foto: public/images/tentang/tim.jpg (kalau tidak ada, otomatis memakai hero.jpg) --}}
+{{-- ============ HERO FOTO PENUH (judul & foto dari admin) ============ --}}
 @include('pages.tentang.partials.hero-foto', [
-  'baris1' => 'Orang-orang di Balik',
-  'baris2' => '<em>Equityworld.</em>',
-  'tombol' => 'Kenali Tim',
-  'href'   => '#tim',
-  'tiles'  => $tiles,
-  'gambar' => 'tim.jpg',
+  'baris1'  => $hero['baris1'],
+  'baris2'  => $hero['baris2'],
+  'tombol'  => 'Kenali Tim',
+  'href'    => '#tim',
+  'tiles'   => $tiles,
+  'gambar'  => 'tim.jpg',
+  'fotoUrl' => $hero['foto'],
 ])
 
 {{-- ============ LAPISAN PUTIH (naik menimpa foto) ============ --}}
@@ -51,18 +52,20 @@
       <div class="ab-grid g4" id="timGrid" data-stagger>
         @foreach($tim as $o)
           @php
-            $inisial = collect(preg_split('/\s+/', trim($o->nama)))->filter()->take(2)->map(fn ($k) => mb_strtoupper(mb_substr($k, 0, 1)))->implode('');
+            $inisial = collect(preg_split('/\s+/', trim((string) $o->nama)))->filter()->take(2)
+                ->map(fn ($k) => mb_strtoupper(mb_substr($k, 0, 1)))->implode('');
+            $foto = $o->fotoUrl();   // foto unggahan admin; kosong -> tampil inisial
           @endphp
           <article class="ab-card ab-tim" data-cat="{{ $o->divisi }}">
             <div class="ab-avatar">
-              @if(filled($o->foto))
-                <img src="{{ asset('storage/' . ltrim($o->foto, '/')) }}" alt="{{ $o->nama }}" loading="lazy">
+              @if($foto)
+                <img src="{{ $foto }}" alt="{{ $o->nama }}" loading="lazy">
               @else
                 {{ $inisial }}
               @endif
             </div>
             <div class="ab-tim-body">
-              <span class="ab-badge">{{ $o->divisi }}</span>
+              @if(filled($o->divisi)) <span class="ab-badge">{{ $o->divisi }}</span> @endif
               <h4 style="margin-top:.7rem">{{ $o->nama }}</h4>
               <div class="jab">{{ $o->jabatan }}</div>
 

@@ -1,9 +1,18 @@
+{{-- resources/views/pages/tentang/produk.blade.php --}}
 @extends('pages.tentang.layout')
 
 @section('title', 'Produk & Layanan')
 
 {{-- Hero foto penuh sampai ke atas layar, jadi padding atas main dimatikan --}}
 @section('main_class', 'no-pad')
+
+@push('styles')
+<style>
+  .ab-produk-foto { margin: -1.5rem -1.5rem 1.2rem; height: 9.5rem; overflow: hidden; background: var(--card-dark); }
+  .ab-produk-foto img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s; }
+  .ab-card:hover .ab-produk-foto img { transform: scale(1.06); }
+</style>
+@endpush
 
 @section('konten')
 
@@ -12,20 +21,20 @@
 
   // Tombol di bawah hero: "Semua Produk" + tiap kategori (maks. 5). Klik = pilih filter kategori di bawah.
   $tiles = [['Semua Produk', '#produk', 'semua']];
-  foreach ($kategori->filter()->take(5) as $k) {
+  foreach ($kategori->take(5) as $k) {
     $tiles[] = [$k, '#produk', $k];
   }
 @endphp
 
-{{-- ============ HERO FOTO PENUH ============ --}}
-{{-- Foto: public/images/tentang/produk.jpg (kalau tidak ada, otomatis memakai hero.jpg) --}}
+{{-- ============ HERO FOTO PENUH (judul & foto dari admin) ============ --}}
 @include('pages.tentang.partials.hero-foto', [
-  'baris1' => 'Produk & Layanan',
-  'baris2' => '<em>Unggulan Kami.</em>',
-  'tombol' => 'Lihat Produk',
-  'href'   => '#produk',
-  'tiles'  => $tiles,
-  'gambar' => 'produk.jpg',
+  'baris1'  => $hero['baris1'],
+  'baris2'  => $hero['baris2'],
+  'tombol'  => 'Lihat Produk',
+  'href'    => '#produk',
+  'tiles'   => $tiles,
+  'gambar'  => 'produk.jpg',
+  'fotoUrl' => $hero['foto'],
 ])
 
 {{-- ============ LAPISAN PUTIH (naik menimpa foto) ============ --}}
@@ -41,10 +50,10 @@
     @if($produk->isEmpty())
       <div class="ab-empty" data-reveal>Produk dan layanan akan segera hadir.</div>
     @else
-      @if($kategori->filter()->count() > 1)
+      @if($kategori->count() > 1)
         <div class="ab-filters" data-reveal data-filter-group="#produkGrid">
           <button type="button" class="on" data-filter="semua">Semua</button>
-          @foreach($kategori->filter() as $k)
+          @foreach($kategori as $k)
             <button type="button" data-filter="{{ $k }}">{{ $k }}</button>
           @endforeach
         </div>
@@ -53,14 +62,11 @@
       <div class="ab-grid g3" id="produkGrid" data-stagger>
         @foreach($produk as $p)
           @php
-            // Nama kolom dicek berurutan, jadi tetap jalan walau nama kolom di tabelmu sedikit berbeda
-            $nama  = $p->nama_produk ?? $p->nama ?? $p->nama_layanan ?? $p->judul ?? 'Produk';
-            $kode  = $p->kode ?? $p->kode_produk ?? $p->singkatan ?? $p->simbol
-                     ?? Str::upper(Str::limit(preg_replace('/[^A-Za-z0-9]/', '', $nama), 3, ''));
-            $desk  = $p->deskripsi ?? $p->isi_konten ?? $p->keterangan ?? null;
+            $nama  = $p->judul ?: 'Produk';
+            $kode  = $p->label ?: Str::upper(Str::limit(preg_replace('/[^A-Za-z0-9]/', '', $nama), 3, ''));
+            $desk  = $p->deskripsi;
             $kat   = $p->kategori ?? '';
-            $warna = $p->warna ?? $p->warna_aksen ?? '#f97316';
-            if (! preg_match('/^#[0-9a-fA-F]{3,8}$/', (string) $warna)) $warna = '#f97316';
+            $warna = '#f97316';
 
             // Garis grafik dekoratif, dibuat tetap (sama setiap kali) dari nama produk
             $seed = crc32($nama);
@@ -74,6 +80,10 @@
           @endphp
 
           <article class="ab-card ab-produk" data-cat="{{ $kat }}" style="--c: {{ $warna }}">
+            <div class="ab-produk-foto">
+              <img src="{{ $p->fotoUrl('produk-' . $p->getKey(), 700, 380) }}" alt="{{ $nama }}" loading="lazy">
+            </div>
+
             <div class="ab-cardtop">
               <div class="ab-kode">{{ Str::limit($kode, 4, '') }}</div>
               @if(filled($kat)) <span class="ab-badge">{{ $kat }}</span> @endif
