@@ -105,9 +105,7 @@ Route::middleware(['auth', 'role:admin_hr'])->prefix('admin')->name('admin.')->g
         ->whereNumber('id')
         ->name('lowongan.update');
 
-<<<<<<< HEAD
     // Daftar pelamar & seleksi
-=======
     // Kelola konten website (halaman Tentang). {tipe} dibatasi ke jenis konten yang dikenal.
     // Nama route: admin.konten.index | daftar | create | store | edit | update | destroy
     Route::prefix('konten')->name('konten.')->controller(AdminKontenController::class)->group(function () {
@@ -123,7 +121,6 @@ Route::middleware(['auth', 'role:admin_hr'])->prefix('admin')->name('admin.')->g
     });
 
     // Seleksi pelamar
->>>>>>> vina
     Route::get('/pelamar', [SeleksiController::class, 'index'])->name('pelamar.index');
     Route::get('/pelamar/{id}', [SeleksiController::class, 'show'])->whereNumber('id')->name('pelamar.show');
     Route::patch('/pelamar/{id}/status', [SeleksiController::class, 'updateStatus'])->whereNumber('id')->name('pelamar.status');
