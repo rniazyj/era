@@ -265,7 +265,7 @@
       <div>
         <h3
           class="text-4xl sm:text-5xl font-bold tracking-tight count-target"
-          data-target="{{ isset($pelamarBaruList) ? count($pelamarBaruList) : 0 }}">
+          data-target="{{ $totalPelamarBaru }}">
           0
         </h3>
 
@@ -328,7 +328,7 @@
       <div>
         <h3
           class="text-4xl sm:text-5xl font-bold tracking-tight count-target"
-          data-target="{{ isset($userBelumLengkapList) ? count($userBelumLengkapList) : 0 }}">
+          data-target="{{ $userBelumLengkapList->count() }}">
           0
         </h3>
 
@@ -374,49 +374,81 @@
                 <th class="py-3 px-4 text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-black/5 text-xs">
-              @forelse($pelamarBaruList ?? [] as $pelamar)
-                <tr class="table-row-item table-row-hover">
-                  <td class="py-4 px-4 font-bold text-zinc-900">{{ $pelamar->user->name ?? 'Nama Pelamar' }}</td>
-                  <td class="py-4 px-4 text-zinc-600">{{ $pelamar->posisi->nama_posisi ?? 'Konsultan Bisnis Intern' }}</td>
-                  <td class="py-4 px-4">
-                    <span class="px-2.5 py-1 rounded-md font-semibold text-[10px] {{ ($pelamar->jenis ?? 'Magang') == 'Magang' ? 'bg-orange-50 text-ewforange' : 'bg-zinc-100 text-zinc-800' }}">
-                      {{ $pelamar->jenis ?? 'Magang' }}
-                    </span>
-                  </td>
-                  <td class="py-4 px-4 text-zinc-600">{{ $pelamar->durasi ?? '-' }}</td>
-                  <td class="py-4 px-4 text-zinc-400">{{ $pelamar->created_at ? $pelamar->created_at->format('d M Y') : '-' }}</td>
-                  <td class="py-4 px-4 text-center">
-                    <a href="#" class="inline-block px-4 py-2 bg-zinc-900 hover:bg-black text-white text-[11px] font-medium rounded-full transition shadow-sm hover:scale-105">Selengkapnya</a>
-                  </td>
-                </tr>
-              @empty
-                <tr class="table-row-item table-row-hover">
-                  <td class="py-4 px-4 font-bold text-zinc-900">Rania Shava</td>
-                  <td class="py-4 px-4 text-zinc-600">Konsultan Bisnis Intern</td>
-                  <td class="py-4 px-4">
-                    <span class="bg-orange-50 text-ewforange px-2.5 py-1 rounded-md font-semibold text-[10px]">Magang</span>
-                  </td>
-                  <td class="py-4 px-4 text-zinc-600">3 Bulan (90 Hari)</td>
-                  <td class="py-4 px-4 text-zinc-400">04 Nov 2026</td>
-                  <td class="py-4 px-4 text-center">
-                    <a href="#" class="inline-block px-4 py-2 bg-zinc-900 hover:bg-black text-white text-[11px] font-medium rounded-full transition shadow-sm hover:scale-105">Selengkapnya</a>
-                  </td>
-                </tr>
-                <tr class="table-row-item table-row-hover">
-                  <td class="py-4 px-4 font-bold text-zinc-900">Inez Vina</td>
-                  <td class="py-4 px-4 text-zinc-600">UI/UX Designer Intern</td>
-                  <td class="py-4 px-4">
-                    <span class="bg-zinc-100 text-zinc-800 px-2.5 py-1 rounded-md font-semibold text-[10px]">Kerja</span>
-                  </td>
-                  <td class="py-4 px-4 text-zinc-600">Full-Time</td>
-                  <td class="py-4 px-4 text-zinc-400">03 Nov 2026</td>
-                  <td class="py-4 px-4 text-center">
-                    <a href="#" class="inline-block px-4 py-2 bg-zinc-900 hover:bg-black text-white text-[11px] font-medium rounded-full transition shadow-sm hover:scale-105">Selengkapnya</a>
-                  </td>
-                </tr>
-              @endforelse
-            </tbody>
+            
+<tbody class="divide-y divide-black/5 text-xs">
+    @forelse($pelamarBaruList as $lamaran)
+        @php
+            $jenis = $lamaran->id_program ? 'Magang' : 'Kerja';
+
+            $namaPosisi = $lamaran->id_program
+                ? ($lamaran->program?->nama_program ?? '-')
+                : ($lamaran->lowongan?->judul ?? '-');
+
+            $durasi = $lamaran->id_program
+                ? (
+                    $lamaran->durasi_hari
+                        ? $lamaran->durasi_hari . ' Hari'
+                        : (
+                            $lamaran->program?->durasi_hari
+                                ? $lamaran->program->durasi_hari . ' Hari'
+                                : '-'
+                        )
+                )
+                : '-';
+        @endphp
+
+        <tr class="table-row-item table-row-hover">
+            {{-- Nama Pelamar --}}
+            <td class="py-4 px-4 font-bold text-zinc-900">
+                {{ $lamaran->pelamar?->name ?? 'Nama tidak ditemukan' }}
+            </td>
+
+            {{-- Posisi --}}
+            <td class="py-4 px-4 text-zinc-600">
+                {{ $namaPosisi }}
+            </td>
+
+            {{-- Kategori --}}
+            <td class="py-4 px-4">
+                <span class="px-2.5 py-1 rounded-md font-semibold text-[10px]
+                    {{ $jenis === 'Magang'
+                        ? 'bg-orange-50 text-ewforange'
+                        : 'bg-zinc-100 text-zinc-800' }}">
+                    {{ $jenis }}
+                </span>
+            </td>
+
+            {{-- Durasi --}}
+            <td class="py-4 px-4 text-zinc-600">
+                {{ $durasi }}
+            </td>
+
+            {{-- Tanggal Kirim --}}
+            <td class="py-4 px-4 text-zinc-400">
+                {{ $lamaran->tgl_pengajuan
+                    ? \Carbon\Carbon::parse($lamaran->tgl_pengajuan)->format('d M Y')
+                    : '-' }}
+            </td>
+
+            {{-- Aksi --}}
+            <td class="py-4 px-4 text-center">
+                <a href="#"
+                   class="inline-block px-4 py-2 bg-zinc-900 hover:bg-black
+                          text-white text-[11px] font-medium rounded-full
+                          transition shadow-sm hover:scale-105">
+                    Selengkapnya
+                </a>
+            </td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="6" class="py-12 text-center text-xs text-zinc-400">
+                Belum ada pelamar baru yang perlu ditinjau.
+            </td>
+        </tr>
+    @endforelse
+</tbody>
+
           </table>
         </div>
       </div>
@@ -440,21 +472,31 @@
                 <th class="py-3 px-4">No. Telepon</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-black/5 text-xs">
-              @forelse($userBelumLengkapList ?? [] as $user)
-                <tr class="table-row-item table-row-hover">
-                  <td class="py-4 px-4 font-bold text-zinc-900">{{ $user->name }}</td>
-                  <td class="py-4 px-4 text-zinc-600">{{ $user->email }}</td>
-                  <td class="py-4 px-4 text-zinc-600">{{ $user->no_telepon ?? '-' }}</td>
-                </tr>
-              @empty
-                <tr class="table-row-item table-row-hover">
-                  <td class="py-4 px-4 font-bold text-zinc-900">Budi Santoso</td>
-                  <td class="py-4 px-4 text-zinc-600">budi@gmail.com</td>
-                  <td class="py-4 px-4 text-zinc-600">081298765432</td>
-                </tr>
-              @endforelse
-            </tbody>
+            
+<tbody class="divide-y divide-black/5 text-xs">
+    @forelse($userBelumLengkapList as $user)
+        <tr class="table-row-item table-row-hover">
+            <td class="py-4 px-4 font-bold text-zinc-900">
+                {{ $user->name }}
+            </td>
+
+            <td class="py-4 px-4 text-zinc-600">
+                {{ $user->email }}
+            </td>
+
+            <td class="py-4 px-4 text-zinc-600">
+                {{ $user->no_telepon ?? '-' }}
+            </td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="3" class="py-12 text-center text-xs text-zinc-400">
+                Semua pelamar sudah melengkapi profil dan CV.
+            </td>
+        </tr>
+    @endforelse
+</tbody>
+
           </table>
         </div>
       </div>

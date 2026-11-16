@@ -21,8 +21,11 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminLowonganController;
 use App\Http\Controllers\Admin\SeleksiController;
 use App\Http\Controllers\Admin\AdminProfilController;
+use App\Http\Controllers\Admin\LogAktivitasController;
 use App\Http\Controllers\Pimpinan\PimpinanDashboardController;
 use App\Http\Controllers\Pimpinan\PimpinanProfilController;
+use App\Http\Controllers\Pimpinan\PimpinanAnalisisController;
+use App\Http\Middleware\CatatAktivitas;
 
 // 1. RUTE PUBLIK
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -77,7 +80,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 // 3. RUTE ROLE: ADMIN / HR
 // Semua rute admin digabung & dikunci role:admin_hr.
 // (Sebelumnya grup lowongan & pelamar hanya memakai 'auth', sehingga akun pelamar bisa membukanya.)
-Route::middleware(['auth', 'role:admin_hr'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'catat.aktivitas', 'role:admin_hr'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // Profil admin
@@ -103,20 +106,50 @@ Route::middleware(['auth', 'role:admin_hr'])->prefix('admin')->name('admin.')->g
     Route::get('/pelamar/{id}', [SeleksiController::class, 'show'])->whereNumber('id')->name('pelamar.show');
     Route::patch('/pelamar/{id}/status', [SeleksiController::class, 'updateStatus'])->whereNumber('id')->name('pelamar.status');
     Route::post('/pelamar/{id}/jadwal', [SeleksiController::class, 'simpanJadwal'])->whereNumber('id')->name('pelamar.jadwal');
+
+    // Log aktivitas (hanya-baca, khusus admin)
+    Route::get('/log-aktivitas', [LogAktivitasController::class, 'index'])
+    ->name('log');
+
+    // Ekspor log aktivitas
+Route::get('/log-aktivitas/export/excel', [LogAktivitasController::class, 'exportExcel'])
+    ->name('log.export.excel');
+
+Route::get('/log-aktivitas/export/pdf', [LogAktivitasController::class, 'exportPdf'])
+    ->name('log.export.pdf');
 });
 
 // 4. RUTE ROLE: PIMPINAN
-Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan.')->group(function () {
-    Route::get('/dashboard', [PimpinanDashboardController::class, 'index'])->name('dashboard');
+Route::middleware(['auth', 'catat.aktivitas', 'role:pimpinan'])
+    ->prefix('pimpinan')
+    ->name('pimpinan.')
+    ->group(function () {
 
-    // Profil pimpinan
-    Route::get('/profil', [PimpinanProfilController::class, 'show'])->name('profil');
-    Route::put('/profil', [PimpinanProfilController::class, 'update'])->name('profil.update');
-    Route::put('/profil/password', [PimpinanProfilController::class, 'updatePassword'])->name('profil.password');
+        Route::get('/dashboard', [PimpinanDashboardController::class, 'index'])
+            ->name('dashboard');
+
+        Route::get('/dashboard/export/excel', [PimpinanDashboardController::class, 'exportExcel'])
+            ->name('dashboard.export.excel');
+
+        Route::get('/dashboard/export/pdf', [PimpinanDashboardController::class, 'exportPdf'])
+            ->name('dashboard.export.pdf');
+
+        Route::get('/analisis', [PimpinanAnalisisController::class, 'index'])
+            ->name('analisis.index');
+
+        // Route profil tetap seperti sebelumnya
+        Route::get('/profil', [PimpinanProfilController::class, 'show'])
+            ->name('profil');
+
+        Route::put('/profil', [PimpinanProfilController::class, 'update'])
+            ->name('profil.update');
+
+        Route::put('/profil/password', [PimpinanProfilController::class, 'updatePassword'])
+            ->name('profil.password');
 });
 
 // 5. RUTE ROLE: PELAMAR
-Route::middleware(['auth', 'role:pelamar'])->group(function () {
+Route::middleware(['auth', 'catat.aktivitas', 'role:pelamar'])->group(function () {
     Route::get('/dashboard', [PelamarDashboardController::class, 'index'])->name('pelamar.dashboard');
 
     // Pendaftaran program magang (lowongan kerja memakai route lowongan.apply di atas)
