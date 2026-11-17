@@ -500,6 +500,62 @@
               </form>
             </section>
 
+
+{{-- LETTER OF ACCEPTANCE MAGANG --}}
+@if($isMagang && $status === 'diterima')
+    <section class="scroll-rv bg-white rounded-2xl sm:rounded-3xl border border-black/5 p-4 sm:p-6 shadow-sm space-y-4">
+
+        <h3 class="text-sm font-bold tracking-wide text-zinc-900 uppercase pb-3 border-b border-black/5">
+            Letter of Acceptance
+        </h3>
+
+        @if($lamaran->surat && $lamaran->surat->status_penerbitan === 'terbit')
+            <div class="rounded-2xl bg-emerald-50 border border-emerald-100 p-4 space-y-2">
+                <p class="text-xs font-bold text-emerald-700">
+                    ✓ LOA Sudah Diterbitkan
+                </p>
+
+                <p class="text-[11px] text-emerald-600">
+                    Nomor: {{ $lamaran->surat->nomor_surat }}
+                </p>
+
+                <p class="text-[11px] text-emerald-600">
+                    Tanggal terbit:
+                    {{ $fmt($lamaran->surat->tgl_terbit) }}
+                </p>
+
+                @if(filled($lamaran->surat->file_surat) &&
+                    \Illuminate\Support\Facades\Storage::disk('public')->exists($lamaran->surat->file_surat))
+
+                    <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($lamaran->surat->file_surat) }}"
+                       target="_blank"
+                       rel="noopener"
+                       class="inline-flex w-full justify-center items-center gap-2 px-4 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition">
+                        Lihat PDF LOA
+                    </a>
+                @endif
+            </div>
+
+            <a href="{{ route('admin.pelamar.loa.form', $lamaran->id_lamaran) }}"
+               class="inline-flex w-full justify-center items-center px-4 py-2.5 rounded-full bg-orange-50 hover:bg-orange-100 text-ewforange text-xs font-bold transition">
+                Perbarui LOA
+            </a>
+
+        @else
+            <p class="text-xs text-zinc-500">
+                Pelamar telah diterima sebagai peserta magang, tetapi belum memiliki surat penerimaan.
+            </p>
+
+            <a href="{{ route('admin.pelamar.loa.form', $lamaran->id_lamaran) }}"
+               class="inline-flex w-full justify-center items-center gap-2 px-4 py-3 rounded-full bg-ewforange hover:bg-orange-600 text-white text-xs font-bold shadow-lg shadow-orange-500/20 transition">
+                Buat LOA Magang
+            </a>
+        @endif
+
+    </section>
+@endif
+
+
             <!-- JADWAL INTERVIEW -->
             <section class="scroll-rv bg-white rounded-2xl sm:rounded-3xl border border-black/5 p-4 sm:p-6 shadow-sm space-y-4">
               <h3 class="text-sm font-bold tracking-wide text-zinc-900 uppercase pb-3 border-b border-black/5">Jadwal Interview</h3>

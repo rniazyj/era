@@ -14,12 +14,19 @@ class DataAkademik extends Model
 
     protected $fillable = [
         'id_cv',
-        'jenjang',
-        'institusi',
-        'jurusan',
-        'ipk',
-        'tahun_masuk',
-        'tahun_lulus',
-        'deskripsi',
-    ];
+    'jenjang',
+    'institusi',
+    'jurusan',
+    'ipk',
+    'tahun_masuk',
+    'tahun_lulus',
+    'deskripsi',
+    'npm',
+    'fakultas',
+    'is_utama',
+];
+
+protected $casts = [
+    'is_utama' => 'boolean',
+];
 }

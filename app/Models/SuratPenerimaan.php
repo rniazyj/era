@@ -27,4 +27,15 @@ class SuratPenerimaan extends Model
     {
         return $this->hasMany(LogKirim::class, 'id_surat', 'id_surat');
     }
+
+
+public function template()
+{
+    return $this->belongsTo(
+        TemplateSurat::class,
+        'id_template',
+        'id_template'
+    );
+}
+
 }

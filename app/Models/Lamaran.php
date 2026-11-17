@@ -92,4 +92,14 @@ class Lamaran extends Model
     {
         return $this->id_program ? 'Magang' : 'Kerja';
     }
+
+    public function anggotaTim()
+{
+    return $this->hasMany(
+        AnggotaTimLamaran::class,
+        'id_lamaran',
+        'id_lamaran'
+    )->orderByDesc('is_ketua')
+     ->orderBy('id_anggota');
+}
 }

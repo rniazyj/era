@@ -20,89 +20,106 @@ class ProgramController extends Controller
     /**
      * Menampilkan form pendaftaran program magang.
      */
-    public function create(Request $request)
-    {
-        $idProgram = $request->query('id_program');
+    
+/**
+ * Menampilkan form pendaftaran program magang.
+ */
+public function create(Request $request)
+{
+    $idProgram = $request->query('id_program');
 
-        if (!$idProgram) {
-            return redirect()
-                ->route('internship.index')
-                ->with('error', 'Silakan pilih program magang terlebih dahulu.');
-        }
+    if (!$idProgram) {
+        return redirect()
+            ->route('internship.index')
+            ->with('error', 'Silakan pilih program magang terlebih dahulu.');
+    }
 
-        $program = ProgramMagang::with('persyaratan')
-            ->findOrFail($idProgram);
+    $program = ProgramMagang::with('persyaratan')
+        ->findOrFail($idProgram);
 
-        $user = Auth::user();
+    $user = Auth::user();
 
-        if (!$this->pendaftaranMasihDibuka($program)) {
-    return redirect()
-        ->route('program.show', $program->id_program)
-        ->with('error', 'Pendaftaran program ini belum dibuka atau sudah ditutup.');
+    if (!$this->pendaftaranMasihDibuka($program)) {
+        return redirect()
+            ->route('program.show', $program->id_program)
+            ->with('error', 'Pendaftaran program ini belum dibuka atau sudah ditutup.');
+    }
+
+    // Periksa apakah pelamar sudah pernah mendaftar.
+    $sudahMelamar = Lamaran::where('id_pelamar', $user->id)
+        ->where('id_program', $program->id_program)
+        ->exists();
+
+    if ($sudahMelamar) {
+        return redirect()
+            ->route('program.show', $program->id_program)
+            ->with('error', 'Kamu sudah mengajukan lamaran untuk program ini.');
+    }
+
+    // Variabel untuk form gabungan kerja dan magang.
+    $jenisLamaran = 'magang';
+    $itemLamaran = $program;
+    $persyaratan = $program->persyaratan;
+
+    // Ambil profil pelamar.
+    $profil = $user->profilPelamar
+        ?? new ProfilPelamar(['id_pengguna' => $user->id]);
+
+    $profil->setRelation('user', $user);
+
+    // Ambil data CV dan riwayat pendidikan.
+    $profil->loadMissing('cv.dataAkademik');
+
+    // Ambil pendidikan yang ditandai sebagai pendidikan utama.
+    $pendidikanUtama = $profil->cv
+        ? $profil->cv->dataAkademik
+            ->firstWhere('is_utama', true)
+        : null;
+
+    // Periksa kelengkapan profil pelamar.
+    $kelengkapan = $profil->kelengkapan();
+
+    $syaratProfil = [
+        'Nama lengkap',
+        'No. telepon',
+        'Foto',
+        'Ringkasan diri',
+        'Jenis kelamin',
+        'Tempat lahir',
+        'Tanggal lahir',
+        'Kota',
+        'Alamat',
+        'Pendidikan',
+    ];
+
+    $profilItem = collect($kelengkapan['item'])
+        ->only($syaratProfil);
+
+    $profilKurang = $profilItem->reject()->keys()->all();
+
+    $kelayakan = [
+        'profil_item' => $profilItem->all(),
+        'profil_kurang' => $profilKurang,
+        'profil_lengkap' => count($profilKurang) === 0,
+        'persen_profil' => $kelengkapan['persen'],
+        'sudah_melamar' => false,
+        'boleh_melamar' => count($profilKurang) === 0,
+    ];
+
+    $linkProfil = route('pelamar.profil');
+
+    return view('pages.apply', compact(
+        'jenisLamaran',
+        'itemLamaran',
+        'persyaratan',
+        'user',
+        'profil',
+        'pendidikanUtama',
+        'kelayakan',
+        'linkProfil'
+    ));
 }
 
-        // Periksa apakah pelamar sudah pernah mendaftar.
-        $sudahMelamar = Lamaran::where('id_pelamar', $user->id)
-            ->where('id_program', $program->id_program)
-            ->exists();
-
-        if ($sudahMelamar) {
-            return redirect()
-                ->route('program.show', $program->id_program)
-                ->with('error', 'Kamu sudah mengajukan lamaran untuk program ini.');
-        }
-
-        // Variabel untuk form gabungan kerja dan magang.
-        $jenisLamaran = 'magang';
-        $itemLamaran = $program;
-        $persyaratan = $program->persyaratan;
-
-        // Periksa kelengkapan profil pelamar.
-        $profil = $user->profilPelamar
-            ?? new ProfilPelamar(['id_pengguna' => $user->id]);
-
-        $profil->setRelation('user', $user);
-
-        $kelengkapan = $profil->kelengkapan();
-
-        $syaratProfil = [
-            'Nama lengkap',
-            'No. telepon',
-            'Foto',
-            'Ringkasan diri',
-            'Jenis kelamin',
-            'Tempat lahir',
-            'Tanggal lahir',
-            'Kota',
-            'Alamat',
-            'Pendidikan',
-        ];
-
-        $profilItem = collect($kelengkapan['item'])
-            ->only($syaratProfil);
-
-        $profilKurang = $profilItem->reject()->keys()->all();
-
-        $kelayakan = [
-            'profil_item' => $profilItem->all(),
-            'profil_kurang' => $profilKurang,
-            'profil_lengkap' => count($profilKurang) === 0,
-            'persen_profil' => $kelengkapan['persen'],
-            'sudah_melamar' => false,
-            'boleh_melamar' => count($profilKurang) === 0,
-        ];
-
-        $linkProfil = route('pelamar.profil');
-
-        return view('pages.apply', compact(
-            'jenisLamaran',
-            'itemLamaran',
-            'persyaratan',
-            'user',
-            'kelayakan',
-            'linkProfil'
-        ));
-    }
 
     /**
      * Menyimpan pendaftaran program magang.

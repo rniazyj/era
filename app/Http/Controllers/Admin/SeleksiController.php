@@ -50,6 +50,7 @@ class SeleksiController extends Controller
             'program.persyaratan',
             'berkas.persyaratan',
             'jadwal',
+            'surat',
         ])->findOrFail($id);
 
         $profil = $lamaran->pelamar?->profilPelamar;

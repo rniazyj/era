@@ -474,6 +474,7 @@
   </main>
 </div>
 
+
 <script>
   // Tombol buka/tutup form (Tambah / Edit / Batal): data-toggle="id-elemen"
   document.addEventListener('click', function (e) {
@@ -483,6 +484,10 @@
     if (el) el.classList.toggle('open');
   });
 </script>
+
+{{-- Alpine.js untuk accordion dan interaksi halaman --}}
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
 @stack('scripts')
 
 </body>

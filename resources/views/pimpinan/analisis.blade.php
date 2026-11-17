@@ -262,7 +262,8 @@
 
                 
 {{-- FILTER --}}
-<form method="GET"
+<form id="formFilterAnalisis"
+      method="GET"
       action="{{ route('pimpinan.analisis.index') }}"
       class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-3 items-end mb-5">
 
@@ -274,6 +275,7 @@
 
         <input
             type="month"
+            id="filterBulan"
             name="bulan"
             value="{{ $bulan }}"
             class="field"
@@ -295,7 +297,12 @@
             Posisi
         </label>
 
-        <input type="hidden" name="posisi" :value="selected">
+        <input
+    type="hidden"
+    id="filterPosisi"
+    name="posisi"
+    x-model="selected"
+>
 
         {{-- BUTTON DROPDOWN --}}
         <button
@@ -743,9 +750,20 @@
 </div>
 
 <script>
+    
     // ---------- DATA GRAFIK ----------
     const dataBulan = @json($grafikBulan);
     const dataPosisi = @json($grafikPosisi);
+
+    // ---------- FORM FILTER ----------
+    const formFilter = document.getElementById('formFilterAnalisis');
+    const inputBulan = document.getElementById('filterBulan');
+    const inputPosisi = document.getElementById('filterPosisi');
+
+    // Mengirim filter dan memperbarui tabel
+    function terapkanFilterAnalisis() {
+        formFilter.requestSubmit();
+    }
 
     const commonOptions = {
         responsive: true,
@@ -773,8 +791,10 @@
         }
     };
 
+    // ---------- GRAFIK PENDAFTAR PER BULAN ----------
     new Chart(document.getElementById('chartBulan'), {
         type: 'line',
+
         data: {
             labels: dataBulan.map(item => item.label),
             datasets: [{
@@ -786,15 +806,45 @@
                 tension: .35,
                 borderWidth: 2.5,
                 pointRadius: 4,
+                pointHoverRadius: 7,
+                pointHitRadius: 12,
                 pointBackgroundColor: '#f97316'
             }]
         },
-        options: commonOptions
+
+        options: {
+            ...commonOptions,
+
+            // Klik titik grafik untuk memfilter bulan
+            onClick: function(event, elements) {
+                if (!elements.length) return;
+
+                const index = elements[0].index;
+                const data = dataBulan[index];
+
+                if (!data) return;
+
+                // Isi filter bulan
+                inputBulan.value = data.kode;
+
+                // Kirim form filter
+                terapkanFilterAnalisis();
+            },
+
+            // Ubah kursor ketika mengarah ke titik grafik
+            onHover: function(event, elements) {
+                event.native.target.style.cursor =
+                    elements.length ? 'pointer' : 'default';
+            }
+        }
     });
 
+
+    // ---------- GRAFIK PENDAFTAR PER POSISI ----------
     @if($grafikPosisi->isNotEmpty())
         new Chart(document.getElementById('chartPosisi'), {
             type: 'bar',
+
             data: {
                 labels: dataPosisi.map(item => item.label),
                 datasets: [{
@@ -805,22 +855,58 @@
                     maxBarThickness: 45
                 }]
             },
+
             options: {
                 ...commonOptions,
                 indexAxis: 'y',
+
                 scales: {
                     x: {
                         beginAtZero: true,
-                        ticks: { precision: 0 },
-                        grid: { color: '#f4f4f5' }
+                        ticks: {
+                            precision: 0
+                        },
+                        grid: {
+                            color: '#f4f4f5'
+                        }
                     },
                     y: {
-                        grid: { display: false }
+                        grid: {
+                            display: false
+                        }
                     }
+                },
+
+                // Klik batang grafik untuk memfilter posisi
+                onClick: function(event, elements) {
+                    if (!elements.length) return;
+
+                    const index = elements[0].index;
+                    const data = dataPosisi[index];
+
+                    if (!data) return;
+
+                    // Isi pilihan posisi
+                    inputPosisi.value = data.key;
+
+                    // Sinkronkan dengan Alpine.js
+                    inputPosisi.dispatchEvent(
+                        new Event('input', { bubbles: true })
+                    );
+
+                    // Kirim form filter
+                    terapkanFilterAnalisis();
+                },
+
+                // Ubah kursor ketika mengarah ke batang grafik
+                onHover: function(event, elements) {
+                    event.native.target.style.cursor =
+                        elements.length ? 'pointer' : 'default';
                 }
             }
         });
     @endif
+
 
     // ---------- SIMULASI KUOTA ----------
     function simulasiKuota(options = []) {

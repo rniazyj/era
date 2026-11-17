@@ -11,11 +11,14 @@ class BerkasLamaran extends Model
 
     protected $fillable = [
         'id_lamaran',
-        'id_persyaratan',
-        'nama_file',
-        'path_file',
-        'status_verifikasi',
-        'catatan_verifikasi',
+    'id_anggota',
+    'id_persyaratan',
+    'nama_file',
+    'path_file',
+    'status_verifikasi',
+    'catatan_verifikasi',
+    'algoritma_enkripsi',
+    'iv_nonce',
     ];
 
     public function lamaran()
@@ -35,4 +38,13 @@ class BerkasLamaran extends Model
             'id_persyaratan'
         );
     }
+
+    public function anggota()
+{
+    return $this->belongsTo(
+        AnggotaTimLamaran::class,
+        'id_anggota',
+        'id_anggota'
+    );
+}
 }

@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\AdminJadwalController;
 use App\Http\Controllers\Admin\SeleksiController;
 use App\Http\Controllers\Admin\AdminProfilController;
 use App\Http\Controllers\Admin\LogAktivitasController;
+use App\Http\Controllers\Admin\SuratPenerimaanMagangController;
 use App\Http\Controllers\Pimpinan\PimpinanDashboardController;
 use App\Http\Controllers\Pimpinan\PimpinanProfilController;
 use App\Http\Controllers\Pimpinan\PimpinanAnalisisController;
@@ -152,6 +153,16 @@ Route::patch('/pelamar/{id}/status', [SeleksiController::class, 'updateStatus'])
     Route::post('/jadwal', [AdminJadwalController::class, 'simpan'])->name('jadwal.store');
     Route::patch('/jadwal/{id}/status', [AdminJadwalController::class, 'updateStatus'])->whereNumber('id')->name('jadwal.status');
     Route::delete('/jadwal/{id}', [AdminJadwalController::class, 'destroy'])->whereNumber('id')->name('jadwal.destroy');
+
+    Route::get(
+    '/pelamar/{id}/loa-magang',
+    [SuratPenerimaanMagangController::class, 'form']
+)->name('pelamar.loa.form');
+
+Route::post(
+    '/pelamar/{id}/loa-magang',
+    [SuratPenerimaanMagangController::class, 'terbitkan']
+)->name('pelamar.loa.terbitkan');
 
     // Log aktivitas (hanya-baca, khusus admin)
     Route::get('/log-aktivitas', [LogAktivitasController::class, 'index'])

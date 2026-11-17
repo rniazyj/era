@@ -23,8 +23,13 @@ class LamaranController extends Controller
             $jenis = 'semua';
         }
 
-        $query = Lamaran::with(['lowongan', 'program'])
-            ->where('id_pelamar', $request->user()->id);
+        $query = Lamaran::with([
+    'lowongan',
+    'program',
+    'jadwal',
+    'surat',
+])
+    ->where('id_pelamar', $request->user()->id);
 
         // Filter berdasarkan jenis lamaran.
         if ($jenis === 'kerja') {
