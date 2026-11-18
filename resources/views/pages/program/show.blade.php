@@ -1,4 +1,3 @@
-
 @php
     $panah = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="M7 17 17 7M8 7h9v9"/></svg>';
 
@@ -148,7 +147,7 @@
                         </dt>
 
                         <dd class="mt-1 font-head text-lg font-medium">
-                            {{ $program->kuota ?? 0 }} posisi
+                            {{ $program->sisa_kuota ?? 0 }} posisi
                         </dd>
                     </div>
 

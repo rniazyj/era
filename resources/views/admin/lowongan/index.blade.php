@@ -250,7 +250,14 @@
                         <span class="text-zinc-300">-</span>
                       @endif
                     </td>
-                    <td class="py-4 px-4 text-center font-semibold text-zinc-700">{{ $row->kuota ?? '-' }}</td>
+                    <td class="py-4 px-4 text-center">
+    <span class="font-semibold text-zinc-700">
+        {{ $row->sisa_kuota }}
+    </span>
+    <span class="text-zinc-400">
+        / {{ $row->kuota }}
+    </span>
+</td>
                     <td class="py-4 px-4 text-center">
                       <span class="inline-block min-w-[2rem] px-2 py-1 rounded-full text-[11px] font-bold {{ $row->jumlah_pelamar > 0 ? 'bg-orange-50 text-ewforange' : 'bg-zinc-100 text-zinc-400' }}">
                         {{ $row->jumlah_pelamar }}

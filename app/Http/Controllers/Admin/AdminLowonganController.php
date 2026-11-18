@@ -20,16 +20,42 @@ class AdminLowonganController extends Controller
     // Sesuaikan dengan nilai status yang kamu pakai di database
     private const STATUS = ['draft', 'dibuka', 'ditutup'];
 
-    public function index()
-    {
-        $kerja  = LowonganKerja::withCount('lamaran')->get()->map(fn ($l) => $this->mapKerja($l));
-        $magang = ProgramMagang::withCount('lamaran')->get()->map(fn ($p) => $this->mapMagang($p));
+    
+public function index()
+{
+    // Lowongan kerja: ambil jumlah seluruh lamaran
+    // dan data lamaran yang sudah diterima.
+    $kerja = LowonganKerja::withCount('lamaran')
+        ->with([
+            'lamaran' => function ($query) {
+                $query->where('status_lamaran', 'diterima');
+            },
+        ])
+        ->get()
+        ->map(fn ($l) => $this->mapKerja($l));
 
-        $items = $kerja->concat($magang)->sortByDesc('created_at')->values();
-        $statusList = self::STATUS;
+    // Program magang: ambil jumlah seluruh lamaran
+    // dan jumlah anggota tim dari setiap lamaran yang diterima.
+    $magang = ProgramMagang::withCount('lamaran')
+        ->with([
+            'lamaran' => function ($query) {
+                $query->where('status_lamaran', 'diterima')
+                    ->withCount('anggotaTim');
+            },
+        ])
+        ->get()
+        ->map(fn ($p) => $this->mapMagang($p));
 
-        return view('admin.lowongan.index', compact('items', 'statusList'));
-    }
+    $items = $kerja
+        ->concat($magang)
+        ->sortByDesc('created_at')
+        ->values();
+
+    $statusList = self::STATUS;
+
+    return view('admin.lowongan.index', compact('items', 'statusList'));
+}
+
 
     // /admin/lowongan/create?jenis=kerja|magang  -> jenis langsung terpilih
     public function create(Request $request)
@@ -243,58 +269,119 @@ class AdminLowonganController extends Controller
         return $gagal;
     }
 
-    private function mapKerja($l, bool $detail = false): array
-    {
-        return [
-            'id'             => $l->id_lowongan,
-            'jenis'          => 'Kerja',
-            'judul'          => $l->judul,
-            'deskripsi'      => $l->deskripsi,
-            'kualifikasi'    => $l->kualifikasi,
-            'gaji_min'       => $l->gaji_min,
-            'gaji_max'       => $l->gaji_max,
-            'urgent'         => (int) ($l->urgent ?? 0),
-            'silabus'        => '',
-            'silabus_url'    => null,
-            'silabus_nama'   => '',
-            'kuota'          => $l->kuota,
-            'tgl_buka'       => $this->tanggal($l->tgl_buka),
-            'tgl_tutup'      => $this->tanggal($l->tgl_tutup),
-            'tgl_mulai'      => '',
-            'tgl_selesai'    => '',
-            'durasi_hari'    => null,
-            'status'         => $l->status,
-            'jumlah_pelamar' => (int) ($l->lamaran_count ?? 0),
-            'created_at'     => $l->created_at?->timestamp ?? 0,
-            'persyaratan'    => $detail ? $this->mapPersyaratan($l->persyaratan) : [],
-        ];
+    
+private function mapKerja($l, bool $detail = false): array
+{
+    // Hitung jumlah pelamar yang sudah diterima.
+    // Jika relasi sudah dimuat dari index(), gunakan data tersebut.
+    // Jika belum dimuat (misalnya saat edit), hitung langsung dari database.
+    $kuotaTerpakai = $l->relationLoaded('lamaran')
+        ? $l->lamaran->count()
+        : $l->lamaran()
+            ->where('status_lamaran', 'diterima')
+            ->count();
+
+    $kuotaAwal = (int) ($l->kuota ?? 0);
+
+    return [
+        'id'             => $l->id_lowongan,
+        'jenis'          => 'Kerja',
+        'judul'          => $l->judul,
+        'deskripsi'      => $l->deskripsi,
+        'kualifikasi'    => $l->kualifikasi,
+        'gaji_min'       => $l->gaji_min,
+        'gaji_max'       => $l->gaji_max,
+        'urgent'         => (int) ($l->urgent ?? 0),
+        'silabus'        => '',
+        'silabus_url'    => null,
+        'silabus_nama'   => '',
+
+        // Kuota awal tetap disimpan.
+        'kuota'          => $kuotaAwal,
+
+        // Data tambahan untuk perhitungan kuota.
+        'kuota_terpakai' => $kuotaTerpakai,
+        'sisa_kuota'     => max(0, $kuotaAwal - $kuotaTerpakai),
+
+        'tgl_buka'       => $this->tanggal($l->tgl_buka),
+        'tgl_tutup'      => $this->tanggal($l->tgl_tutup),
+        'tgl_mulai'      => '',
+        'tgl_selesai'    => '',
+        'durasi_hari'    => null,
+        'status'         => $l->status,
+
+        // Tetap menghitung semua lamaran, bukan hanya yang diterima.
+        'jumlah_pelamar' => (int) ($l->lamaran_count ?? 0),
+
+        'created_at'     => $l->created_at?->timestamp ?? 0,
+        'persyaratan'    => $detail
+            ? $this->mapPersyaratan($l->persyaratan)
+            : [],
+    ];
+}
+
+    
+private function mapMagang($p, bool $detail = false): array
+{
+    $ada = $this->silabusAda($p->silabus);
+
+    // Ambil lamaran yang sudah diterima.
+    // Hitung jumlah orang dari anggota tim, bukan jumlah formulir lamaran.
+    if ($p->relationLoaded('lamaran')) {
+        $kuotaTerpakai = $p->lamaran->sum(function ($lamaran) {
+            return $lamaran->anggota_tim_count > 0
+                ? $lamaran->anggota_tim_count
+                : 1;
+        });
+    } else {
+        $kuotaTerpakai = $p->lamaran()
+            ->where('status_lamaran', 'diterima')
+            ->withCount('anggotaTim')
+            ->get()
+            ->sum(function ($lamaran) {
+                return $lamaran->anggota_tim_count > 0
+                    ? $lamaran->anggota_tim_count
+                    : 1;
+            });
     }
 
-    private function mapMagang($p, bool $detail = false): array
-    {
-        $ada = $this->silabusAda($p->silabus);
+    $kuotaAwal = (int) ($p->kuota ?? 0);
 
-        return [
-            'id'             => $p->id_program,
-            'jenis'          => 'Magang',
-            'judul'          => $p->nama_program,
-            'deskripsi'      => $p->deskripsi,
-            'kualifikasi'    => '',
-            'silabus'        => $p->silabus ?? '',
-            'silabus_url'    => $ada ? Storage::disk('public')->url($p->silabus) : null,
-            'silabus_nama'   => $ada ? basename($p->silabus) : '',
-            'kuota'          => $p->kuota,
-            'tgl_buka'       => $this->tanggal($p->tgl_buka),
-            'tgl_tutup'      => $this->tanggal($p->tgl_tutup),
-            'tgl_mulai'      => $this->tanggal($p->tgl_mulai),
-            'tgl_selesai'    => $this->tanggal($p->tgl_selesai),
-            'durasi_hari'    => $p->durasi_hari,
-            'status'         => $p->status,
-            'jumlah_pelamar' => (int) ($p->lamaran_count ?? 0),
-            'created_at'     => $p->created_at?->timestamp ?? 0,
-            'persyaratan'    => $detail ? $this->mapPersyaratan($p->persyaratan) : [],
-        ];
-    }
+    return [
+        'id'             => $p->id_program,
+        'jenis'          => 'Magang',
+        'judul'          => $p->nama_program,
+        'deskripsi'      => $p->deskripsi,
+        'kualifikasi'    => '',
+        'silabus'        => $p->silabus ?? '',
+        'silabus_url'    => $ada
+            ? Storage::disk('public')->url($p->silabus)
+            : null,
+        'silabus_nama'   => $ada ? basename($p->silabus) : '',
+
+        // Kuota awal tetap disimpan.
+        'kuota'          => $kuotaAwal,
+
+        // Data tambahan untuk perhitungan kuota.
+        'kuota_terpakai' => $kuotaTerpakai,
+        'sisa_kuota'     => max(0, $kuotaAwal - $kuotaTerpakai),
+
+        'tgl_buka'       => $this->tanggal($p->tgl_buka),
+        'tgl_tutup'      => $this->tanggal($p->tgl_tutup),
+        'tgl_mulai'      => $this->tanggal($p->tgl_mulai),
+        'tgl_selesai'    => $this->tanggal($p->tgl_selesai),
+        'durasi_hari'    => $p->durasi_hari,
+        'status'         => $p->status,
+
+        // Tetap menghitung semua formulir lamaran.
+        'jumlah_pelamar' => (int) ($p->lamaran_count ?? 0),
+
+        'created_at'     => $p->created_at?->timestamp ?? 0,
+        'persyaratan'    => $detail
+            ? $this->mapPersyaratan($p->persyaratan)
+            : [],
+    ];
+}
 
     private function mapPersyaratan($daftar): array
     {

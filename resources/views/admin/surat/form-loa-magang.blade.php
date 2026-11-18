@@ -247,46 +247,28 @@
                     </div>
                 </div>
 
-                <div class="border-t border-black/5 pt-5 space-y-4">
-                    <div>
-                        <h3 class="text-xs font-bold text-zinc-800">
-                            Penandatangan Surat
-                        </h3>
-                        <p class="text-[11px] text-zinc-400 mt-1">
-                            Informasi pejabat yang menandatangani LOA.
-                        </p>
-                    </div>
+                <div class="border-t border-black/5 pt-5 space-y-3">
+    <div>
+        <h3 class="text-xs font-bold text-zinc-800">
+            Tanda Tangan dan Stempel
+        </h3>
 
-                    <div>
-                        <label for="nama_penandatangan" class="block text-xs font-semibold text-zinc-600 mb-2">
-                            Nama Penandatangan <span class="text-rose-500">*</span>
-                        </label>
+        <p class="text-[11px] text-zinc-400 mt-1">
+            Logo perusahaan serta gambar tanda tangan dan stempel
+            Supervisor Magang akan otomatis dimasukkan ke dalam PDF.
+        </p>
+    </div>
 
-                        <input type="text"
-                               id="nama_penandatangan"
-                               name="nama_penandatangan"
-                               value="{{ old('nama_penandatangan') }}"
-                               maxlength="255"
-                               required
-                               placeholder="Nama lengkap pejabat"
-                               class="field">
-                    </div>
-
-                    <div>
-                        <label for="jabatan_penandatangan" class="block text-xs font-semibold text-zinc-600 mb-2">
-                            Jabatan <span class="text-rose-500">*</span>
-                        </label>
-
-                        <input type="text"
-                               id="jabatan_penandatangan"
-                               name="jabatan_penandatangan"
-                               value="{{ old('jabatan_penandatangan') }}"
-                               maxlength="255"
-                               required
-                               placeholder="Contoh: Human Resources Manager"
-                               class="field">
-                    </div>
-                </div>
+    <div class="rounded-2xl bg-orange-50 border border-orange-100 p-4">
+        <p class="text-xs font-bold text-orange-700">
+            Aset surat tersedia
+        </p>
+        <p class="text-[11px] text-orange-600 mt-1">
+            Tanda tangan dan stempel menggunakan gambar resmi
+            yang telah disiapkan.
+        </p>
+    </div>
+</div>
 
                 <div class="rounded-2xl bg-orange-50 border border-orange-100 p-4">
                     <p class="text-xs font-bold text-orange-700">

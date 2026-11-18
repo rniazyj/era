@@ -159,64 +159,341 @@
 
                 <div class="space-y-6">
 
-                    {{-- Data diri --}}
-                    <section class="rounded-[1.75rem] bg-sand p-6">
+                    
+{{-- Data diri --}}
+@if($isMagang)
 
-                        <div class="flex items-center justify-between gap-3">
-                            <h2 class="font-head text-xl font-medium">
-                                Data pelamar
-                            </h2>
+    <section class="rounded-[1.75rem] bg-sand p-6">
+        <div class="flex items-center justify-between gap-3">
+            <h2 class="font-head text-xl font-medium">
+                Ketua tim
+            </h2>
 
-                            <a href="{{ $linkProfil }}"
-                               class="text-xs font-semibold text-zinc-500 underline-offset-4 hover:text-ewforange hover:underline">
-                                Ubah di profil
-                            </a>
+            <span class="rounded-full bg-ink px-3 py-1 text-[10px] font-bold text-ewforange">
+                KETUA
+            </span>
+        </div>
+
+        <p class="mt-1 text-sm text-zinc-500">
+            Data ketua diambil otomatis dari akun dan profil ERA yang sedang digunakan.
+        </p>
+
+        
+<div class="mt-5 grid gap-4 sm:grid-cols-2">
+
+    {{-- Nama --}}
+    <div>
+        <label class="text-xs font-semibold">Nama lengkap *</label>
+        <input type="text"
+               name="anggota[0][nama]"
+               value="{{ old('anggota.0.nama', $user->name) }}"
+               required
+               maxlength="255"
+               class="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-ewforange">
+    </div>
+
+    {{-- Email --}}
+    <div>
+        <label class="text-xs font-semibold">Email *</label>
+        <input type="email"
+               name="anggota[0][email]"
+               value="{{ old('anggota.0.email', $user->email) }}"
+               required
+               maxlength="255"
+               class="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-ewforange">
+    </div>
+
+    {{-- Nomor telepon --}}
+    <div>
+        <label class="text-xs font-semibold">No. telepon *</label>
+        <input type="text"
+               name="anggota[0][no_telepon]"
+               value="{{ old('anggota.0.no_telepon', $user->no_telepon) }}"
+               required
+               maxlength="30"
+               class="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-ewforange">
+    </div>
+
+    {{-- NPM --}}
+    <div>
+        <label class="text-xs font-semibold">NPM *</label>
+        <input type="text"
+               name="anggota[0][npm]"
+               value="{{ old('anggota.0.npm', $pendidikanUtama->npm ?? '') }}"
+               required
+               maxlength="30"
+               class="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-ewforange">
+    </div>
+
+    {{-- Jenjang --}}
+    <div>
+        <label class="text-xs font-semibold">Jenjang pendidikan *</label>
+        <select name="anggota[0][jenjang]"
+                required
+                class="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-ewforange">
+            <option value="">Pilih jenjang</option>
+            @foreach(['SMA', 'SMK', 'D3', 'D4', 'S1', 'S2', 'S3'] as $jenjang)
+                <option value="{{ $jenjang }}"
+                    {{ old('anggota.0.jenjang', $pendidikanUtama->jenjang ?? '') === $jenjang ? 'selected' : '' }}>
+                    {{ $jenjang }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    {{-- Institusi --}}
+    <div>
+        <label class="text-xs font-semibold">Institusi *</label>
+        <input type="text"
+               name="anggota[0][institusi]"
+               value="{{ old('anggota.0.institusi', $pendidikanUtama->institusi ?? '') }}"
+               required
+               maxlength="255"
+               class="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-ewforange">
+    </div>
+
+    {{-- Fakultas --}}
+    <div>
+        <label class="text-xs font-semibold">Fakultas *</label>
+        <input type="text"
+               name="anggota[0][fakultas]"
+               value="{{ old('anggota.0.fakultas', $pendidikanUtama->fakultas ?? '') }}"
+               required
+               maxlength="255"
+               class="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-ewforange">
+    </div>
+
+    {{-- Program studi --}}
+    <div>
+        <label class="text-xs font-semibold">Program studi *</label>
+        <input type="text"
+               name="anggota[0][program_studi]"
+               value="{{ old('anggota.0.program_studi', $pendidikanUtama->jurusan ?? '') }}"
+               required
+               maxlength="255"
+               class="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-ewforange">
+    </div>
+
+</div>
+
+        <p class="mt-3 text-xs text-zinc-500">
+            Data akademik diambil dari pendidikan yang ditandai sebagai pendidikan utama di profilmu.
+        </p>
+
+        <a href="{{ $linkProfil }}"
+           class="mt-3 inline-block text-xs font-semibold text-zinc-500 underline hover:text-ewforange">
+            Ubah data melalui profil
+        </a>
+    </section>
+
+    {{-- Anggota tambahan --}}
+    <section class="rounded-[1.75rem] border border-black/10 p-6">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h2 class="font-head text-xl font-medium">Anggota tim</h2>
+                <p class="mt-1 text-sm text-zinc-500">
+                    Tambahkan maksimal 3 orang selain ketua.
+                </p>
+            </div>
+
+            <span class="rounded-full bg-sand px-3 py-1.5 text-xs font-bold text-zinc-600"
+                  id="jumlahAnggota">
+                1 / 4 orang
+            </span>
+        </div>
+
+        <div id="daftarAnggota" class="mt-5 space-y-5"></div>
+
+        <button type="button"
+                id="tambahAnggota"
+                class="mt-5 inline-flex items-center gap-2 rounded-full border border-ewforange px-5 py-3 text-sm font-semibold text-ewforange transition hover:bg-orange-50">
+            <span class="text-lg leading-none">+</span>
+            Tambah anggota
+        </button>
+
+        <p class="mt-3 text-xs text-zinc-500">
+            Anggota tambahan tidak perlu memiliki akun ERA. Isi data sesuai identitas masing-masing.
+        </p>
+    </section>
+
+@else
+
+    {{-- Data diri untuk pendaftaran kerja: tetap seperti sebelumnya --}}
+    <section class="rounded-[1.75rem] bg-sand p-6">
+        <div class="flex items-center justify-between gap-3">
+            <h2 class="font-head text-xl font-medium">Data pelamar</h2>
+
+            <a href="{{ $linkProfil }}"
+               class="text-xs font-semibold text-zinc-500 underline-offset-4 hover:text-ewforange hover:underline">
+                Ubah di profil
+            </a>
+        </div>
+
+        <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+            <div class="rounded-2xl bg-white p-4">
+                <dt class="text-[11px] font-semibold text-zinc-500">Nama lengkap</dt>
+                <dd class="mt-1 font-semibold">{{ $user->name }}</dd>
+            </div>
+
+            <div class="rounded-2xl bg-white p-4">
+                <dt class="text-[11px] font-semibold text-zinc-500">Email</dt>
+                <dd class="mt-1 break-all font-semibold">{{ $user->email }}</dd>
+            </div>
+
+            <div class="rounded-2xl bg-white p-4">
+                <dt class="text-[11px] font-semibold text-zinc-500">No. telepon</dt>
+                <dd class="mt-1 font-semibold">{{ $user->no_telepon }}</dd>
+            </div>
+
+            <div class="rounded-2xl bg-white p-4">
+                <dt class="text-[11px] font-semibold text-zinc-500">Kota</dt>
+                <dd class="mt-1 font-semibold">{{ $user->profilPelamar->kota ?? '-' }}</dd>
+            </div>
+        </dl>
+
+        <p class="mt-3 text-xs text-zinc-500">
+            CV dibuat otomatis dari profilmu dan ikut terkirim bersama lamaran.
+        </p>
+    </section>
+
+@endif
+
+@if($isMagang)
+    <template id="templateAnggota">
+        <div class="anggota-card rounded-2xl border border-black/10 p-5"
+             data-member-card>
+
+            <div class="flex items-center justify-between gap-3">
+                <h3 class="font-semibold text-sm">
+                    Anggota <span data-nomor></span>
+                </h3>
+
+                <button type="button"
+                        data-hapus-anggota
+                        class="text-xs font-semibold text-rose-600 hover:text-rose-700">
+                    Hapus anggota
+                </button>
+            </div>
+
+            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+
+                <div>
+                    <label class="text-xs font-semibold">Nama lengkap *</label>
+                    <input type="text"
+                           name="anggota[__INDEX__][nama]"
+                           required
+                           maxlength="255"
+                           class="mt-2 w-full rounded-xl border border-black/10 bg-sand px-4 py-3 text-sm outline-none focus:border-ewforange">
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold">Email *</label>
+                    <input type="email"
+                           name="anggota[__INDEX__][email]"
+                           required
+                           maxlength="255"
+                           class="mt-2 w-full rounded-xl border border-black/10 bg-sand px-4 py-3 text-sm outline-none focus:border-ewforange">
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold">No. telepon *</label>
+                    <input type="text"
+                           name="anggota[__INDEX__][no_telepon]"
+                           required
+                           maxlength="30"
+                           class="mt-2 w-full rounded-xl border border-black/10 bg-sand px-4 py-3 text-sm outline-none focus:border-ewforange">
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold">NPM *</label>
+                    <input type="text"
+                           name="anggota[__INDEX__][npm]"
+                           required
+                           maxlength="30"
+                           class="mt-2 w-full rounded-xl border border-black/10 bg-sand px-4 py-3 text-sm outline-none focus:border-ewforange">
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold">Jenjang pendidikan *</label>
+                    <select name="anggota[__INDEX__][jenjang]"
+                            required
+                            class="mt-2 w-full rounded-xl border border-black/10 bg-sand px-4 py-3 text-sm outline-none focus:border-ewforange">
+                        <option value="">Pilih jenjang</option>
+                        <option value="SMA">SMA</option>
+<option value="SMK">SMK</option>
+<option value="D3">D3</option>
+<option value="D4">D4</option>
+<option value="S1">S1</option>
+<option value="S2">S2</option>
+<option value="S3">S3</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold">Institusi *</label>
+                    <input type="text"
+                           name="anggota[__INDEX__][institusi]"
+                           required
+                           maxlength="255"
+                           class="mt-2 w-full rounded-xl border border-black/10 bg-sand px-4 py-3 text-sm outline-none focus:border-ewforange">
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold">Fakultas *</label>
+                    <input type="text"
+                           name="anggota[__INDEX__][fakultas]"
+                           required
+                           maxlength="255"
+                           class="mt-2 w-full rounded-xl border border-black/10 bg-sand px-4 py-3 text-sm outline-none focus:border-ewforange">
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold">Program studi *</label>
+                    <input type="text"
+                           name="anggota[__INDEX__][program_studi]"
+                           required
+                           maxlength="255"
+                           class="mt-2 w-full rounded-xl border border-black/10 bg-sand px-4 py-3 text-sm outline-none focus:border-ewforange">
+                </div>
+
+            </div>
+
+            <div class="mt-6 border-t border-black/10 pt-5">
+                <h4 class="text-sm font-semibold">Berkas persyaratan</h4>
+                <p class="mt-1 text-xs text-zinc-500">
+                    Unggah berkas milik anggota ini, bukan milik ketua atau anggota lain.
+                </p>
+
+                <div class="mt-4 space-y-5">
+                    @foreach($persyaratan as $p)
+                        <div>
+                            <label class="flex flex-wrap items-center gap-2 text-xs font-semibold">
+                                {{ $p->nama_berkas }}
+
+                                <span class="rounded-full px-2 py-0.5 text-[10px] font-bold {{ $p->wajib ? 'bg-ink text-ewforange' : 'bg-sand text-zinc-500' }}">
+                                    {{ $p->wajib ? 'WAJIB' : 'OPSIONAL' }}
+                                </span>
+                            </label>
+
+                            <p class="mt-1 text-xs text-zinc-500">
+                                {{ strtoupper(implode(', ', $formatList($p))) }} · maks 5 MB
+                            </p>
+
+                            <input type="file"
+                                   name="anggota[__INDEX__][berkas][{{ $p->id_persyaratan }}]"
+                                   accept="{{ collect($formatList($p))->map(fn ($f) => '.' . trim($f))->implode(',') }}"
+                                   data-maks="5120"
+                                   {{ $p->wajib ? 'required' : '' }}
+                                   class="field-file mt-2 block w-full rounded-2xl border border-dashed border-black/20 bg-sand p-3 text-xs text-zinc-600">
+
+                            <p class="mt-1 hidden text-xs font-semibold text-rose-600" data-err></p>
                         </div>
-
-                        <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-
-                            <div class="rounded-2xl bg-white p-4">
-                                <dt class="text-[11px] font-semibold text-zinc-500">
-                                    Nama lengkap
-                                </dt>
-                                <dd class="mt-1 font-semibold">
-                                    {{ $user->name }}
-                                </dd>
-                            </div>
-
-                            <div class="rounded-2xl bg-white p-4">
-                                <dt class="text-[11px] font-semibold text-zinc-500">
-                                    Email
-                                </dt>
-                                <dd class="mt-1 break-all font-semibold">
-                                    {{ $user->email }}
-                                </dd>
-                            </div>
-
-                            <div class="rounded-2xl bg-white p-4">
-                                <dt class="text-[11px] font-semibold text-zinc-500">
-                                    No. telepon
-                                </dt>
-                                <dd class="mt-1 font-semibold">
-                                    {{ $user->no_telepon }}
-                                </dd>
-                            </div>
-
-                            <div class="rounded-2xl bg-white p-4">
-                                <dt class="text-[11px] font-semibold text-zinc-500">
-                                    Kota
-                                </dt>
-                                <dd class="mt-1 font-semibold">
-                                    {{ $user->profilPelamar->kota ?? '-' }}
-                                </dd>
-                            </div>
-
-                        </dl>
-
-                        <p class="mt-3 text-xs text-zinc-500">
-                            CV dibuat otomatis dari profilmu dan ikut terkirim bersama lamaran.
-                        </p>
-                    </section>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </template>
+@endif
 
                     {{-- Tanggal magang --}}
                     @if($isMagang)
@@ -278,72 +555,101 @@
                         </section>
                     @endif
 
-                    {{-- Berkas --}}
-                    <section class="rounded-[1.75rem] border border-black/10 p-6">
+                    
+{{-- Berkas --}}
+<section class="rounded-[1.75rem] border border-black/10 p-6">
 
-                        <h2 class="font-head text-xl font-medium">
-                            Unggah berkas
-                        </h2>
+    <h2 class="font-head text-xl font-medium">
+        {{ $isMagang ? 'Berkas persyaratan ketua' : 'Unggah berkas' }}
+    </h2>
 
-                        @if($persyaratan->isEmpty())
+    @if($persyaratan->isEmpty())
 
-                            <p class="mt-2 text-sm text-zinc-500">
-                                {{ $isMagang ? 'Program magang' : 'Lowongan' }} ini tidak membutuhkan berkas tambahan.
-                            </p>
+        <p class="mt-2 text-sm text-zinc-500">
+            {{ $isMagang ? 'Program magang' : 'Lowongan' }} ini tidak membutuhkan berkas tambahan.
+        </p>
 
-                        @else
+    @elseif($isMagang)
 
-                            <div class="mt-5 space-y-5">
+        <p class="mt-1 text-sm text-zinc-500">
+            Unggah berkas milik ketua tim.
+        </p>
 
-                                @foreach($persyaratan as $p)
+        <div class="mt-5 space-y-5">
 
-                                    @php
-                                        $nama = 'berkas.' . $p->id_persyaratan;
-                                    @endphp
+            @foreach($persyaratan as $p)
+                @php
+                    $nama = 'anggota.0.berkas.' . $p->id_persyaratan;
+                @endphp
 
-                                    <div>
+                <div>
+                    <label for="berkas_ketua_{{ $p->id_persyaratan }}"
+                           class="flex flex-wrap items-center gap-2 text-sm font-semibold">
+                        {{ $p->nama_berkas }}
 
-                                        <label for="berkas_{{ $p->id_persyaratan }}"
-                                               class="flex flex-wrap items-center gap-2 text-sm font-semibold">
+                        <span class="rounded-full px-2 py-0.5 text-[10px] font-bold {{ $p->wajib ? 'bg-ink text-ewforange' : 'bg-sand text-zinc-500' }}">
+                            {{ $p->wajib ? 'WAJIB' : 'OPSIONAL' }}
+                        </span>
+                    </label>
 
-                                            {{ $p->nama_berkas }}
+                    <p class="mt-0.5 text-xs text-zinc-500">
+                        Berkas ketua · {{ strtoupper(implode(', ', $formatList($p))) }} · maks 5 MB
+                    </p>
 
-                                            <span class="rounded-full px-2 py-0.5 text-[10px] font-bold {{ $p->wajib ? 'bg-ink text-ewforange' : 'bg-sand text-zinc-500' }}">
-                                                {{ $p->wajib ? 'WAJIB' : 'OPSIONAL' }}
-                                            </span>
+                    <input type="file"
+                           id="berkas_ketua_{{ $p->id_persyaratan }}"
+                           name="anggota[0][berkas][{{ $p->id_persyaratan }}]"
+                           accept="{{ collect($formatList($p))->map(fn ($f) => '.' . trim($f))->implode(',') }}"
+                           data-maks="5120"
+                           {{ $p->wajib ? 'required' : '' }}
+                           class="field-file mt-2 block w-full rounded-2xl border border-dashed border-black/20 bg-sand p-3 text-xs text-zinc-600">
 
-                                        </label>
+                    <p class="mt-1 hidden text-xs font-semibold text-rose-600" data-err></p>
+                </div>
+            @endforeach
 
-                                        <p class="mt-0.5 text-xs text-zinc-500">
-                                            {{ strtoupper(implode(', ', $formatList($p))) }} · maks 5 MB
-                                        </p>
+        </div>
 
-                                        <input type="file"
-                                               id="berkas_{{ $p->id_persyaratan }}"
-                                               name="berkas[{{ $p->id_persyaratan }}]"
-                                               accept="{{ collect($formatList($p))->map(fn ($f) => '.' . trim($f))->implode(',') }}"
-                                               data-maks="5120"
-                                               {{ $p->wajib ? 'required' : '' }}
-                                               class="field-file mt-2 block w-full rounded-2xl border border-dashed {{ $errors->has($nama) ? 'border-rose-400 bg-rose-50' : 'border-black/20 bg-sand' }} p-3 text-xs text-zinc-600">
+    @else
 
-                                        <p class="mt-1 hidden text-xs font-semibold text-rose-600"
-                                           data-err></p>
+        {{-- Berkas pendaftaran kerja: tidak diubah --}}
+        <div class="mt-5 space-y-5">
 
-                                        @error($nama)
-                                            <p class="mt-1 text-xs font-semibold text-rose-600">
-                                                {{ $message }}
-                                            </p>
-                                        @enderror
+            @foreach($persyaratan as $p)
+                @php
+                    $nama = 'berkas.' . $p->id_persyaratan;
+                @endphp
 
-                                    </div>
+                <div>
+                    <label for="berkas_{{ $p->id_persyaratan }}"
+                           class="flex flex-wrap items-center gap-2 text-sm font-semibold">
+                        {{ $p->nama_berkas }}
 
-                                @endforeach
+                        <span class="rounded-full px-2 py-0.5 text-[10px] font-bold {{ $p->wajib ? 'bg-ink text-ewforange' : 'bg-sand text-zinc-500' }}">
+                            {{ $p->wajib ? 'WAJIB' : 'OPSIONAL' }}
+                        </span>
+                    </label>
 
-                            </div>
+                    <p class="mt-0.5 text-xs text-zinc-500">
+                        {{ strtoupper(implode(', ', $formatList($p))) }} · maks 5 MB
+                    </p>
 
-                        @endif
+                    <input type="file"
+                           id="berkas_{{ $p->id_persyaratan }}"
+                           name="berkas[{{ $p->id_persyaratan }}]"
+                           accept="{{ collect($formatList($p))->map(fn ($f) => '.' . trim($f))->implode(',') }}"
+                           data-maks="5120"
+                           {{ $p->wajib ? 'required' : '' }}
+                           class="field-file mt-2 block w-full rounded-2xl border border-dashed border-black/20 bg-sand p-3 text-xs text-zinc-600">
 
-                    </section>
+                    <p class="mt-1 hidden text-xs font-semibold text-rose-600" data-err></p>
+                </div>
+            @endforeach
+
+        </div>
+
+    @endif
+</section>
 
                     {{-- Pernyataan --}}
                     <label class="flex items-start gap-3 rounded-[1.5rem] border border-black/10 p-5 text-sm leading-relaxed text-zinc-600">
@@ -457,21 +763,27 @@
 
 <script>
     // Validasi ukuran berkas maksimal 5 MB
-    document.querySelectorAll('input[type=file][data-maks]').forEach(inp => {
-        inp.addEventListener('change', () => {
-            const err = inp.parentElement.querySelector('[data-err]');
-            const file = inp.files[0];
+    // Validasi ukuran berkas maksimal 5 MB
+document.addEventListener('change', event => {
+    const inp = event.target;
 
-            if (file && file.size > 5 * 1024 * 1024) {
-                err.textContent = 'Ukuran file maksimal 5 MB.';
-                err.classList.remove('hidden');
-                inp.value = '';
-            } else {
-                err.classList.add('hidden');
-                err.textContent = '';
-            }
-        });
-    });
+    if (!inp.matches('input[type="file"][data-maks]')) return;
+
+    const err = inp.parentElement.querySelector('[data-err]');
+    const file = inp.files[0];
+
+    if (file && file.size > 5 * 1024 * 1024) {
+        if (err) {
+            err.textContent = 'Ukuran file maksimal 5 MB.';
+            err.classList.remove('hidden');
+        }
+
+        inp.value = '';
+    } else if (err) {
+        err.classList.add('hidden');
+        err.textContent = '';
+    }
+});
 
     // Cegah pengiriman ganda
     const form = document.getElementById('formLamar');
@@ -485,6 +797,74 @@
             button.classList.add('opacity-70');
         });
     }
+
+
+    // Pengelolaan anggota tim magang
+    const daftarAnggota = document.getElementById('daftarAnggota');
+    const templateAnggota = document.getElementById('templateAnggota');
+    const tombolTambah = document.getElementById('tambahAnggota');
+    const jumlahAnggota = document.getElementById('jumlahAnggota');
+
+    if (daftarAnggota && templateAnggota && tombolTambah) {
+        const MAX_ANGGOTA = 4;
+
+        
+function perbaruiAnggota() {
+    const cards = daftarAnggota.querySelectorAll('[data-member-card]');
+
+    cards.forEach((card, index) => {
+        const nomor = index + 2;
+        const indeks = index + 1;
+
+        card.querySelector('[data-nomor]').textContent = nomor;
+
+        card.querySelectorAll('[name]').forEach(input => {
+            input.name = input.name.replace(
+                /anggota\[(?:\d+|__INDEX__)\]/,
+                `anggota[${indeks}]`
+            );
+        });
+    });
+
+    jumlahAnggota.textContent = `${cards.length + 1} / ${MAX_ANGGOTA} orang`;
+
+    tombolTambah.disabled = cards.length + 1 >= MAX_ANGGOTA;
+
+    tombolTambah.classList.toggle(
+        'opacity-40',
+        tombolTambah.disabled
+    );
+
+    tombolTambah.classList.toggle(
+        'cursor-not-allowed',
+        tombolTambah.disabled
+    );
+}
+
+
+        tombolTambah.addEventListener('click', () => {
+            const cards = daftarAnggota.querySelectorAll('[data-member-card]');
+
+            if (cards.length + 1 >= MAX_ANGGOTA) return;
+
+            const fragment = templateAnggota.content.cloneNode(true);
+            daftarAnggota.appendChild(fragment);
+
+            perbaruiAnggota();
+        });
+
+        daftarAnggota.addEventListener('click', event => {
+            const tombolHapus = event.target.closest('[data-hapus-anggota]');
+
+            if (!tombolHapus) return;
+
+            tombolHapus.closest('[data-member-card]').remove();
+            perbaruiAnggota();
+        });
+
+        perbaruiAnggota();
+    }
+
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>

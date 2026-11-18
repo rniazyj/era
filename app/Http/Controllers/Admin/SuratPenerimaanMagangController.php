@@ -21,6 +21,7 @@ class SuratPenerimaanMagangController extends Controller
             'pelamar',
             'program',
             'surat',
+            'anggotaTim',
         ])->findOrFail($id);
 
         $this->pastikanLayakMenerimaLoa($lamaran);
@@ -45,6 +46,7 @@ class SuratPenerimaanMagangController extends Controller
             'pelamar',
             'program',
             'surat',
+            'anggotaTim',
         ])->findOrFail($id);
 
         $this->pastikanLayakMenerimaLoa($lamaran);
@@ -78,17 +80,49 @@ class SuratPenerimaanMagangController extends Controller
                 'date',
                 'after_or_equal:tgl_mulai_magang',
             ],
-            'nama_penandatangan' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-            'jabatan_penandatangan' => [
-                'required',
-                'string',
-                'max:255',
-            ],
         ]);
+
+        // Pastikan gambar logo, tanda tangan, dan stempel tersedia.
+        $pathLogo = public_path('storage/surat/logoEWF.png');
+        $pathTtdStempel = public_path('storage/surat/ttd-stempel.png');
+
+        if (!file_exists($pathLogo) || !file_exists($pathTtdStempel)) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'gambar' => 'Logo atau gambar tanda tangan dan stempel tidak ditemukan. Periksa folder public/storage/surat/.',
+                ]);
+        }
+
+        // Ambil seluruh anggota tim yang terdaftar.
+        $anggotaTim = $lamaran->anggotaTim;
+
+        // Fallback untuk lamaran lama yang belum memiliki data anggota tim.
+        if ($anggotaTim->isEmpty()) {
+            $anggotaTim = collect([
+                (object) [
+                    'nama' => $lamaran->pelamar?->name ?? '-',
+                    'npm' => '-',
+                    'fakultas' => '-',
+                    'institusi' => '-',
+                    'program_studi' => '-',
+                    'jenjang' => '-',
+                ],
+            ]);
+        }
+
+        // Ambil fakultas dan institusi tanpa duplikasi.
+        $daftarFakultas = $anggotaTim
+            ->pluck('fakultas')
+            ->filter()
+            ->unique()
+            ->implode(', ');
+
+        $daftarInstitusi = $anggotaTim
+            ->pluck('institusi')
+            ->filter()
+            ->unique()
+            ->implode(', ');
 
         // Perbarui periode magang sesuai input admin.
         $lamaran->tgl_mulai_magang = $validated['tgl_mulai_magang'];
@@ -102,28 +136,20 @@ class SuratPenerimaanMagangController extends Controller
 
         $lamaran->save();
 
-        // Pastikan gambar tanda tangan dan stempel tersedia.
-        $gambarTtdStempel = public_path(
-            'storage/surat/ttd-stempel.png'
-        );
-
-        if (! file_exists($gambarTtdStempel)) {
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'gambar' => 'File tanda tangan dan stempel tidak ditemukan di public/images/surat/ttd-stempel.png.',
-                ]);
-        }
-
         $data = [
             'lamaran' => $lamaran,
             'template' => $template,
+            'anggotaTim' => $anggotaTim,
+            'daftarFakultas' => $daftarFakultas ?: '-',
+            'daftarInstitusi' => $daftarInstitusi ?: '-',
             'nomorSurat' => $validated['nomor_surat'],
             'tanggalTerbit' => $validated['tgl_terbit'],
-            'namaPenandatangan' => $validated['nama_penandatangan'],
-            'jabatanPenandatangan' => $validated['jabatan_penandatangan'],
+
+            'gambarLogo' => 'data:image/png;base64,' .
+                base64_encode(file_get_contents($pathLogo)),
+
             'gambarTtdStempel' => 'data:image/png;base64,' .
-                base64_encode(file_get_contents($gambarTtdStempel)),
+                base64_encode(file_get_contents($pathTtdStempel)),
         ];
 
         // Buat PDF menggunakan DomPDF.
@@ -139,7 +165,7 @@ class SuratPenerimaanMagangController extends Controller
         );
 
         // Simpan atau perbarui data surat untuk lamaran ini.
-        $surat = $lamaran->surat()->updateOrCreate(
+        $lamaran->surat()->updateOrCreate(
             [
                 'id_lamaran' => $lamaran->id_lamaran,
             ],

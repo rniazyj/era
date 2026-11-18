@@ -18,7 +18,7 @@
           'judul'     => $program->nama_program,
           'huruf'     => mb_strtoupper(mb_substr($program->nama_program, 0, 1)),
           'kategori'  => 'Program Magang',
-          'posisi'    => (int) $program->kuota,
+          'posisi'    => (int) ($program->sisa_kuota ?? $program->kuota),
           'urgent'    => false,
           'status'    => 'Pendaftaran dibuka',
           'deskripsi' => $program->deskripsi ?? '',
@@ -163,9 +163,6 @@
         <div id="seg" class="relative flex overflow-x-auto rounded-full bg-sand p-1" style="scrollbar-width:none">
           <span id="segInd" class="absolute bottom-1 left-0 top-1 w-0 rounded-full bg-ink"></span>
           <button type="button" class="seg-btn on" data-kat="semua">Semua Program ({{ count($daftarProgram) }})</button>
-          @foreach($kategoriHitung as $nama => $jml)
-            <button type="button" class="seg-btn" data-kat="{{ $nama }}">{{ $nama }} ({{ $jml }})</button>
-          @endforeach
         </div>
 
         <label class="flex items-center gap-2 rounded-full bg-sand px-4 py-2.5 md:mr-2 md:w-72">

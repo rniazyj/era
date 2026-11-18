@@ -16,8 +16,13 @@ class LowonganController extends Controller
     public function index()
     {
         $daftarLowongan = LowonganKerja::whereIn('status', ['aktif', 'dibuka'])
-            ->latest('id_lowongan')
-            ->get()
+    ->withCount([
+        'lamaran as kuota_terpakai' => function ($query) {
+            $query->where('status_lamaran', 'diterima');
+        },
+    ])
+    ->latest('id_lowongan')
+    ->get()
             ->map(function (LowonganKerja $lowongan) {
                 $gajiMin = (int) ($lowongan->gaji_min ?? 0);
                 $gajiMax = (int) ($lowongan->gaji_max ?? 0);
@@ -36,7 +41,10 @@ class LowonganController extends Controller
                     'judul' => $lowongan->judul,
                     'huruf' => strtoupper(mb_substr($lowongan->judul, 0, 1)),
                     'kategori' => $lowongan->kategori ?: 'Umum',
-                    'posisi' => (int) ($lowongan->kuota ?? 1),
+                    'posisi' => max(
+    0,
+    (int) ($lowongan->kuota ?? 0) - (int) $lowongan->kuota_terpakai
+),
                     'urgent' => (bool) ($lowongan->urgent ?? false),
                     'status' => in_array($lowongan->status, ['aktif', 'dibuka'], true) ? 'Aktif' : ucfirst((string) $lowongan->status),
                     'gaji' => $gaji,
@@ -52,7 +60,18 @@ class LowonganController extends Controller
     // Menampilkan detail lowongan tertentu berdasarkan ID
     public function show($id)
     {
-        $lowongan = LowonganKerja::with('persyaratan')->findOrFail($id);
+        $lowongan = LowonganKerja::with('persyaratan')
+    ->withCount([
+        'lamaran as kuota_terpakai' => function ($query) {
+            $query->where('status_lamaran', 'diterima');
+        },
+    ])
+    ->findOrFail($id);
+
+$lowongan->setAttribute(
+    'sisa_kuota',
+    max(0, (int) ($lowongan->kuota ?? 0) - (int) $lowongan->kuota_terpakai)
+);
 
         $user = Auth::user();
         $kelayakan = null;

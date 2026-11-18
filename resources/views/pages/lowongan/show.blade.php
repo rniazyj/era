@@ -63,7 +63,7 @@
       <div class="space-y-10">
         <dl class="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
           <div class="rounded-2xl bg-sand p-4"><dt class="text-[11px] font-semibold text-zinc-500">Gaji</dt><dd class="mt-1 font-head text-lg font-medium">{{ $lowongan->gaji_label }}</dd></div>
-          <div class="rounded-2xl bg-sand p-4"><dt class="text-[11px] font-semibold text-zinc-500">Posisi tersedia</dt><dd class="mt-1 font-head text-lg font-medium">{{ $lowongan->kuota }} posisi</dd></div>
+          <div class="rounded-2xl bg-sand p-4"><dt class="text-[11px] font-semibold text-zinc-500">Posisi tersedia</dt><dd class="mt-1 font-head text-lg font-medium">{{ $lowongan->sisa_kuota ?? 0 }} posisi</dd></div>
           <div class="rounded-2xl bg-sand p-4"><dt class="text-[11px] font-semibold text-zinc-500">Dibuka</dt><dd class="mt-1 font-semibold">{{ optional($lowongan->tgl_buka)->translatedFormat('d M Y') ?? '-' }}</dd></div>
           <div class="rounded-2xl bg-sand p-4"><dt class="text-[11px] font-semibold text-zinc-500">Ditutup</dt><dd class="mt-1 font-semibold">{{ optional($lowongan->tgl_tutup)->translatedFormat('d M Y') ?? 'Hingga terisi' }}</dd></div>
         </dl>

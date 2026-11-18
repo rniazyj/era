@@ -6,11 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\DataAkademik;
 use App\Models\JadwalInterview;
 use App\Models\Lamaran;
+use App\Models\ProgramMagang;
+use App\Models\LowonganKerja;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
+
 
 class SeleksiController extends Controller
 {
@@ -179,41 +183,140 @@ private function fotoCvBase64($profil): ?string
     );
 }
 
-    // ---------- UBAH STATUS LAMARAN ----------
-    public function updateStatus(Request $request, int $id)
-    {
-        $lamaran = Lamaran::findOrFail($id);
+    
+// ---------- UBAH STATUS LAMARAN ----------
 
-        $data = $request->validate([
-            'status'  => ['required', Rule::in(self::STATUS)],
-            'catatan' => ['nullable', 'string', 'max:1000'],
-        ], [
-            'status.required' => 'Status wajib dipilih.',
-            'status.in'       => 'Status tidak valid.',
-            'catatan.max'     => 'Catatan maksimal :max karakter.',
-        ]);
+public function updateStatus(Request $request, int $id)
+{
+    $data = $request->validate([
+        'status'  => ['required', Rule::in(self::STATUS)],
+        'catatan' => ['nullable', 'string', 'max:1000'],
+    ], [
+        'status.required' => 'Status wajib dipilih.',
+        'status.in'       => 'Status tidak valid.',
+        'catatan.max'     => 'Catatan maksimal :max karakter.',
+    ]);
+
+    DB::transaction(function () use ($data, $id) {
+
+        // 1. Kunci lamaran agar tidak diproses bersamaan.
+        $lamaran = Lamaran::where('id_lamaran', $id)
+            ->lockForUpdate()
+            ->firstOrFail();
 
         $status = $data['status'];
+
+        // 2. Tentukan lowongan atau program magang terkait.
+        if ($lamaran->id_program) {
+
+            $target = ProgramMagang::where(
+                'id_program',
+                $lamaran->id_program
+            )->lockForUpdate()->firstOrFail();
+
+            $jenis = 'magang';
+
+            $kolomRelasi = 'id_program';
+            $idTarget = $lamaran->id_program;
+
+        } else {
+
+            $target = LowonganKerja::where(
+                'id_lowongan',
+                $lamaran->id_lowongan
+            )->lockForUpdate()->firstOrFail();
+
+            $jenis = 'kerja';
+
+            $kolomRelasi = 'id_lowongan';
+            $idTarget = $lamaran->id_lowongan;
+        }
+
+        // 3. Periksa kuota hanya jika status akan menjadi diterima.
+        if ($status === 'diterima') {
+
+            // Ambil lamaran lain yang sudah diterima.
+            // Lamaran yang sedang diubah tidak ikut dihitung
+            // agar tidak terjadi penghitungan dua kali.
+            $lamaranDiterima = Lamaran::where($kolomRelasi, $idTarget)
+                ->where('status_lamaran', 'diterima')
+                ->where('id_lamaran', '!=', $lamaran->id_lamaran)
+                ->withCount('anggotaTim')
+                ->get();
+
+            // 4. Hitung kuota yang sudah terpakai.
+            if ($jenis === 'magang') {
+
+                // Magang dihitung berdasarkan jumlah anggota tim.
+                $kuotaTerpakai = $lamaranDiterima->sum(
+                    fn ($item) => $item->anggota_tim_count > 0
+                        ? $item->anggota_tim_count
+                        : 1
+                );
+
+                // Hitung anggota tim dari lamaran yang akan diterima.
+                $jumlahDiterima = $lamaran->anggotaTim()->count();
+
+                // Jika lamaran lama tidak memiliki data anggota tim,
+                // tetap hitung sebagai satu orang.
+                if ($jumlahDiterima === 0) {
+                    $jumlahDiterima = 1;
+                }
+
+            } else {
+
+                // Lowongan kerja dihitung satu lamaran = satu orang.
+                $kuotaTerpakai = $lamaranDiterima->count();
+                $jumlahDiterima = 1;
+            }
+
+            // 5. Pastikan kuota masih mencukupi.
+            $kuotaAwal = (int) ($target->kuota ?? 0);
+            $sisaKuota = max(0, $kuotaAwal - $kuotaTerpakai);
+
+            if (($kuotaTerpakai + $jumlahDiterima) > $kuotaAwal) {
+
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'status' => [
+                        'Kuota tidak mencukupi. Sisa kuota saat ini hanya '
+                        . $sisaKuota
+                        . ' orang, sedangkan lamaran ini membutuhkan '
+                        . $jumlahDiterima
+                        . ' orang.'
+                    ],
+                ]);
+            }
+        }
+
+        // 6. Simpan perubahan status.
         $lamaran->status_lamaran = $status;
 
         if (in_array($status, ['diterima', 'ditolak'], true)) {
-            // Keputusan akhir
+
             $lamaran->hasil_seleksi = $status;
             $lamaran->tgl_keputusan = now();
 
+            // Catatan lama tidak ditimpa jika input kosong.
             if (filled($data['catatan'] ?? null)) {
                 $lamaran->catatan_seleksi = $data['catatan'];
             }
+
         } else {
-            // Kembali ke diajukan / diproses: keputusan dibatalkan
+
+            // Jika kembali ke diajukan/diproses,
+            // keputusan akhir dibatalkan.
             $lamaran->hasil_seleksi = null;
             $lamaran->tgl_keputusan = null;
         }
 
         $lamaran->save();
+    });
 
-        return back()->with('success', 'Status lamaran diubah menjadi "' . ucfirst($status) . '".');
-    }
+    return back()->with(
+        'success',
+        'Status lamaran berhasil diubah menjadi "' . ucfirst($data['status']) . '".'
+    );
+}
 
     // ---------- JADWAL INTERVIEW ----------
     public function simpanJadwal(Request $request, int $id)
