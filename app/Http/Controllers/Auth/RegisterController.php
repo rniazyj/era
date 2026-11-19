@@ -4,12 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rules\Password;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\ProfilPelamar;
 use App\Models\Cv;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
 
 class RegisterController extends Controller
 {
@@ -20,47 +21,56 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password' => [
+                'required',
+                'confirmed',
+                Password::min(8)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols(),
+            ],
         ]);
 
-        // Cari ID role untuk pelamar
-        $rolePelamar = Role::where('nama_role', 'pelamar')->first();
+        // Role pelamar wajib tersedia.
+        // Jangan menggunakan fallback ID role.
+        $rolePelamar = Role::where('nama_role', 'pelamar')->firstOrFail();
 
-        DB::beginTransaction();
-        try {
-            // 1. Buat User baru
+        DB::transaction(function () use ($validated, $rolePelamar, &$user) {
+
+            // Membuat akun pelamar.
+            // Password otomatis di-hash melalui cast pada model User.
             $user = User::create([
-                'id_role' => $rolePelamar ? $rolePelamar->id_role : 1,
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
+                'id_role' => $rolePelamar->id_role,
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => $validated['password'],
                 'status_akun' => 'aktif',
+                'email_verified_at' => null,
+                'percobaan_gagal' => 0,
+                'terkunci_sampai' => null,
             ]);
 
-            // 2. Buat otomatis baris profil_pelamar kosong
+            // Membuat profil pelamar kosong.
             $profil = ProfilPelamar::create([
                 'id_pengguna' => $user->id,
             ]);
 
-            // 3. Buat otomatis baris cv kosong terkait profil tersebut
+            // Membuat CV kosong.
             Cv::create([
                 'id_profil' => $profil->id_profil,
                 'sumber_cv' => 'manual',
                 'progres_cv' => 0,
             ]);
+        });
 
-            DB::commit();
+        // Mengirim email verifikasi melalui notifikasi bawaan Laravel.
+        event(new Registered($user));
 
-            // Arahkan ke halaman login dengan pesan sukses (TIDAK AUTO-LOGIN)
-            // Pakai kunci 'status' karena itu yang ditampilkan oleh layout auth.
-            return redirect()->route('login')->with('status', 'Registrasi berhasil! Silakan login menggunakan akun Anda.');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withErrors(['error' => 'Terjadi kesalahan saat registrasi: ' . $e->getMessage()])->withInput();
-        }
+        return redirect()
+            ->route('verification.notice', ['email' => $user->email])
+            ->with('status', 'Registrasi berhasil! Silakan periksa email Anda untuk melakukan verifikasi akun.');
     }
 }

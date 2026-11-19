@@ -41,27 +41,46 @@ class LoginController extends Controller
 
         // Coba autentikasi Laravel
         if (Auth::attempt($request->only('email', 'password'), $request->filled('remember'))) {
-            // regenerate() mempertahankan isi session, jadi 'url.intended' tidak hilang
-            $request->session()->regenerate();
 
-            // Reset percobaan gagal jika login sukses
-            $authUser = Auth::user();
-            $authUser->update([
-                'percobaan_gagal' => 0,
-                'terkunci_sampai' => null
-            ]);
+    $authUser = Auth::user();
 
-            // Tujuan bawaan per role, dipakai kalau tidak ada halaman sebelumnya
-            $default = match (true) {
-                $authUser->isAdmin()    => route('admin.dashboard'),
-                $authUser->isPimpinan() => route('pimpinan.dashboard'),
-                $authUser->isPelamar()  => route('pelamar.dashboard'),
-                default                 => route('home'),
-            };
+    // Tolak login jika email belum diverifikasi.
+    if (! $authUser->hasVerifiedEmail()) {
+        $email = $authUser->email;
 
-            // Kembali ke halaman yang tadi dibuka (mis. form lamar), kalau tidak ada baru ke $default
-            return redirect()->intended($default);
-        }
+        Auth::logout();
+
+        return redirect()
+            ->route('verification.notice', ['email' => $email])
+            ->with('status', 'Email Anda belum diverifikasi. Silakan periksa email atau kirim ulang tautan verifikasi.');
+    }
+
+    // Tolak akun yang tidak aktif.
+    if ($authUser->status_akun !== 'aktif') {
+        Auth::logout();
+
+        return back()->withErrors([
+            'email' => 'Akun Anda tidak aktif. Silakan hubungi administrator.',
+        ]);
+    }
+
+    $request->session()->regenerate();
+
+    // Reset percobaan gagal.
+    $authUser->update([
+        'percobaan_gagal' => 0,
+        'terkunci_sampai' => null,
+    ]);
+
+    $default = match (true) {
+        $authUser->isAdmin()    => route('admin.dashboard'),
+        $authUser->isPimpinan() => route('pimpinan.dashboard'),
+        $authUser->isPelamar()  => route('pelamar.dashboard'),
+        default                 => route('home'),
+    };
+
+    return redirect()->intended($default);
+}
 
         // Jika login GAGAL, tangani hitungan percobaan gagal
         if ($user) {

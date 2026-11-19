@@ -9,6 +9,7 @@ use App\Http\Controllers\BantuanController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Pelamar\ProfilController as PelamarProfilController;
 use App\Http\Controllers\Pelamar\ProgramMagangController;
 use App\Http\Controllers\Pelamar\AkademikController;
@@ -88,6 +89,27 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name('password.update');
 });
 
+// VERIFIKASI EMAIL
+Route::get('/email/verify', [
+    EmailVerificationController::class,
+    'notice'
+])->name('verification.notice');
+
+Route::get('/email/verify/{id}/{hash}', [
+    EmailVerificationController::class,
+    'verify'
+])
+    ->whereNumber('id')
+    ->middleware('signed')
+    ->name('verification.verify');
+
+Route::post('/email/verification-notification', [
+    EmailVerificationController::class,
+    'resend'
+])
+    ->middleware('throttle:6,1')
+    ->name('verification.send');
+    
 // Logout (Auth Only)
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
