@@ -295,6 +295,57 @@
         line-height: 1.7;
     }
 
+
+/* Animasi card accordion */
+.detail-accordion {
+    border: 1px solid #ededf0;
+    border-radius: 17px;
+    background: #fff;
+    overflow: hidden;
+    transition:
+        border-color .35s ease,
+        box-shadow .35s ease,
+        transform .35s ease;
+}
+
+.detail-accordion:has(.accordion-trigger[aria-expanded="true"]) {
+    border-color: #fed7aa;
+    box-shadow: 0 7px 22px rgba(249, 115, 22, .08);
+}
+
+/* Efek hover */
+@media (hover: hover) {
+    .detail-accordion:hover {
+        border-color: #fed7aa;
+        transform: translateY(-2px);
+    }
+}
+
+/* Animasi isi accordion */
+.accordion-content {
+    padding: 0 1.2rem 1.25rem;
+    transform-origin: top center;
+}
+
+/* Gerakan ikon */
+.accordion-arrow {
+    transition:
+        transform .4s cubic-bezier(.22, 1, .36, 1),
+        color .3s ease;
+}
+
+.accordion-trigger[aria-expanded="true"] .accordion-arrow {
+    transform: rotate(180deg);
+    color: #ea580c;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .detail-accordion,
+    .accordion-arrow {
+        transition: none !important;
+    }
+}
+
     @media (max-width: 600px) {
         .detail-summary {
             padding: 1.1rem;
@@ -437,14 +488,9 @@
                 </button>
 
                 <div class="accordion-content"
-                    x-show="openPanel === 'pengajuan'"
-                    x-cloak
-                    x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0 -translate-y-2"
-                    x-transition:enter-end="opacity-100 translate-y-0"
-                    x-transition:leave="transition ease-in duration-200"
-                    x-transition:leave-start="opacity-100 translate-y-0"
-                    x-transition:leave-end="opacity-0 -translate-y-2">
+    x-show="openPanel === 'pengajuan'"
+    x-collapse.duration.400ms
+    x-cloak>
 
                     <div class="accordion-divider"></div>
 
@@ -551,14 +597,9 @@
                 </button>
 
                 <div class="accordion-content"
-                    x-show="openPanel === 'interview'"
-                    x-cloak
-                    x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0 -translate-y-2"
-                    x-transition:enter-end="opacity-100 translate-y-0"
-                    x-transition:leave="transition ease-in duration-200"
-                    x-transition:leave-start="opacity-100 translate-y-0"
-                    x-transition:leave-end="opacity-0 -translate-y-2">
+    x-show="openPanel === 'interview'"
+    x-collapse.duration.400ms
+    x-cloak>
 
                     <div class="accordion-divider"></div>
 
@@ -656,14 +697,9 @@
                     </button>
 
                     <div class="accordion-content"
-                        x-show="openPanel === 'loa'"
-                        x-cloak
-                        x-transition:enter="transition ease-out duration-300"
-                        x-transition:enter-start="opacity-0 -translate-y-2"
-                        x-transition:enter-end="opacity-100 translate-y-0"
-                        x-transition:leave="transition ease-in duration-200"
-                        x-transition:leave-start="opacity-100 translate-y-0"
-                        x-transition:leave-end="opacity-0 -translate-y-2">
+    x-show="openPanel === 'loa'"
+    x-collapse.duration.400ms
+    x-cloak>
 
                         <div class="accordion-divider"></div>
 
@@ -754,14 +790,9 @@
                     </button>
 
                     <div class="accordion-content"
-                        x-show="openPanel === 'catatan'"
-                        x-cloak
-                        x-transition:enter="transition ease-out duration-300"
-                        x-transition:enter-start="opacity-0 -translate-y-2"
-                        x-transition:enter-end="opacity-100 translate-y-0"
-                        x-transition:leave="transition ease-in duration-200"
-                        x-transition:leave-start="opacity-100 translate-y-0"
-                        x-transition:leave-end="opacity-0 -translate-y-2">
+    x-show="openPanel === 'catatan'"
+    x-collapse.duration.400ms
+    x-cloak>
 
                         <div class="accordion-divider"></div>
 

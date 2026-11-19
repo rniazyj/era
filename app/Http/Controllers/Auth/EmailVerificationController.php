@@ -32,7 +32,13 @@ class EmailVerificationController extends Controller
         );
 
         // Hanya akun pelamar yang menggunakan verifikasi publik.
-        abort_unless($user->isPelamar(), 403);
+        abort_unless(
+    $user->isPelamar() ||
+    $user->isAdmin() ||
+    $user->isPimpinan(),
+    403,
+    'Role akun tidak diizinkan melakukan verifikasi.'
+);
 
         if (! $user->hasVerifiedEmail()) {
             $user->markEmailAsVerified();
@@ -53,12 +59,12 @@ class EmailVerificationController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (
-            $user &&
-            $user->isPelamar() &&
-            ! $user->hasVerifiedEmail()
-        ) {
-            $user->sendEmailVerificationNotification();
-        }
+    $user &&
+    ($user->isPelamar() || $user->isAdmin() || $user->isPimpinan()) &&
+    ! $user->hasVerifiedEmail()
+) {
+    $user->sendEmailVerificationNotification();
+}
 
         // Pesan dibuat umum untuk mencegah pengungkapan email terdaftar.
         return back()->with(

@@ -302,6 +302,243 @@
       .savebar .actions { justify-content: center; }
     }
     @media (prefers-reduced-motion: reduce) { .banner { animation: none; } }
+
+
+/* ================= PENGATURAN AKUN ================= */
+.account-header {
+    margin-bottom: 1.5rem;
+}
+
+.account-eyebrow {
+    color: var(--orange);
+    font-size: .75rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    margin-bottom: .4rem;
+}
+
+.account-header h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: -.03em;
+}
+
+.account-header p {
+    color: var(--muted);
+    font-size: .85rem;
+    margin-top: .4rem;
+}
+
+.account-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.2rem;
+}
+
+.account-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.account-card-head {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.account-icon {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    flex: none;
+    border-radius: 13px;
+    background: var(--orange-soft);
+    color: var(--orange);
+}
+
+.account-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.account-card-head h3 {
+    font-size: .95rem;
+    font-weight: 800;
+    color: var(--ink);
+}
+
+.account-card-head p {
+    font-size: .73rem;
+    color: var(--muted);
+}
+
+.account-card-body {
+    padding: 1.5rem;
+}
+
+.account-current {
+    background: #fafafb;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1rem;
+    margin-bottom: 1.4rem;
+}
+
+.account-current-label {
+    display: block;
+    font-size: .72rem;
+    color: var(--muted);
+    margin-bottom: .4rem;
+}
+
+.account-current-value {
+    font-size: .86rem;
+    font-weight: 700;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+}
+
+.account-status {
+    display: inline-flex;
+    border-radius: 99px;
+    padding: .25rem .7rem;
+    font-size: .68rem;
+    font-weight: 800;
+    margin-top: .6rem;
+}
+
+.account-status.verified {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.account-status.unverified {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.account-field {
+    margin-bottom: 1.1rem;
+}
+
+.account-field label {
+    display: block;
+    color: var(--ink-soft);
+    font-size: .76rem;
+    font-weight: 700;
+    margin-bottom: .45rem;
+}
+
+.account-field input {
+    display: block;
+    width: 100%;
+    padding: .75rem .9rem;
+    border: 1.5px solid #ececf0;
+    border-radius: 13px;
+    background: #fafafb;
+    color: var(--ink);
+    font: inherit;
+    font-size: .85rem;
+    transition: .2s;
+}
+
+.account-field input::placeholder {
+    color: #a9a9b4;
+}
+
+.account-field input:focus {
+    outline: none;
+    background: #fff;
+    border-color: var(--orange);
+    box-shadow: 0 0 0 4px rgba(249,115,22,.14);
+}
+
+.account-note {
+    padding: .9rem 1rem;
+    margin: 1.2rem 0;
+    border-radius: 14px;
+    background: var(--orange-soft);
+    border: 1px solid #ffdfc5;
+    color: #9a3412;
+    font-size: .76rem;
+    line-height: 1.65;
+}
+
+.account-alert {
+    padding: .85rem 1rem;
+    margin-bottom: 1rem;
+    border-radius: 14px;
+    font-size: .82rem;
+    font-weight: 600;
+}
+
+.account-alert.success {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.account-alert.info {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.account-alert.error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.account-alert ul {
+    margin: .4rem 0 0 1.2rem;
+}
+
+.account-submit {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    border-radius: 99px;
+    background: var(--orange);
+    color: #fff;
+    padding: .8rem 1rem;
+    font: inherit;
+    font-size: .84rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.account-submit:hover {
+    background: var(--orange-dark);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 850px) {
+    .account-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .account-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .account-card-head,
+    .account-card-body {
+        padding: 1.1rem;
+    }
+}
   </style>
 </head>
 <body>
@@ -429,7 +666,7 @@
       </a>
 
       <div class="nav-label">Sistem</div>
-      <a href="#" class="nav-item">
+      <a href="{{ route('pelamar.profil.pengaturan-akun') }}" class="nav-item">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></span>
         Pengaturan Akun
       </a>
@@ -485,6 +722,7 @@
   });
 </script>
 
+<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
 {{-- Alpine.js untuk accordion dan interaksi halaman --}}
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 

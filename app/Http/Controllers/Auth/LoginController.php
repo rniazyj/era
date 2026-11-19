@@ -11,7 +11,15 @@ use Carbon\Carbon;
 class LoginController extends Controller
 {
     // Halaman yang tidak boleh dijadikan tujuan setelah login
-    private const ABAIKAN = ['/login', '/daftar', '/lupa-password', '/reset-password', '/logout'];
+    private const ABAIKAN = [
+    '/login',
+    '/daftar',
+    '/lupa-password',
+    '/reset-password',
+    '/logout',
+    '/admin',
+    '/pimpinan',
+];
 
     // Tampilkan halaman login
     public function showLoginForm(Request $request)
@@ -73,13 +81,21 @@ class LoginController extends Controller
     ]);
 
     $default = match (true) {
-        $authUser->isAdmin()    => route('admin.dashboard'),
-        $authUser->isPimpinan() => route('pimpinan.dashboard'),
-        $authUser->isPelamar()  => route('pelamar.dashboard'),
-        default                 => route('home'),
-    };
+    $authUser->isAdmin()    => route('admin.dashboard'),
+    $authUser->isPimpinan() => route('pimpinan.dashboard'),
+    $authUser->isPelamar()  => route('pelamar.dashboard'),
+    default                 => route('home'),
+};
 
-    return redirect()->intended($default);
+// Admin dan pimpinan selalu diarahkan ke dashboard sesuai role.
+if ($authUser->isAdmin() || $authUser->isPimpinan()) {
+    $request->session()->forget('url.intended');
+
+    return redirect()->to($default);
+}
+
+// Pelamar tetap bisa kembali ke halaman tujuan sebelumnya.
+return redirect()->intended($default);
 }
 
         // Jika login GAGAL, tangani hitungan percobaan gagal

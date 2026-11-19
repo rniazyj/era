@@ -235,8 +235,9 @@
         justify-content: center;
         gap: .5rem;
         padding: .65rem 1.15rem;
-        background: #18181b;
-        color: white;
+        background: #ffffff;
+        border: 1px solid #000000;
+        color: black;
         text-decoration: none;
         border-radius: 999px;
         font-size: .78rem;
@@ -313,7 +314,7 @@
 }
 
 .ticket-detail:hover {
-    background: #ea580c;
+    background: #000000;
     color: white;
     transform: translateX(4px);
     box-shadow: 0 5px 14px rgba(234, 88, 12, .2);

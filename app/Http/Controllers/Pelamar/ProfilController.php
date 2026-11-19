@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Pelamar;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Pelamar\Concerns\MemuatProfil;
 use App\Models\ProfilPelamar;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Schema;
@@ -110,4 +111,91 @@ class ProfilController extends Controller
 
         return $redirect;
     }
+
+    // Menampilkan halaman Pengaturan Akun
+public function pengaturanAkun(Request $request)
+{
+    $data = $this->dataDasar($request);
+
+    return view('pelamar.profil.pengaturan-akun', $data);
+}
+
+// Mengubah email akun pelamar
+public function updateEmail(Request $request)
+{
+    $user = $request->user();
+
+    $validated = $request->validate([
+        'email' => [
+            'required',
+            'email',
+            'max:255',
+            Rule::unique('users', 'email')->ignore($user->id),
+        ],
+        'password_lama' => [
+            'required',
+            'current_password',
+        ],
+    ], [
+        'email.required' => 'Email baru wajib diisi.',
+        'email.email' => 'Format email tidak valid.',
+        'email.unique' => 'Email tersebut sudah digunakan akun lain.',
+        'password_lama.required' => 'Password saat ini wajib diisi.',
+        'password_lama.current_password' => 'Password saat ini tidak sesuai.',
+    ]);
+
+    // Jika email tidak berubah, tidak perlu mengirim verifikasi ulang.
+    if ($user->email === $validated['email']) {
+        return back()->with('info', 'Email yang dimasukkan sama dengan email saat ini.');
+    }
+
+    // Email baru belum dianggap terverifikasi.
+    $user->forceFill([
+        'email' => $validated['email'],
+        'email_verified_at' => null,
+    ])->save();
+
+    // Kirim tautan verifikasi ke email baru.
+    $user->sendEmailVerificationNotification();
+
+    return redirect()
+        ->route('verification.notice', ['email' => $user->email])
+        ->with('status', 'Email berhasil diperbarui. Silakan periksa inbox email baru untuk melakukan verifikasi.');
+}
+
+// Mengubah password akun pelamar
+public function updatePassword(Request $request)
+{
+    $user = $request->user();
+
+    $validated = $request->validate([
+        'password_lama' => [
+            'required',
+            'current_password',
+        ],
+        'password_baru' => [
+            'required',
+            'string',
+            'min:8',
+            'confirmed',
+            'different:password_lama',
+        ],
+    ], [
+        'password_lama.required' => 'Password saat ini wajib diisi.',
+        'password_lama.current_password' => 'Password saat ini tidak sesuai.',
+        'password_baru.required' => 'Password baru wajib diisi.',
+        'password_baru.min' => 'Password baru minimal 8 karakter.',
+        'password_baru.confirmed' => 'Konfirmasi password baru tidak cocok.',
+        'password_baru.different' => 'Password baru harus berbeda dari password saat ini.',
+    ]);
+
+    $user->forceFill([
+        'password' => $validated['password_baru'],
+    ])->save();
+
+    return back()->with(
+        'success_password',
+        'Password berhasil diperbarui.'
+    );
+}
 }
