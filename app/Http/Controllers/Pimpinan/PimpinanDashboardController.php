@@ -208,11 +208,118 @@ class PimpinanDashboardController extends Controller
             ],
         ];
 
+
+        // ---------- 5. INSIGHT STRATEGIS OTOMATIS ----------
+        $insight = [];
+
+        // A. Lamaran yang melewati batas waktu seleksi
+if ($totalLamaran === 0) {
+    $insight[] = [
+        'jenis' => 'info',
+        'judul' => 'Belum Ada Data Pendaftaran',
+        'pesan' => 'Belum terdapat data lamaran pada periode ini. Insight strategis akan tersedia setelah data pendaftaran tercatat.'
+    ];
+} elseif ($lewatSla > 0) {
+    $insight[] = [
+        'jenis' => 'warning',
+        'judul' => 'Lamaran Melewati Batas Waktu Seleksi',
+        'pesan' => "{$lewatSla} lamaran belum memperoleh keputusan dan telah melewati batas {$data['slaHari']} hari. Perlu dilakukan evaluasi terhadap lamaran tersebut."
+    ];
+} elseif ($belumDiputuskan > 0) {
+    $insight[] = [
+        'jenis' => 'info',
+        'judul' => 'Lamaran Masih Dalam Proses',
+        'pesan' => "Terdapat {$belumDiputuskan} lamaran yang belum memperoleh keputusan. Pantau proses seleksi agar tidak menumpuk."
+    ];
+} else {
+    $insight[] = [
+        'jenis' => 'success',
+        'judul' => 'Status Seleksi Terkendali',
+        'pesan' => 'Seluruh lamaran pada periode ini telah memiliki keputusan seleksi.'
+    ];
+}
+
+        // B. Tingkat penerimaan
+        if ($diputuskan > 0) {
+            $insight[] = [
+                'jenis' => 'info',
+                'judul' => 'Evaluasi Tingkat Penerimaan',
+                'pesan' => "Tingkat penerimaan sebesar {$persenDiterima}% dari {$diputuskan} lamaran yang telah diputuskan. Data ini dapat digunakan untuk mengevaluasi hasil seleksi."
+            ];
+        } else {
+            $insight[] = [
+                'jenis' => 'info',
+                'judul' => 'Belum Tersedia Hasil Seleksi',
+                'pesan' => 'Belum terdapat lamaran yang diputuskan pada periode ini sehingga tingkat penerimaan belum dapat dianalisis.'
+            ];
+        }
+
+        // C. Waktu proses seleksi
+        if ($waktu['rata'] !== null) {
+            if ($waktu['rata'] > self::SLA_HARI) {
+                $insight[] = [
+                    'jenis' => 'warning',
+                    'judul' => 'Waktu Seleksi Perlu Dievaluasi',
+                    'pesan' => "Rata-rata waktu penyelesaian seleksi {$waktu['rata']} hari, melebihi acuan {$data['slaHari']} hari. Evaluasi proses seleksi dapat dilakukan untuk meningkatkan efisiensi."
+                ];
+            } else {
+                $insight[] = [
+                    'jenis' => 'success',
+                    'judul' => 'Waktu Seleksi Relatif Baik',
+                    'pesan' => "Rata-rata waktu penyelesaian seleksi {$waktu['rata']} hari, masih dalam acuan {$data['slaHari']} hari."
+                ];
+            }
+        }
+
+        // D. Perbandingan tren pendaftaran dua bulan terakhir
+        $trenValid = collect($tren)->values();
+        $bulanTerakhir = $trenValid->last();
+        $bulanSebelumnya = $trenValid->get($trenValid->count() - 2);
+
+        if ($bulanTerakhir && $bulanSebelumnya) {
+            $selisih = $bulanTerakhir['total'] - $bulanSebelumnya['total'];
+
+            if ($bulanSebelumnya['total'] > 0) {
+                $persenPerubahan = round(
+                    ($selisih / $bulanSebelumnya['total']) * 100,
+                    1
+                );
+
+                if ($selisih > 0) {
+                    $insight[] = [
+                        'jenis' => 'success',
+                        'judul' => 'Minat Pendaftaran Meningkat',
+                        'pesan' => "Jumlah pendaftaran bulan {$bulanTerakhir['bulan']} meningkat {$persenPerubahan}% dibanding bulan {$bulanSebelumnya['bulan']}. Hal ini menunjukkan peningkatan minat pendaftar."
+                    ];
+                } elseif ($selisih < 0) {
+                    $insight[] = [
+                        'jenis' => 'warning',
+                        'judul' => 'Minat Pendaftaran Menurun',
+                        'pesan' => "Jumlah pendaftaran bulan {$bulanTerakhir['bulan']} menurun " . abs($persenPerubahan) . "% dibanding bulan {$bulanSebelumnya['bulan']}. Evaluasi daya tarik lowongan dapat dipertimbangkan."
+                    ];
+                } else {
+                    $insight[] = [
+                        'jenis' => 'info',
+                        'judul' => 'Minat Pendaftaran Stabil',
+                        'pesan' => "Jumlah pendaftaran bulan {$bulanTerakhir['bulan']} sama dengan bulan {$bulanSebelumnya['bulan']}. "
+                    ];
+                }
+            } elseif ($bulanTerakhir['total'] > 0) {
+                $insight[] = [
+                    'jenis' => 'success',
+                    'judul' => 'Pendaftaran Mulai Tercatat',
+                    'pesan' => "Terdapat {$bulanTerakhir['total']} pendaftaran pada bulan {$bulanTerakhir['bulan']}, sedangkan bulan sebelumnya belum terdapat pendaftaran."
+                ];
+            }
+        }
+
+
         return view('pimpinan.dashboard', [
-            'd'           => $data,
-            'periode'     => $periode,
-            'opsiPeriode' => self::OPSI_PERIODE,
-        ]);
+    'd'           => $data,
+    'periode'      => $periode,
+    'opsiPeriode'  => self::OPSI_PERIODE,
+    'insight'      => $insight,
+]);
     }
 
     // ==========================================
