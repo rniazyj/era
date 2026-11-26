@@ -46,12 +46,6 @@ class ProfilPerusahaan extends Model
             'ringkas' => 'Foto dan profil orang-orang di perusahaan.',
             'bagian'  => ['hero', 'tim'],
         ],
-        'produk' => [
-            'nama'    => 'Halaman Produk',
-            'route'   => 'tentang.produk',
-            'ringkas' => 'Daftar produk dan layanan perdagangan berjangka.',
-            'bagian'  => ['hero', 'produk'],
-        ],
     ];
 
     /*
@@ -179,20 +173,6 @@ class ProfilPerusahaan extends Model
                                 'bantuan' => 'Disarankan rasio 4:5. Kosongkan untuk menampilkan inisial nama.'],
             ],
         ],
-
-        'produk' => [
-            'nama' => 'Produk & layanan', 'halaman' => 'produk', 'anchor' => 'produk', 'mode' => 'daftar',
-            'bantuan' => 'Produk yang tampil di halaman Produk. Filter dibuat otomatis dari isian "Kategori".',
-            'utama' => 'judul', 'sub' => 'label', 'badge' => 'kategori',
-            'field' => [
-                'label'     => ['label' => 'Kode', 'tipe' => 'teks', 'aturan' => 'required|string|max:10',
-                                'bantuan' => 'Singkatan pendek yang tampil di ikon kartu, mis. XAU.'],
-                'judul'     => ['label' => 'Nama produk', 'tipe' => 'teks', 'aturan' => 'required|string|max:160'],
-                'kategori'  => ['label' => 'Kategori', 'tipe' => 'teks', 'aturan' => 'nullable|string|max:80'],
-                'deskripsi' => ['label' => 'Deskripsi', 'tipe' => 'area', 'aturan' => 'nullable|string|max:600'],
-                'foto'      => ['label' => 'Foto (opsional)', 'tipe' => 'foto', 'bantuan' => 'Tampil di bagian atas kartu produk.'],
-            ],
-        ],
     ];
 
     /*
@@ -251,7 +231,6 @@ class ProfilPerusahaan extends Model
         $awal = [
             'perusahaan' => ['Mitra Tepercaya', 'Investasi *Berjangka*'],
             'tim'        => ['Orang-orang di Balik', '*Equityworld.*'],
-            'produk'     => ['Produk & Layanan', '*Unggulan Kami.*'],
         ];
 
         foreach ($awal as $halaman => [$baris1, $baris2]) {

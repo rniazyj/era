@@ -11,7 +11,7 @@ class BantuanSeeder extends Seeder
     {
         $data = [
             // Akun
-            ['Akun', 'Bagaimana cara membuat akun di ERA?',
+            ['Akun', 'Bagaimana cara membuat akun di Galeri Magang?',
              'Klik tombol Get Started di pojok kanan atas, lalu pilih Daftar. Isi nama lengkap, e-mail aktif, dan password minimal 8 karakter. Setelah berhasil, silakan masuk menggunakan akun tersebut.'],
             ['Akun', 'Saya lupa password, apa yang harus dilakukan?',
              'Di halaman Masuk, klik "Lupa password?", lalu tulis e-mail yang kamu pakai saat mendaftar. Kami akan mengirim tautan untuk membuat password baru. Jangan lupa cek folder spam.'],

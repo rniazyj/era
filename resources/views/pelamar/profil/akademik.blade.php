@@ -1,6 +1,6 @@
 @extends('pelamar.profil.layout')
 
-@section('title', 'Data Akademik - ERA')
+@section('title', 'Data Akademik - Galeri Magang')
 
 @section('konten')
 <section class="card" id="akademik">

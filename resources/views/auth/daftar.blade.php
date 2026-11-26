@@ -1,6 +1,6 @@
 @extends('layouts.auth')
 
-@section('title', 'Daftar - ERA')
+@section('title', 'Daftar - Galeri Magang')
 @section('palette', 'register')
 
 @section('cta')
@@ -12,7 +12,7 @@
 @endsection
 
 @section('heading')
-  Gabung bareng ERA,<br><span class="dim">mulai dari sini.</span>
+  Gabung bareng Galeri Magang,<br><span class="dim">mulai dari sini.</span>
 @endsection
 
 @section('lead', 'Cuma semenit. Habis itu kamu bisa langsung lamar lowongan dan program magang yang cocok.')
@@ -72,5 +72,5 @@
 @endsection
 
 @section('footnote')
-  Sudah punya akun? <a href="{{ route('login') }}" class="u" data-wipe="Masuk">Masuk di sini</a>. Dengan mendaftar, kamu setuju dengan Kebijakan Privasi ERA.
+  Sudah punya akun? <a href="{{ route('login') }}" class="u" data-wipe="Masuk">Masuk di sini</a>. Dengan mendaftar, kamu setuju dengan Kebijakan Privasi Galeri Magang.
 @endsection

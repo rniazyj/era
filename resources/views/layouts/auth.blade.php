@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <title>@yield('title', 'ERA')</title>
+  <title>@yield('title', 'Galeri Magang')</title>
 
   {{-- Kalau datang dari halaman auth lain, tandai supaya halaman ini ikut geser masuk --}}
   <script>
@@ -221,7 +221,7 @@
       <aside class="panel">
         <div class="blobs"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i></div>
         <div class="grain"></div>
-        <a href="{{ route('home') }}" class="logo" data-wipe="Home" aria-label="ERA, ke beranda">ERA<i></i></a>
+        <a href="{{ route('home') }}" class="logo" data-wipe="Home" aria-label="Galeri Magang, ke beranda">Galeri Magang<i></i></a>
         <p class="tag">Pilih. Kirim. Seleksi.<br><span>Berkarya.</span></p>
       </aside>
 

@@ -1,6 +1,6 @@
 @extends('layouts.auth')
 
-@section('title', 'Reset Password - ERA')
+@section('title', 'Reset Password - Galeri Magang')
 @section('palette', 'reset')
 
 @section('cta')

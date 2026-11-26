@@ -1,6 +1,6 @@
 @extends('pelamar.profil.layout')
 
-@section('title', 'Pengalaman - ERA')
+@section('title', 'Pengalaman - Galeri Magang')
 
 @php
   $tgl = fn ($d) => $d ? \Carbon\Carbon::parse($d)->locale('id')->translatedFormat('d M Y') : null;

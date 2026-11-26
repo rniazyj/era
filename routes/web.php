@@ -39,7 +39,6 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // Halaman Tentang (isi dikelola admin di Admin > Konten Website, tabel profil_perusahaan)
 Route::get('/tentang', [TentangController::class, 'perusahaan'])->name('tentang');
 Route::get('/tentang/tim', [TentangController::class, 'tim'])->name('tentang.tim');
-Route::get('/tentang/produk', [TentangController::class, 'produk'])->name('tentang.produk');
 
 // Legalitas & cabang kini menjadi bagian halaman /tentang (tidak ada method terpisah di controller).
 // Nama route lama dipertahankan sebagai pengalihan, supaya link di navbar/footer tidak error.
@@ -53,7 +52,7 @@ Route::get('/lowongan/{id}', [LowonganController::class, 'show'])->whereNumber('
 // Lowongan kerja: melamar wajib login.
 // Guest yang klik "Lamar" dilempar ke login, lalu kembali ke form (lihat catatan intended() di LoginController).
 // Cek role pelamar & kelengkapan profil ditangani LowonganController agar pesannya ramah.
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/lowongan/{id}/lamar', [PelamarLowonganController::class, 'apply'])
     ->whereNumber('id')
     ->name('lowongan.apply');
@@ -116,7 +115,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 // 3. RUTE ROLE: ADMIN / HR
 // Semua rute admin digabung & dikunci role:admin_hr.
 // (Sebelumnya grup lowongan & pelamar hanya memakai 'auth', sehingga akun pelamar bisa membukanya.)
-Route::middleware(['auth', 'catat.aktivitas', 'role:admin_hr'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'verified', 'catat.aktivitas', 'role:admin_hr'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // Profil admin
@@ -141,7 +140,7 @@ Route::middleware(['auth', 'catat.aktivitas', 'role:admin_hr'])->prefix('admin')
     // Kelola konten website (halaman Tentang). {tipe} dibatasi ke jenis konten yang dikenal.
     // Nama route: admin.konten.index | daftar | create | store | edit | update | destroy
     Route::prefix('konten')->name('konten.')->controller(AdminKontenController::class)->group(function () {
-        $tipe = 'hero|profil|visi|misi|nilai|tonggak|legalitas|cabang|tim|produk';
+        $tipe = 'hero|profil|visi|misi|nilai|tonggak|legalitas|cabang|tim';
 
         Route::get('/', 'index')->name('index');
         Route::get('/{tipe}', 'daftar')->where('tipe', $tipe)->name('daftar');
@@ -199,7 +198,7 @@ Route::get('/log-aktivitas/export/pdf', [LogAktivitasController::class, 'exportP
 });
 
 // 4. RUTE ROLE: PIMPINAN
-Route::middleware(['auth', 'catat.aktivitas', 'role:pimpinan'])
+Route::middleware(['auth', 'verified', 'catat.aktivitas', 'role:pimpinan'])
     ->prefix('pimpinan')
     ->name('pimpinan.')
     ->group(function () {
@@ -228,8 +227,18 @@ Route::middleware(['auth', 'catat.aktivitas', 'role:pimpinan'])
 });
 
 // 5. RUTE ROLE: PELAMAR
-Route::middleware(['auth', 'catat.aktivitas', 'role:pelamar'])->group(function () {
+Route::middleware(['auth', 'verified', 'catat.aktivitas', 'role:pelamar'])->group(function () {
     Route::get('/dashboard', [PelamarDashboardController::class, 'index'])->name('pelamar.dashboard');
+
+    // Pengaturan Akun Pelamar
+Route::get('/pengaturan-akun', [PelamarProfilController::class, 'pengaturanAkun'])
+    ->name('pelamar.profil.pengaturan-akun');
+
+Route::put('/pengaturan-akun/email', [PelamarProfilController::class, 'updateEmail'])
+    ->name('pelamar.profil.pengaturan-akun.email');
+
+Route::put('/pengaturan-akun/password', [PelamarProfilController::class, 'updatePassword'])
+    ->name('pelamar.profil.pengaturan-akun.password');
 
     // Pendaftaran program magang
     Route::get('/lamaran/create', [PelamarProgramController::class, 'create'])

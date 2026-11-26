@@ -175,7 +175,7 @@
         </div>
 
         <p class="mt-1 text-sm text-zinc-500">
-            Data ketua diambil otomatis dari akun dan profil ERA yang sedang digunakan.
+            Data ketua diambil otomatis dari akun dan profil Galeri Magang yang sedang digunakan.
         </p>
 
         
@@ -312,7 +312,7 @@
         </button>
 
         <p class="mt-3 text-xs text-zinc-500">
-            Anggota tambahan tidak perlu memiliki akun ERA. Isi data sesuai identitas masing-masing.
+            Anggota tambahan tidak perlu memiliki akun Galeri Magang. Isi data sesuai identitas masing-masing.
         </p>
     </section>
 
@@ -572,7 +572,7 @@
     @elseif($isMagang)
 
         <p class="mt-1 text-sm text-zinc-500">
-            Unggah berkas milik ketua tim.
+            Unggah berkas milik ketua tim. Jika anda sendiri yang mendaftar, unggah berkas milikmu disini.
         </p>
 
         <div class="mt-5 space-y-5">

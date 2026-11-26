@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ERA - Membangun Masa Depan Karier &amp; Talenta</title>
+  <title>Galeri Magang - Membangun Masa Depan Karier &amp; Talenta</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -269,7 +269,7 @@ body.lock{overflow:hidden}
   <div class="relative z-10 bg-[#161616] text-white">
     <div class="max-w-[90rem] mx-auto px-6 md:px-10 py-6 md:py-8 grid md:grid-cols-2 gap-6 md:gap-8">
       <div class="flex flex-col justify-between gap-4">
-        <span class="inline-flex items-center gap-1.5 text-lg font-semibold tracking-tight">ERA<i class="w-1.5 h-1.5 rounded-full bg-orange-500"></i></span>
+        <span class="inline-flex items-center gap-1.5 text-lg font-semibold tracking-tight">Galeri Magang<i class="w-1.5 h-1.5 rounded-full bg-orange-500"></i></span>
         <p class="text-sm font-semibold leading-snug tracking-tight">Pilih. Kirim. Seleksi. <span class="text-white/45">Berkarya.</span></p>
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-5 text-xs">

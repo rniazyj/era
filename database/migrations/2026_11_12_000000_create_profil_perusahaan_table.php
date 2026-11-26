@@ -127,7 +127,6 @@ return new class extends Migration
         // 7. hero tiap halaman (judul 2 baris + foto). Kata di antara *bintang* tampil tebal.
         $tambah(['tipe' => 'hero', 'kategori' => 'perusahaan', 'judul' => 'Mitra Tepercaya',      'label' => 'Investasi *Berjangka*']);
         $tambah(['tipe' => 'hero', 'kategori' => 'tim',        'judul' => 'Orang-orang di Balik', 'label' => '*Equityworld.*']);
-        $tambah(['tipe' => 'hero', 'kategori' => 'produk',     'judul' => 'Produk & Layanan',     'label' => '*Unggulan Kami.*']);
 
         foreach (array_chunk($baris, 100) as $paket) {
             DB::table('profil_perusahaan')->insert($paket);

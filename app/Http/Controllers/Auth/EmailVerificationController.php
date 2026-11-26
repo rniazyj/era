@@ -31,7 +31,13 @@ class EmailVerificationController extends Controller
 );
 
         // Hanya akun pelamar yang menggunakan verifikasi publik.
-        abort_unless($user->isPelamar(), 403);
+        abort_unless(
+    $user->isPelamar() ||
+    $user->isAdmin() ||
+    $user->isPimpinan(),
+    403,
+    'Role akun tidak diizinkan melakukan verifikasi.'
+);
 
         if (! $user->hasVerifiedEmail()) {
             $user->markEmailAsVerified();

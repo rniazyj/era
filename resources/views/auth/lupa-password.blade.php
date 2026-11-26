@@ -1,6 +1,6 @@
 @extends('layouts.auth')
 
-@section('title', 'Lupa Password - ERA')
+@section('title', 'Lupa Password - Galeri Magang')
 @section('palette', 'forgot')
 
 @section('cta')

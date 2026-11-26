@@ -10,6 +10,8 @@
 
   $kirim = $d['kirim'];
 
+  $insight = $insight ?? [];
+
 
 
   // Warna status lamaran: [warna batang, kelas label]
@@ -87,7 +89,7 @@
 
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
-  <title>Dashboard Pimpinan - ERA</title>
+  <title>Dashboard Pimpinan - Galeri Magang</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
 
@@ -1376,7 +1378,98 @@
 
         </div>
 
+        {{-- INSIGHT STRATEGIS OTOMATIS --}}
+<section class="scroll-rv mt-6 sm:mt-8 bg-white rounded-2xl sm:rounded-3xl border border-black/5 p-4 sm:p-6 md:p-8 shadow-sm">
 
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-5 border-b border-black/5">
+        <div>
+            <h3 class="text-sm font-bold tracking-wide text-zinc-900 uppercase">
+                Insight Strategis Otomatis
+            </h3>
+            <p class="text-xs text-zinc-400 mt-1">
+                Analisis data dashboard dan rekomendasi tindak lanjut untuk pimpinan.
+            </p>
+        </div>
+
+        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-50 text-orange-600 text-[10px] font-bold w-fit">
+            <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+            ANALISIS SISTEM
+        </span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+
+        @foreach($insight as $item)
+
+            @php
+    if ($item['jenis'] === 'warning') {
+        $style = [
+            'bg' => 'bg-amber-50',
+            'border' => 'border-amber-100',
+            'icon' => 'text-amber-600',
+            'title' => 'text-amber-800',
+            'dot' => 'bg-amber-500',
+            'label' => 'Perlu Perhatian',
+        ];
+        $icon = '⚠️';
+
+    } elseif ($item['jenis'] === 'success') {
+        $style = [
+            'bg' => 'bg-emerald-50',
+            'border' => 'border-emerald-100',
+            'icon' => 'text-emerald-600',
+            'title' => 'text-emerald-800',
+            'dot' => 'bg-emerald-500',
+            'label' => 'Kondisi Positif',
+        ];
+        $icon = '✓';
+
+    } else {
+        $style = [
+            'bg' => 'bg-orange-50',
+            'border' => 'border-orange-100',
+            'icon' => 'text-orange-500',
+            'title' => 'text-orange-800',
+            'dot' => 'bg-orange-500',
+            'label' => 'Informasi',
+        ];
+        $icon = 'ℹ️';
+    }
+@endphp
+
+            <div class="rounded-2xl border {{ $style['border'] }} {{ $style['bg'] }} p-4 sm:p-5">
+
+                <div class="flex items-start gap-3">
+
+                    <div class="w-9 h-9 rounded-xl bg-white/80 flex items-center justify-center shrink-0 text-base">
+                        {{ $icon }}
+                    </div>
+
+                    <div class="min-w-0 flex-1">
+
+                        <span class="text-[9px] font-bold uppercase tracking-wider {{ $style['icon'] }}">
+                            {{ $style['label'] }}
+                        </span>
+
+                        <h4 class="text-sm font-bold {{ $style['title'] }} mt-1">
+                            {{ $item['judul'] }}
+                        </h4>
+
+                        <p class="text-xs text-zinc-600 leading-relaxed mt-2">
+                            {{ $item['pesan'] }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        @endforeach
+
+    </div>
+
+</section>
 
       </div>
 
