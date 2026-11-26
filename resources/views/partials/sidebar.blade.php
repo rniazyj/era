@@ -142,9 +142,9 @@
            @click="toggleLogo()">
 
         <div class="flex items-center gap-4 overflow-hidden">
-          <div class="w-9 h-9 rounded-full bg-orange-500 text-white font-bold flex items-center justify-center shrink-0 shadow-md">
-            <span>E</span>
-          </div>
+    <div class="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center shrink-0 shadow-md overflow-hidden">
+        <img src="{{ asset('storage/logoGaleri.png') }}" alt="Logo" class="w-full h-full object-cover">
+    </div>
 
           <span x-show="expanded"
                 x-transition:enter="transition ease-out duration-500"
@@ -154,7 +154,7 @@
                 x-transition:leave-start="opacity-100 translate-x-0"
                 x-transition:leave-end="opacity-0 -translate-x-2"
                 class="font-bold tracking-tight text-sm whitespace-nowrap">
-            ERA<i class="inline-block w-1.5 h-1.5 rounded-full bg-orange-500 ml-0.5"></i>
+            Galeri Magang<i class="inline-block w-1.5 h-1.5 rounded-full bg-orange-500 ml-0.5"></i>
           </span>
         </div>
 

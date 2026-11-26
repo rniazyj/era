@@ -12,7 +12,7 @@ class CustomResetPassword extends ResetPassword
         $url = $this->resetUrl($notifiable);
 
         return (new MailMessage)
-            ->subject('Permintaan Reset Password — ERA')
+            ->subject('Permintaan Reset Password — Galeri Magang')
             ->view('emails.auth.reset-password', [
                 'name' => $notifiable->name,
                 'url' => $url,

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Verifikasi Email - ERA</title>
+    <title>Verifikasi Email - Galeri Magang</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -23,7 +23,7 @@
         </h1>
 
         <p class="text-sm text-zinc-500 mt-3 leading-relaxed">
-            Terima kasih telah mendaftar di ERA.
+            Terima kasih telah mendaftar di Galeri Magang.
             Silakan periksa email Anda dan klik tautan verifikasi
             untuk mengaktifkan akses akun.
         </p>

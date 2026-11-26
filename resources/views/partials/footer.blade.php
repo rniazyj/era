@@ -31,7 +31,7 @@
     <!-- Brand -->
     <div class="flex flex-col justify-between gap-6">
       <div>
-        <a href="{{ url('/') }}" class="inline-flex items-center gap-1.5 text-xl font-semibold tracking-tight">ERA<i class="w-1.5 h-1.5 rounded-full bg-orange-500"></i></a>
+        <a href="{{ url('/') }}" class="inline-flex items-center gap-1.5 text-xl font-semibold tracking-tight">Galeri Magang<i class="w-1.5 h-1.5 rounded-full bg-orange-500"></i></a>
         <p class="mt-3 text-xs text-white/45 leading-relaxed max-w-xs">Portal karir korporat resmi dan inkubasi talenta magang nasional. Menghubungkan potensi terbaik Indonesia dengan peluang industri terpercaya.</p>
       </div>
       <p class="text-sm font-semibold leading-snug tracking-tight">Pilih. Kirim. Seleksi. <span class="text-white/45">Berkarya.</span></p>

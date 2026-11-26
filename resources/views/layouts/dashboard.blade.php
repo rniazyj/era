@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <title>@yield('title', 'Dashboard - ERA')</title>
+  <title>@yield('title', 'Dashboard - Galeri Magang')</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   {{-- Jika project memakai Vite + Tailwind, ganti baris CDN di bawah dengan @vite(['resources/css/app.css','resources/js/app.js']) --}}
@@ -33,7 +33,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7h16M4 12h16M4 17h10"/></svg>
           </button>
           <div class="min-w-0">
-            <p class="text-[10px] tracking-[.18em] text-black/40 leading-none">@yield('page_label', 'PORTAL ERA')</p>
+            <p class="text-[10px] tracking-[.18em] text-black/40 leading-none">@yield('page_label', 'PORTAL GALERI MAGANG')</p>
             <h1 class="text-base md:text-lg font-semibold tracking-tight truncate">@yield('page_title', 'Dashboard')</h1>
           </div>
         </div>
@@ -84,7 +84,7 @@
       </main>
 
       <footer class="px-4 md:px-8 py-5 border-t border-black/5 text-[11px] text-black/40 flex flex-wrap items-center justify-between gap-2">
-        <span>&copy; {{ date('Y') }} ERA Platform. All rights reserved.</span>
+        <span>&copy; {{ date('Y') }} Galeri Magang Platform. All rights reserved.</span>
         <span>Equityworld Recruitment Access</span>
       </footer>
     </div>

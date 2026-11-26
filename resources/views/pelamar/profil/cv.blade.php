@@ -1,6 +1,6 @@
 @extends('pelamar.profil.layout')
 
-@section('title', 'Curriculum Vitae - ERA')
+@section('title', 'Curriculum Vitae - Galeri Magang')
 
 @section('konten')
 <div class="stack">

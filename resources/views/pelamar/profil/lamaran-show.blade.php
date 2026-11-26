@@ -1,7 +1,7 @@
 
 @extends('pelamar.profil.layout')
 
-@section('title', 'Detail Lamaran - ERA')
+@section('title', 'Detail Lamaran - Galeri Magang')
 
 @section('konten')
 

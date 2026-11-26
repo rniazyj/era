@@ -89,7 +89,7 @@
 
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
-  <title>Dashboard Pimpinan - ERA</title>
+  <title>Dashboard Pimpinan - Galeri Magang</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
 

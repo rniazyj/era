@@ -1,6 +1,6 @@
 @extends('pelamar.profil.layout')
 
-@section('title', 'Data Diri & Profil - ERA')
+@section('title', 'Data Diri & Profil - Galeri Magang')
 
 {{-- Menandai halaman ini boleh mengubah foto & bio di header (input terhubung ke #formProfil lewat atribut form="") --}}
 @section('editable', '1')

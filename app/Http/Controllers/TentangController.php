@@ -62,17 +62,6 @@ class TentangController extends Controller
         ]);
     }
 
-    public function produk()
-    {
-        $produk = ProfilPerusahaan::tipe('produk')->aktif()->get();
-
-        return view('pages.tentang.produk', [
-            'hero'     => $this->hero('produk', ['Produk & Layanan', '*Unggulan Kami.*']),
-            'produk'   => $produk,
-            'kategori' => $produk->pluck('kategori')->filter()->unique()->values(),
-        ]);
-    }
-
     // Judul 2 baris + foto hero tiap halaman (diedit di admin: Konten Website > Hero halaman)
     private function hero(string $halaman, array $awal): array
     {

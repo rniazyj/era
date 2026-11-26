@@ -39,7 +39,6 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // Halaman Tentang (isi dikelola admin di Admin > Konten Website, tabel profil_perusahaan)
 Route::get('/tentang', [TentangController::class, 'perusahaan'])->name('tentang');
 Route::get('/tentang/tim', [TentangController::class, 'tim'])->name('tentang.tim');
-Route::get('/tentang/produk', [TentangController::class, 'produk'])->name('tentang.produk');
 
 // Legalitas & cabang kini menjadi bagian halaman /tentang (tidak ada method terpisah di controller).
 // Nama route lama dipertahankan sebagai pengalihan, supaya link di navbar/footer tidak error.
@@ -141,7 +140,7 @@ Route::middleware(['auth', 'verified', 'catat.aktivitas', 'role:admin_hr'])->pre
     // Kelola konten website (halaman Tentang). {tipe} dibatasi ke jenis konten yang dikenal.
     // Nama route: admin.konten.index | daftar | create | store | edit | update | destroy
     Route::prefix('konten')->name('konten.')->controller(AdminKontenController::class)->group(function () {
-        $tipe = 'hero|profil|visi|misi|nilai|tonggak|legalitas|cabang|tim|produk';
+        $tipe = 'hero|profil|visi|misi|nilai|tonggak|legalitas|cabang|tim';
 
         Route::get('/', 'index')->name('index');
         Route::get('/{tipe}', 'daftar')->where('tipe', $tipe)->name('daftar');

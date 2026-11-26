@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password ERA</title>
+    <title>Reset Password Galeri Magang</title>
 </head>
 <body style="margin:0; padding:0; background-color:#f4f5f7; font-family:Arial, Helvetica, sans-serif; color:#333333;">
 
@@ -18,7 +18,7 @@
                     <tr>
                         <td align="center" style="padding:32px 24px 22px;">
                             <h1 style="margin:0; font-size:23px; font-weight:800; letter-spacing:1px; color:#F97316;">
-                                ERA
+                                Galeri Magang
                             </h1>
 
                             <p style="margin:7px 0 0; font-size:12px; color:#888888; letter-spacing:0.5px;">
@@ -46,7 +46,7 @@
                             </p>
 
                             <p style="margin:0 0 16px; font-size:14px; line-height:1.8; color:#555555;">
-                                Kami menerima permintaan untuk mengatur ulang password akun ERA kamu.
+                                Kami menerima permintaan untuk mengatur ulang password akun Galeri Magang kamu.
                             </p>
 
                             <p style="margin:0 0 24px; font-size:14px; line-height:1.8; color:#555555;">
@@ -99,12 +99,12 @@
                             <div style="height:1px; background-color:#eeeeee; margin-bottom:20px;"></div>
 
                             <p style="margin:0; font-size:11px; line-height:1.7; color:#aaaaaa;">
-                                Email ini dikirim secara otomatis oleh ERA.<br>
+                                Email ini dikirim secara otomatis oleh Galeri Magang.<br>
                                 Mohon tidak membalas email ini.
                             </p>
 
                             <p style="margin:10px 0 0; font-size:10px; color:#bbbbbb;">
-                                &copy; {{ date('Y') }} ERA · PT Equityworld Futures
+                                &copy; {{ date('Y') }} Galeri Magang · PT Equityworld Futures
                             </p>
                         </td>
                     </tr>

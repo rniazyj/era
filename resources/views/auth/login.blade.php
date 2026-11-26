@@ -1,6 +1,6 @@
 @extends('layouts.auth')
 
-@section('title', 'Masuk - ERA')
+@section('title', 'Masuk - Galeri Magang')
 @section('palette', 'login')
 
 @section('cta')
@@ -51,5 +51,5 @@
 @endsection
 
 @section('footnote')
-  Belum punya akun? <a href="{{ route('register') }}" class="u" data-wipe="Daftar">Daftar gratis</a>. Dengan masuk, kamu setuju dengan Kebijakan Privasi ERA.
+  Belum punya akun? <a href="{{ route('register') }}" class="u" data-wipe="Daftar">Daftar gratis</a>. Dengan masuk, kamu setuju dengan Kebijakan Privasi Galeri Magang.
 @endsection

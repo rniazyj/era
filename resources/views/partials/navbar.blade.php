@@ -6,7 +6,7 @@
 
   Letakkan di resources/views/partials/navbar.blade.php
 
-  Splash ERA:
+  Splash Galeri Magang:
   - Sekarang ada di dalam navbar ini, jadi berlaku di SEMUA halaman utama.
   - Hanya tampil saat halaman di-RELOAD (refresh). Pindah halaman lewat link tidak memunculkan splash.
   - Tidak tampil kalau pengguna mengaktifkan "kurangi animasi" di perangkatnya.
@@ -41,7 +41,6 @@
   $tentangItems = [
     ['Perusahaan', 'Profil, legalitas & cabang', route('tentang'),         request()->routeIs('tentang')],
     ['Tim',        'Orang di balik Equityworld', route('tentang.tim'),     request()->routeIs('tentang.tim')],
-    ['Produk',     'Produk & layanan',           route('tentang.produk'),  request()->routeIs('tentang.produk')],
   ];
 
   $karierItems = [
@@ -149,13 +148,13 @@
   .nv-item.out:hover{ background:#fef2f2; color:#b91c1c; }
 </style>
 
-{{-- Splash ERA (hanya terlihat saat reload) --}}
-<div class="era-word" id="era-word" aria-hidden="true"><span class="m"><span>E</span></span><span class="m"><span>R</span></span><span class="m"><span>A</span></span></div>
+{{-- Splash Galeri Magang (hanya terlihat saat reload) --}}
+<div class="era-word" id="era-word" aria-hidden="true"><span class="m"><span>G</span></span><span class="m"><span>a</span></span><span class="m"><span>l</span></span><span class="m"><span>e</span></span><span class="m"><span>r</span></span><span class="m"><span>i</span></span><span class="m"><span>M</span></span><span class="m"><span>a</span></span><span class="m"><span>g</span></span><span class="m"><span>a</span></span><span class="m"><span>n</span></span><span class="m"><span>g</span></span></div>
 <div class="era-cap" id="era-cap" aria-hidden="true">EQUITYWORLD RECRUITMENT ACCESS</div>
 
 <header id="nav" class="nv">
   <nav class="nv-in" aria-label="Navigasi utama">
-    <a href="{{ route('home') }}" id="nav-logo" class="nv-logo">ERA</a>
+    <a href="{{ route('home') }}" id="nav-logo" class="nv-logo">Galeri Magang</a>
 
     <ul class="nv-links nav-i">
       <li><a href="{{ route('home') }}">Beranda</a></li>
@@ -188,10 +187,21 @@
       @auth
         <div class="nv-user" id="nvUser">
           <button type="button" class="nv-pill nv-prof" id="nvBtn" aria-haspopup="true" aria-expanded="false" aria-controls="nvMenu">
-            <span class="nv-av" aria-hidden="true">{{ $inisial }}</span>
-            <span class="nv-name">{{ $nama }}</span>
-            <svg class="nv-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg>
-          </button>
+
+    @if(!empty($profil?->foto) && \Illuminate\Support\Facades\Storage::disk('public')->exists($profil->foto))
+        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($profil->foto) }}"
+             class="nv-av"
+             alt="Foto profil">
+    @else
+        <span class="nv-av" aria-hidden="true">{{ $inisial }}</span>
+    @endif
+
+    <span class="nv-name">{{ $nama }}</span>
+
+    <svg class="nv-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M5 9l7 7 7-7"/>
+    </svg>
+</button>
 
           <div class="nv-menu" id="nvMenu" role="menu">
             <div class="nv-menu-h">

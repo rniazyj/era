@@ -1,6 +1,6 @@
 @extends('pelamar.profil.layout')
 
-@section('title', 'Skill & Keahlian - ERA')
+@section('title', 'Skill & Keahlian - Galeri Magang')
 
 @php
   $bagian = [
