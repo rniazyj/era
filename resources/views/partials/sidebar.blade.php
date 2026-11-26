@@ -41,10 +41,11 @@
       ]],
       ['title' => 'Rekrutmen', 'roles' => null, 'items' => [
         ['Kelola Lowongan', 'admin.lowongan.index', 'admin.lowongan*', 'briefcase'],
-        ['Daftar Pelamar',  'admin.pelamar.index',  'admin.pelamar*',  'users'],
+        ['Kelola Lamaran',  'admin.pelamar.index',  'admin.pelamar*',  'users'],
+        ['Kelola Jadwal Interview', 'admin.jadwal.index',  'admin.jadwal*',   'calendar'],
       ]],
       ['title' => 'Pengaturan & Sistem', 'roles' => null, 'items' => [
-        ['Konten Website', 'admin.konten.index', 'admin.konten*', 'globe'],
+        ['Kelola Isi Website', 'admin.konten.index', 'admin.konten*', 'globe'],
         ['Log Aktivitas',  'admin.log',    'admin.log*',    'clock'],
       ]],
     ];

@@ -7,6 +7,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  {{-- Tailwind CDN: dibutuhkan oleh partials.footer (dan komponen lain yang memakai class Tailwind).
+       Preflight dimatikan supaya desain kustom .ab-* tidak berubah. --}}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      corePlugins: { preflight: false },
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] }, colors: { paper: '#faf9fc' } } }
+    };
+  </script>
+
   {{-- Animasi aktif hanya kalau pengguna tidak meminta "reduced motion" --}}
   <script>if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('js');</script>
   <style>
@@ -33,6 +44,13 @@
     :where(.ab-main) a { color: inherit; }
     :where(.ab-main) svg { display: block; }
     :where(.ab-foot) *, :where(.ab-foot) *::before, :where(.ab-foot) *::after { box-sizing: border-box; }
+
+    /* Reset ringan footer (pengganti preflight Tailwind; specificity nol supaya class Tailwind tetap menang) */
+    :where(.ab-foot) ul, :where(.ab-foot) ol { list-style: none; margin: 0; padding: 0; }
+    :where(.ab-foot) p, :where(.ab-foot) h1, :where(.ab-foot) h2, :where(.ab-foot) h3, :where(.ab-foot) h4 { margin: 0; }
+    :where(.ab-foot) a { color: inherit; text-decoration: none; }
+    :where(.ab-foot) i { font-style: normal; }
+    :where(.ab-foot) img, :where(.ab-foot) svg { display: block; max-width: 100%; }
 
     html { scroll-behavior: smooth; }
     [hidden] { display: none !important; }

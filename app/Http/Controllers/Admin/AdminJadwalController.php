@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\JadwalInterview;
 use App\Models\Lamaran;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -12,7 +13,7 @@ class AdminJadwalController extends Controller
 {
     private const TAMPIL = ['mendatang', 'hariini', 'terlewat', 'selesai', 'dibatalkan', 'semua'];
 
-    // Halaman kelola jadwal interview
+    // Halaman kelola jadwal interview: kalender bulanan di atas, daftar interview di bawahnya
     public function index(Request $request)
     {
         $tampil = $request->query('tampil', 'mendatang');
@@ -23,7 +24,33 @@ class AdminJadwalController extends Controller
         $cari    = trim((string) $request->query('q', ''));
         $hariIni = today()->toDateString();
 
-        $query = JadwalInterview::with(['lamaran.pelamar', 'lamaran.lowongan', 'lamaran.program']);
+        // Query dasar (relasi + pencarian nama pelamar), dipakai kalender maupun daftar
+        $dasar = fn () => JadwalInterview::with(['lamaran.pelamar', 'lamaran.lowongan', 'lamaran.program'])
+            ->when($cari !== '', fn ($q) => $q->whereHas(
+                'lamaran.pelamar',
+                fn ($w) => $w->where('name', 'like', '%' . $cari . '%')
+            ));
+
+        // ---- Bulan yang ditampilkan (?bulan=2026-11) ----
+        try {
+            $bulan = Carbon::createFromFormat('!Y-m', (string) $request->query('bulan', today()->format('Y-m')));
+        } catch (\Throwable $e) {
+            $bulan = today()->startOfMonth();
+        }
+        $bulan = $bulan->startOfMonth();
+
+        $awalGrid  = $bulan->copy()->startOfMonth()->startOfWeek(Carbon::MONDAY);
+        $akhirGrid = $bulan->copy()->endOfMonth()->endOfWeek(Carbon::SUNDAY);
+
+        // Kalender bulanan
+        $kalender = $dasar()
+            ->whereBetween('tgl_interview', [$awalGrid->toDateString(), $akhirGrid->toDateString()])
+            ->orderBy('jam_mulai')
+            ->get()
+            ->groupBy(fn ($j) => $j->tgl_interview->toDateString());
+
+        // Daftar interview (di bawah kalender), difilter lewat tab
+        $query = $dasar();
 
         switch ($tampil) {
             case 'hariini':
@@ -44,10 +71,6 @@ class AdminJadwalController extends Controller
                 $query->terjadwal()->whereDate('tgl_interview', '>=', $hariIni);
         }
 
-        if ($cari !== '') {
-            $query->whereHas('lamaran.pelamar', fn ($w) => $w->where('name', 'like', '%' . $cari . '%'));
-        }
-
         $naik = in_array($tampil, ['mendatang', 'hariini'], true);
         $query->orderBy('tgl_interview', $naik ? 'asc' : 'desc')
               ->orderBy('jam_mulai', $naik ? 'asc' : 'desc');
@@ -55,13 +78,19 @@ class AdminJadwalController extends Controller
         $daftar     = $query->get();
         $perTanggal = $daftar->groupBy(fn ($j) => $j->tgl_interview->toDateString());
 
+        // Tanggal yang terpilih di panel agenda kalender
+        $pilih = (string) $request->query('tgl', '');
+        if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $pilih) || $pilih < $awalGrid->toDateString() || $pilih > $akhirGrid->toDateString()) {
+            $pilih = $bulan->isSameMonth(today()) ? $hariIni : $bulan->toDateString();
+        }
+
         $stat = [
-            'hariini'   => JadwalInterview::terjadwal()->whereDate('tgl_interview', $hariIni)->count(),
-            'pekan'     => JadwalInterview::terjadwal()
+            'hariini'  => JadwalInterview::terjadwal()->whereDate('tgl_interview', $hariIni)->count(),
+            'pekan'    => JadwalInterview::terjadwal()
                                 ->whereDate('tgl_interview', '>', $hariIni)
                                 ->whereDate('tgl_interview', '<=', today()->addDays(7)->toDateString())
                                 ->count(),
-            'terlewat'  => JadwalInterview::terjadwal()->whereDate('tgl_interview', '<', $hariIni)->count(),
+            'terlewat' => JadwalInterview::terjadwal()->whereDate('tgl_interview', '<', $hariIni)->count(),
         ];
 
         // Lamaran yang belum punya jadwal aktif (untuk pilihan di form "Atur Jadwal Baru")
@@ -71,7 +100,20 @@ class AdminJadwalController extends Controller
             ->limit(300)
             ->get();
 
-        return view('admin.jadwal.index', compact('perTanggal', 'daftar', 'stat', 'tampil', 'cari', 'lamaranOpsi'));
+        return view('admin.jadwal.index', [
+            'tampil'      => $tampil,
+            'cari'        => $cari,
+            'hariIni'     => $hariIni,
+            'bulan'       => $bulan,
+            'awalGrid'    => $awalGrid,
+            'akhirGrid'   => $akhirGrid,
+            'kalender'    => $kalender,
+            'pilih'       => $pilih,
+            'perTanggal'  => $perTanggal,
+            'daftar'      => $daftar,
+            'stat'        => $stat,
+            'lamaranOpsi' => $lamaranOpsi,
+        ]);
     }
 
     // Dari halaman Jadwal: pelamar dipilih lewat form (field id_lamaran)

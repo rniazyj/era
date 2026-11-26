@@ -56,4 +56,61 @@ class JadwalInterview extends Model
     {
         return (bool) filter_var($this->lokasi_atau_link, FILTER_VALIDATE_URL);
     }
+
+    // ---- Tampilan status (dipakai badge di kartu & chip di kalender) ----
+
+    public function getStatusLabelAttribute(): string
+    {
+        if ($this->terlewat) {
+            return 'Terlewat';
+        }
+
+        return match ($this->status_jadwal) {
+            self::SELESAI    => 'Selesai',
+            self::DIBATALKAN => 'Dibatalkan',
+            default          => 'Terjadwal',
+        };
+    }
+
+    // Kelas Tailwind untuk badge status
+    public function getStatusKelasAttribute(): string
+    {
+        if ($this->terlewat) {
+            return 'bg-amber-50 text-amber-700';
+        }
+
+        return match ($this->status_jadwal) {
+            self::SELESAI    => 'bg-emerald-50 text-emerald-700',
+            self::DIBATALKAN => 'bg-zinc-100 text-zinc-500',
+            default          => 'bg-orange-50 text-orange-600',
+        };
+    }
+
+    // Kelas Tailwind untuk chip kecil di sel kalender
+    public function getChipKelasAttribute(): string
+    {
+        if ($this->terlewat) {
+            return 'bg-amber-100 text-amber-800';
+        }
+
+        return match ($this->status_jadwal) {
+            self::SELESAI    => 'bg-emerald-100 text-emerald-800',
+            self::DIBATALKAN => 'bg-zinc-100 text-zinc-400 line-through',
+            default          => 'bg-orange-100 text-orange-800',
+        };
+    }
+
+    // Warna titik (tampilan mobile)
+    public function getTitikKelasAttribute(): string
+    {
+        if ($this->terlewat) {
+            return 'bg-amber-500';
+        }
+
+        return match ($this->status_jadwal) {
+            self::SELESAI    => 'bg-emerald-500',
+            self::DIBATALKAN => 'bg-zinc-300',
+            default          => 'bg-orange-500',
+        };
+    }
 }
