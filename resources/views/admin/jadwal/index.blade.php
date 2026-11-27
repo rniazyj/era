@@ -39,7 +39,7 @@
 
   @include('partials.sidebar')
 
-  <main class="min-w-0 w-full flex-1 px-4 sm:px-6 md:px-8 lg:px-10 pt-6 sm:pt-8 lg:pt-10 pb-20 sm:pb-24 space-y-6 sm:space-y-8">
+  <main class="min-w-0 w-full flex-1 px-4 sm:px-6 md:px-8 lg:px-10 pt-20 sm:pt-24 lg:pt-10 pb-20 sm:pb-24 space-y-6 sm:space-y-8">
 
     {{-- Header --}}
     <div class="w-full max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -47,12 +47,6 @@
         <span class="text-[10px] tracking-[.2em] font-bold text-ewforange bg-orange-50 px-3 py-1 rounded-full uppercase">Panel Administrator</span>
         <h1 class="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight mt-2">Jadwal Interview</h1>
         <p class="text-xs text-zinc-400 mt-1">Atur, ubah, dan pantau jadwal interview semua pelamar.</p>
-      </div>
-      <div class="flex items-center gap-3">
-        <button type="button" onclick="bukaFormJadwal({mode:'baru'})" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-ewforange hover:bg-orange-600 text-white text-xs font-semibold shadow-sm transition">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          Atur Jadwal Baru
-        </button>
       </div>
     </div>
 
@@ -96,11 +90,15 @@
           <a href="{{ $url(['bulan' => today()->format('Y-m')]) }}" class="ml-1 px-4 py-2 rounded-full bg-white border border-black/10 text-xs font-semibold text-zinc-600 hover:border-ewforange hover:text-ewforange transition">Hari ini</a>
         </div>
 
-        <form method="GET" action="{{ route('admin.jadwal.index') }}" class="flex gap-2">
+        <form method="GET" action="{{ route('admin.jadwal.index') }}" class="flex flex-wrap items-center gap-2">
           <input type="hidden" name="bulan" value="{{ $bulan->format('Y-m') }}">
           <input type="hidden" name="tampil" value="{{ $tampil }}">
-          <input type="search" name="q" value="{{ $cari }}" placeholder="Cari nama pelamar…" class="w-full lg:w-64 rounded-full border border-black/10 bg-white px-4 py-2 text-xs focus:outline-none focus:border-ewforange">
+          <input type="search" name="q" value="{{ $cari }}" placeholder="Cari nama pelamar…" class="w-full sm:w-64 rounded-full border border-black/10 bg-white px-4 py-2 text-xs focus:outline-none focus:border-ewforange">
           <button class="px-4 py-2 rounded-full bg-zinc-900 text-white text-xs font-semibold">Cari</button>
+          <button type="button" onclick="bukaFormJadwal({mode:'baru'})" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-ewforange hover:bg-orange-600 text-white text-xs font-semibold shadow-sm transition">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            Atur Jadwal
+          </button>
         </form>
       </div>
 

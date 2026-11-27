@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\AdminKontenController;
 use App\Http\Controllers\Admin\AdminJadwalController;
 use App\Http\Controllers\Admin\SeleksiController;
 use App\Http\Controllers\Admin\AdminProfilController;
+use App\Http\Controllers\Admin\KelolaAdminController;
 use App\Http\Controllers\Admin\LogAktivitasController;
 use App\Http\Controllers\Admin\SuratPenerimaanMagangController;
 use App\Http\Controllers\Pimpinan\PimpinanDashboardController;
@@ -195,6 +196,14 @@ Route::get('/log-aktivitas/export/excel', [LogAktivitasController::class, 'expor
 
 Route::get('/log-aktivitas/export/pdf', [LogAktivitasController::class, 'exportPdf'])
     ->name('log.export.pdf');
+
+    // Kelola Admin (tambah, ubah, hapus akun admin)
+    Route::get('/admin', [KelolaAdminController::class, 'index'])->name('admin.index');
+    Route::get('/admin/tambah', [KelolaAdminController::class, 'create'])->name('admin.create');
+    Route::post('/admin', [KelolaAdminController::class, 'store'])->name('admin.store');
+    Route::get('/admin/{admin}/edit', [KelolaAdminController::class, 'edit'])->whereNumber('admin')->name('admin.edit');
+    Route::put('/admin/{admin}', [KelolaAdminController::class, 'update'])->whereNumber('admin')->name('admin.update');
+    Route::delete('/admin/{admin}', [KelolaAdminController::class, 'destroy'])->whereNumber('admin')->name('admin.destroy');
 });
 
 // 4. RUTE ROLE: PIMPINAN
@@ -277,6 +286,8 @@ Route::put('/pengaturan-akun/password', [PelamarProfilController::class, 'update
         // Curriculum Vitae + PDF
         Route::get('/cv', [CvController::class, 'show'])->name('pelamar.profil.cv');
         Route::get('/cv/pdf', [CvController::class, 'pdf'])->name('pelamar.profil.cv.pdf');
+        Route::post('/cv/impor', [CvController::class, 'impor'])->name('pelamar.profil.cv.impor');
+        Route::post('/cv/terapkan', [CvController::class, 'terapkan'])->name('pelamar.profil.cv.terapkan');
 
         // Riwayat Lamaran
 Route::get('/lamaran', [PelamarLamaranController::class, 'index'])

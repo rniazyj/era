@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   {{-- Jika project memakai Vite + Tailwind, ganti baris CDN di bawah dengan @vite(['resources/css/app.css','resources/js/app.js']) --}}
   <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"></script>
   <script>
     tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] }, colors: { paper: '#faf9fc' } } } };
   </script>
@@ -26,45 +27,8 @@
 
     <div class="flex-1 min-w-0 flex flex-col">
 
-      <!-- Top bar -->
-      <header class="sticky top-0 z-30 h-16 px-4 md:px-8 flex items-center justify-between gap-4 backdrop-blur-md bg-[#faf9fc]/80 border-b border-black/5">
-        <div class="flex items-center gap-3 min-w-0">
-          <button type="button" id="sidebar-open" class="lg:hidden w-9 h-9 flex items-center justify-center rounded-full border border-black/15" aria-label="Buka menu">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7h16M4 12h16M4 17h10"/></svg>
-          </button>
-          <div class="min-w-0">
-            <p class="text-[10px] tracking-[.18em] text-black/40 leading-none">@yield('page_label', 'PORTAL GALERI MAGANG')</p>
-            <h1 class="text-base md:text-lg font-semibold tracking-tight truncate">@yield('page_title', 'Dashboard')</h1>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <a href="{{ url('/') }}" class="hidden sm:inline text-xs font-medium text-black/50 hover:text-orange-600 transition">Lihat situs</a>
-
-          @if($user)
-            <div class="relative group">
-              <button type="button" class="flex items-center gap-2.5 rounded-full border border-black/10 bg-white pl-1.5 pr-3.5 py-1.5 hover:border-black/30 transition" aria-haspopup="true">
-                <span class="w-7 h-7 rounded-full bg-orange-500 text-white text-xs font-semibold flex items-center justify-center">{{ strtoupper(mb_substr($user->name, 0, 1)) }}</span>
-                <span class="hidden sm:block text-xs font-medium max-w-[8rem] truncate">{{ $user->name }}</span>
-                <span class="text-[10px] text-black/40">▾</span>
-              </button>
-              <div class="absolute right-0 top-full pt-2 hidden group-hover:block group-focus-within:block">
-                <div class="w-48 bg-white rounded-2xl shadow-xl border border-black/5 p-1.5 text-sm">
-                  <a href="{{ $has('profile.edit') ? route('profile.edit') : '#' }}" class="block px-3 py-2 rounded-xl hover:bg-black/5">Profil saya</a>
-                  @if($has('logout'))
-                    <form method="POST" action="{{ route('logout') }}">@csrf
-                      <button type="submit" class="w-full text-left px-3 py-2 rounded-xl text-red-600 hover:bg-red-50">Keluar</button>
-                    </form>
-                  @endif
-                </div>
-              </div>
-            </div>
-          @endif
-        </div>
-      </header>
-
       <!-- Konten -->
-      <main class="flex-1 p-4 md:p-8">
+      <main class="flex-1 px-4 md:px-8 pt-6 pb-8">
         @if(session('success') || session('status') || session('error'))
           <div class="mb-6 space-y-3">
             @if(session('success') || session('status'))

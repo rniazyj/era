@@ -200,6 +200,13 @@
       transition: none;
     }
   }
+
+    .dashboard-card { min-height: 11rem; border: 1px solid rgba(24,24,27,.07); background: rgba(255,255,255,.96); box-shadow: 0 8px 24px rgba(24,24,27,.04); }
+    .dashboard-card:hover { border-color: rgba(249,115,22,.18); }
+    .quick-action { min-height: 3.8rem; transition: transform .2s ease, border-color .2s ease, background .2s ease; }
+    .quick-action:hover { transform: translateY(-2px); border-color: rgba(249,115,22,.25); background: #fffaf7; }
+    .trend-bar { width: 100%; max-height: 110px; border-radius: 999px 999px 8px 8px; background: #f97316; transition: height .5s ease; }
+    .pipeline-track { background: #f4f4f5; }
 </style>
 </head>
 
@@ -211,407 +218,160 @@
     <!-- Memanggil Sidebar -->
     @include('partials.sidebar')
 
-    <!-- KONTEN UTAMA HALAMAN -->
-    <main class="min-w-0 w-full flex-1 px-4 sm:px-6 md:px-8 lg:px-10 pt-6 sm:pt-8 lg:pt-10 pb-20 sm:pb-24 space-y-6 sm:space-y-8 lg:space-y-10">
+    <!-- KONTEN UTAMA DASHBOARD BARU -->
+    <main class="min-w-0 w-full flex-1 px-4 sm:px-6 md:px-8 lg:px-10 pt-20 sm:pt-24 lg:pt-10 pb-20 space-y-6">
+      @php
+        $totalStatus = max(1, collect($ringkasanStatus)->sum());
+        $diajukan = (int) ($ringkasanStatus['diajukan'] ?? 0);
+        $diproses = (int) ($ringkasanStatus['diproses'] ?? $pelamarDiproses);
+        $diterima = (int) ($ringkasanStatus['diterima'] ?? $pelamarDiterima);
+        $nilaiMaxTrend = max(1, collect($trenLamaran)->max('jumlah'));
+      @endphp
 
-      <!-- Header Judul Halaman -->
-      <div class="w-full max-w-6xl mx-auto scroll-rv flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 min-w-0">
+      <div class="w-full max-w-6xl mx-auto flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-end">
         <div>
-          <span class="text-[10px] tracking-[.2em] font-bold text-ewforange bg-orange-50 px-3 py-1 rounded-full uppercase">PANEL ADMINISTRATOR</span>
-          <h1 class="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight mt-2 break-words">Dashboard Pengawasan</h1>
+          <span class="inline-flex rounded-full bg-orange-50 px-3 py-1 text-[10px] font-bold uppercase tracking-[.2em] text-ewforange">Panel Administrator</span>
+          <h1 class="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Dashboard Pengawasan</h1>
+          <p class="mt-1 text-xs text-zinc-400">Ringkasan aktivitas rekrutmen dan tindakan yang perlu diperhatikan.</p>
+        </div>
+        <div class="grid w-full grid-cols-2 gap-2 sm:w-auto lg:flex lg:items-center">
+          <a href="{{ route('admin.lowongan.index') }}" class="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-full border border-zinc-200 bg-white px-4 text-xs font-bold text-zinc-700 transition hover:border-orange-300 hover:text-orange-600">Kelola Lowongan</a>
+          <a href="{{ route('admin.pelamar.index') }}" class="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-full bg-zinc-900 px-4 text-xs font-bold text-white transition hover:bg-black">Tinjau Pelamar</a>
         </div>
       </div>
 
-      <!-- KARTU STATISTIK RINGKAS -->
-<div class="w-full max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 scroll-rv min-w-0">
-
-  <!-- CARD 1: TOTAL PELAMAR BARU -->
-  <div class="stat-card stat-card-orange rounded-3xl p-5 sm:p-7 shadow-sm cursor-pointer text-white min-w-0">
-
-    <!-- Dekorasi background -->
-    <div class="stat-decoration stat-decoration-one"></div>
-    <div class="stat-decoration stat-decoration-two"></div>
-
-    <div class="stat-card-inner relative z-10 flex flex-col gap-5">
-
-      <!-- Header card -->
-      <div class="flex items-center justify-between gap-3">
-
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="stat-icon">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 width="24" height="24"
-                 viewBox="0 0 24 24"
-                 fill="none"
-                 stroke="currentColor"
-                 stroke-width="1.8"
-                 stroke-linecap="round"
-                 stroke-linejoin="round">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
+      <div class="mx-auto grid w-full max-w-6xl grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <a href="{{ route('admin.pelamar.index') }}" class="dashboard-card group relative overflow-hidden rounded-3xl p-5">
+          <div class="flex items-start justify-between">
+            <span class="grid h-10 w-10 place-items-center rounded-2xl bg-orange-50 text-orange-600">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2m7-10a4 4 0 100-8 4 4 0 000 8zm10 1v6m3-3h-6"/></svg>
+            </span>
+            <span class="rounded-full bg-orange-50 px-2.5 py-1 text-[10px] font-bold text-orange-600">Perlu tinjau</span>
           </div>
+          <p class="mt-5 text-[11px] font-bold uppercase tracking-wide text-zinc-400">Lamaran Baru</p>
+          <p class="mt-1 text-4xl font-bold tracking-tight text-zinc-900">{{ $totalPelamarBaru }}</p>
+        </a>
 
-          <span class="text-xs sm:text-sm font-semibold text-white/90">
-            Total Pelamar Baru
-          </span>
-        </div>
-
-      </div>
-
-      <!-- Angka statistik -->
-      <div>
-        <h3
-          class="text-4xl sm:text-5xl font-bold tracking-tight count-target"
-          data-target="{{ $totalPelamarBaru }}">
-          0
-        </h3>
-
-      </div>
-
-      <!-- Footer card -->
-      <div class="flex items-center justify-between gap-3 pt-4 border-t border-white/20">
-
-        <span class="text-xs font-medium text-white/90">
-          Perlu ditinjau
-        </span>
-
-        <span class="px-3 py-1.5 rounded-full bg-white text-orange-600 text-[10px] font-bold">
-          Pelamar
-        </span>
-
-      </div>
-
-    </div>
-  </div>
-
-
-  <!-- CARD 2: CV BELUM LENGKAP -->
-  <div class="stat-card stat-card-gray rounded-3xl p-5 sm:p-7 shadow-sm cursor-pointer text-white min-w-0">
-
-    <!-- Dekorasi background -->
-    <div class="stat-decoration stat-decoration-one"></div>
-    <div class="stat-decoration stat-decoration-two"></div>
-
-    <div class="stat-card-inner relative z-10 flex flex-col gap-5">
-
-      <!-- Header card -->
-      <div class="flex items-center justify-between gap-3">
-
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="stat-icon">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 width="24" height="24"
-                 viewBox="0 0 24 24"
-                 fill="none"
-                 stroke="currentColor"
-                 stroke-width="1.8"
-                 stroke-linecap="round"
-                 stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <path d="M14 2v6h6"/>
-              <path d="M8 13h8"/>
-              <path d="M8 17h5"/>
-            </svg>
+        <a href="{{ route('admin.jadwal.index') }}" class="dashboard-card group rounded-3xl p-5">
+          <div class="flex items-start justify-between">
+            <span class="grid h-10 w-10 place-items-center rounded-2xl bg-emerald-50 text-emerald-600">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </span>
+            <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">Hari ini</span>
           </div>
+          <p class="mt-5 text-[11px] font-bold uppercase tracking-wide text-zinc-400">Jadwal Interview</p>
+          <p class="mt-1 text-4xl font-bold tracking-tight text-zinc-900">{{ $jadwalHariIni }}</p>
+        </a>
 
-          <span class="text-xs sm:text-sm font-semibold text-white/90">
-            CV Belum Lengkap
-          </span>
-        </div>
-
-      </div>
-
-      <!-- Angka statistik -->
-      <div>
-        <h3
-          class="text-4xl sm:text-5xl font-bold tracking-tight count-target"
-          data-target="{{ $userBelumLengkapList->count() }}">
-          0
-        </h3>
-
-      </div>
-
-      <!-- Footer card -->
-      <div class="flex items-center justify-between gap-3 pt-4 border-t border-white/20">
-
-        <span class="text-xs font-medium text-white/90">
-          Perlu dilengkapi
-        </span>
-
-        <span class="px-3 py-1.5 rounded-full bg-white text-zinc-700 text-[10px] font-bold">
-          Profil & CV
-        </span>
-
-      </div>
-
-    </div>
-  </div>
-
-</div>
-
-      <!-- BAGIAN 1: PELAMAR BARU -->
-      <div class="w-full max-w-6xl mx-auto scroll-rv bg-white rounded-2xl sm:rounded-3xl border border-black/5 p-4 sm:p-6 md:p-8 lg:p-10 shadow-sm space-y-4 sm:space-y-6 min-w-0">
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 pb-4 border-b border-black/5 min-w-0">
-          <div>
-            <h3 class="text-sm font-bold tracking-wide text-zinc-900 uppercase">Daftar Pelamar Baru</h3>
-            <p class="text-[11px] text-zinc-400 mt-0.5">Kandidat magang yang baru saja mengirimkan berkas pengajuan.</p>
+        <a href="{{ route('admin.lowongan.index') }}" class="dashboard-card group rounded-3xl p-5">
+          <div class="flex items-start justify-between">
+            <span class="grid h-10 w-10 place-items-center rounded-2xl bg-sky-50 text-sky-600">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M3 12h18"/></svg>
+            </span>
+            <span class="rounded-full bg-sky-50 px-2.5 py-1 text-[10px] font-bold text-sky-700">Aktif</span>
           </div>
-          <span class="text-xs bg-orange-50 text-ewforange font-bold px-3 py-1 rounded-full">Perlu Ditinjau</span>
-        </div>
+          <p class="mt-5 text-[11px] font-bold uppercase tracking-wide text-zinc-400">Lowongan & Program</p>
+          <p class="mt-1 text-4xl font-bold tracking-tight text-zinc-900">{{ $lowonganAktif }}</p>
+        </a>
 
-        <div class="w-full min-w-0 overflow-x-auto overscroll-x-contain">
-          <table class="w-full min-w-[680px] text-left border-collapse">
-            <thead>
-              <tr class="border-b border-black/5 text-[11px] font-semibold text-zinc-400 uppercase">
-                <th class="py-3 px-4">Nama Pelamar</th>
-                <th class="py-3 px-4">Posisi</th>
-                <th class="py-3 px-4">Kategori</th>
-                <th class="py-3 px-4">Durasi Magang</th>
-                <th class="py-3 px-4">Tanggal Kirim</th>
-                <th class="py-3 px-4 text-center">Aksi</th>
-              </tr>
-            </thead>
-            
-<tbody class="divide-y divide-black/5 text-xs">
-    @forelse($pelamarBaruList as $lamaran)
-        @php
-            $jenis = $lamaran->id_program ? 'Magang' : 'Kerja';
+        <a href="{{ route('admin.jadwal.index') }}" class="dashboard-card group rounded-3xl p-5">
+          <div class="flex items-start justify-between">
+            <span class="grid h-10 w-10 place-items-center rounded-2xl bg-amber-50 text-amber-600">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+            </span>
+            <span class="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700">Tindak lanjut</span>
+          </div>
+          <p class="mt-5 text-[11px] font-bold uppercase tracking-wide text-zinc-400">Jadwal Terlewat</p>
+          <p class="mt-1 text-4xl font-bold tracking-tight text-zinc-900">{{ $jadwalPerluTindakLanjut }}</p>
+        </a>
+      </div>
 
-            $namaPosisi = $lamaran->id_program
-                ? ($lamaran->program?->nama_program ?? '-')
-                : ($lamaran->lowongan?->judul ?? '-');
+      <div class="mx-auto grid w-full max-w-6xl grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(18rem,.75fr)]">
+        <section class="dashboard-card rounded-3xl p-5 sm:p-6">
+          <div class="flex items-start justify-between gap-3">
+            <div><p class="text-sm font-bold text-zinc-900">Lamaran 7 Hari Terakhir</p><p class="mt-1 text-[11px] text-zinc-400">Jumlah pengajuan pelamar per hari</p></div>
+            <span class="rounded-full bg-zinc-100 px-3 py-1 text-[10px] font-bold text-zinc-600">{{ collect($trenLamaran)->sum('jumlah') }} lamaran</span>
+          </div>
+          <div class="mt-6 flex h-36 items-end gap-2 sm:gap-4">
+            @foreach($trenLamaran as $item)
+              @php $tinggi = $item['jumlah'] > 0 ? max(18, round(($item['jumlah'] / $nilaiMaxTrend) * 100)) : 8; @endphp
+              <div class="flex h-full flex-1 flex-col justify-end gap-2 text-center">
+                <span class="text-[10px] font-bold text-zinc-500">{{ $item['jumlah'] }}</span>
+                <div class="flex h-[105px] items-end rounded-t-xl bg-zinc-50 px-1">
+                  <div class="trend-bar" style="height: {{ $tinggi }}%"></div>
+                </div>
+                <span class="text-[10px] font-semibold text-zinc-400">{{ $item['label'] }}</span>
+              </div>
+            @endforeach
+          </div>
+        </section>
 
-            $durasi = $lamaran->id_program
-                ? (
-                    $lamaran->durasi_hari
-                        ? $lamaran->durasi_hari . ' Hari'
-                        : (
-                            $lamaran->program?->durasi_hari
-                                ? $lamaran->program->durasi_hari . ' Hari'
-                                : '-'
-                        )
-                )
-                : '-';
-        @endphp
+        <section class="dashboard-card rounded-3xl p-5 sm:p-6">
+          <div class="flex items-start justify-between"><div><p class="text-sm font-bold text-zinc-900">Status Lamaran</p><p class="mt-1 text-[11px] text-zinc-400">Progres seluruh lamaran</p></div></div>
+          @php
+            $pDiajukan = round(($diajukan / $totalStatus) * 100);
+            $pDiproses = round(($diproses / $totalStatus) * 100);
+            $pDiterima = round(($diterima / $totalStatus) * 100);
+          @endphp
+          <div class="mt-6 flex justify-center">
+            <div class="relative grid h-40 w-40 place-items-center rounded-full" style="background: conic-gradient(#f97316 0 {{ $pDiajukan }}%, #38bdf8 {{ $pDiajukan }}% {{ $pDiajukan + $pDiproses }}%, #10b981 {{ $pDiajukan + $pDiproses }}% 100%)">
+              <div class="grid h-28 w-28 place-items-center rounded-full bg-white text-center"><div><p class="text-3xl font-bold text-zinc-900">{{ $totalStatus }}</p><p class="text-[10px] font-semibold text-zinc-400">Total Lamaran</p></div></div>
+            </div>
+          </div>
+          <div class="mt-5 grid grid-cols-3 gap-2 text-center">
+            <div><span class="mx-auto block h-2 w-2 rounded-full bg-orange-500"></span><p class="mt-1 text-lg font-bold">{{ $diajukan }}</p><p class="text-[10px] text-zinc-400">Diajukan</p></div>
+            <div><span class="mx-auto block h-2 w-2 rounded-full bg-sky-400"></span><p class="mt-1 text-lg font-bold">{{ $diproses }}</p><p class="text-[10px] text-zinc-400">Diproses</p></div>
+            <div><span class="mx-auto block h-2 w-2 rounded-full bg-emerald-500"></span><p class="mt-1 text-lg font-bold">{{ $diterima }}</p><p class="text-[10px] text-zinc-400">Diterima</p></div>
+          </div>
+        </section>
+      </div>
 
-        <tr class="table-row-item table-row-hover">
-            {{-- Nama Pelamar --}}
-            <td class="py-4 px-4 font-bold text-zinc-900">
-                {{ $lamaran->pelamar?->name ?? 'Nama tidak ditemukan' }}
-            </td>
+      <div class="mx-auto grid w-full max-w-6xl grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(18rem,.75fr)]">
+        <section class="dashboard-card rounded-3xl p-5 sm:p-6">
+          <div class="flex items-center justify-between gap-3"><div><p class="text-sm font-bold text-zinc-900">Jadwal Mendatang</p><p class="mt-1 text-[11px] text-zinc-400">{{ $jadwalPekanIni }} interview dalam 7 hari ke depan</p></div><a href="{{ route('admin.jadwal.index') }}" class="text-[11px] font-bold text-orange-600 hover:text-orange-700">Lihat semua</a></div>
+          <div class="mt-4 divide-y divide-zinc-100">
+            @forelse($jadwalTerbaru as $jadwal)
+              @php $pelamar = $jadwal->lamaran->pelamar ?? null; $posisi = $jadwal->lamaran->nama_posisi ?? '-'; $inisial = mb_strtoupper(mb_substr(trim($pelamar->name ?? 'P'), 0, 1)); @endphp
+              <a href="{{ route('admin.jadwal.index') }}" class="flex items-center gap-3 py-3">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-zinc-900 text-xs font-bold text-white">{{ $inisial }}</span>
+                <span class="min-w-0 flex-1"><span class="block truncate text-xs font-bold text-zinc-800">{{ $pelamar->name ?? 'Pelamar' }}</span><span class="block truncate text-[11px] text-zinc-400">{{ $posisi }}</span></span>
+                <span class="text-right"><span class="block text-xs font-bold text-zinc-700">{{ $jadwal->jam }}</span><span class="block text-[10px] text-zinc-400">{{ $jadwal->tgl_interview->locale('id')->translatedFormat('d M') }}</span></span>
+              </a>
+            @empty
+              <div class="py-8 text-center text-xs text-zinc-400">Belum ada jadwal mendatang.</div>
+            @endforelse
+          </div>
+        </section>
 
-            {{-- Posisi --}}
-            <td class="py-4 px-4 text-zinc-600">
-                {{ $namaPosisi }}
-            </td>
+        <section class="dashboard-card rounded-3xl p-5 sm:p-6">
+          <p class="text-sm font-bold text-zinc-900">Aksi Cepat</p>
+          <p class="mt-1 text-[11px] text-zinc-400">Menu yang sering membutuhkan tindakan</p>
+          <div class="mt-4 space-y-2">
+            <a href="{{ route('admin.pelamar.index') }}" class="quick-action flex items-center gap-3 rounded-2xl border border-zinc-100 px-3 py-3"><span class="grid h-9 w-9 place-items-center rounded-xl bg-orange-50 text-orange-600"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zm10 1v6m3-3h-6"/></svg></span><span class="flex-1 text-xs font-bold text-zinc-700">Tinjau Pelamar Baru</span><span class="text-xs font-bold text-orange-600">{{ $totalPelamarBaru }}</span></a>
+            <a href="{{ route('admin.jadwal.index') }}" class="quick-action flex items-center gap-3 rounded-2xl border border-zinc-100 px-3 py-3"><span class="grid h-9 w-9 place-items-center rounded-xl bg-emerald-50 text-emerald-600"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></span><span class="flex-1 text-xs font-bold text-zinc-700">Atur Jadwal</span><svg class="h-4 w-4 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></a>
+            <a href="{{ route('admin.lowongan.index') }}" class="quick-action flex items-center gap-3 rounded-2xl border border-zinc-100 px-3 py-3"><span class="grid h-9 w-9 place-items-center rounded-xl bg-sky-50 text-sky-600"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></span><span class="flex-1 text-xs font-bold text-zinc-700">Kelola Lowongan</span><svg class="h-4 w-4 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></a>
+            <a href="{{ route('admin.konten.index') }}" class="quick-action flex items-center gap-3 rounded-2xl border border-zinc-100 px-3 py-3"><span class="grid h-9 w-9 place-items-center rounded-xl bg-violet-50 text-violet-600"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4z"/></svg></span><span class="flex-1 text-xs font-bold text-zinc-700">Perbarui Konten Website</span><svg class="h-4 w-4 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></a>
+          </div>
+        </section>
+      </div>
 
-            {{-- Kategori --}}
-            <td class="py-4 px-4">
-                <span class="px-2.5 py-1 rounded-md font-semibold text-[10px]
-                    {{ $jenis === 'Magang'
-                        ? 'bg-orange-50 text-ewforange'
-                        : 'bg-zinc-100 text-zinc-800' }}">
-                    {{ $jenis }}
-                </span>
-            </td>
-
-            {{-- Durasi --}}
-            <td class="py-4 px-4 text-zinc-600">
-                {{ $durasi }}
-            </td>
-
-            {{-- Tanggal Kirim --}}
-            <td class="py-4 px-4 text-zinc-400">
-                {{ $lamaran->tgl_pengajuan
-                    ? \Carbon\Carbon::parse($lamaran->tgl_pengajuan)->format('d M Y')
-                    : '-' }}
-            </td>
-
-            {{-- Aksi --}}
-            <td class="py-4 px-4 text-center">
-                <a href="#"
-                   class="inline-block px-4 py-2 bg-zinc-900 hover:bg-black
-                          text-white text-[11px] font-medium rounded-full
-                          transition shadow-sm hover:scale-105">
-                    Selengkapnya
-                </a>
-            </td>
-        </tr>
-    @empty
-        <tr>
-            <td colspan="6" class="py-12 text-center text-xs text-zinc-400">
-                Belum ada pelamar baru yang perlu ditinjau.
-            </td>
-        </tr>
-    @endforelse
-</tbody>
-
+      <section class="dashboard-card mx-auto w-full max-w-6xl rounded-3xl p-5 sm:p-6">
+        <div class="flex items-center justify-between gap-3"><div><p class="text-sm font-bold text-zinc-900">Pelamar Baru</p><p class="mt-1 text-[11px] text-zinc-400">Lamaran terbaru yang masih menunggu tinjauan</p></div><a href="{{ route('admin.pelamar.index') }}" class="text-[11px] font-bold text-orange-600 hover:text-orange-700">Buka daftar</a></div>
+        <div class="mt-4 overflow-x-auto">
+          <table class="w-full min-w-[680px] text-left text-xs">
+            <thead><tr class="border-b border-zinc-100 text-[10px] uppercase tracking-wide text-zinc-400"><th class="pb-3">Pelamar</th><th class="pb-3">Posisi</th><th class="pb-3">Kategori</th><th class="pb-3">Tanggal</th><th class="pb-3 text-right">Aksi</th></tr></thead>
+            <tbody class="divide-y divide-zinc-100">
+              @forelse($pelamarBaruList as $lamaran)
+                @php $namaPosisi = $lamaran->id_program ? ($lamaran->program->nama_program ?? '-') : ($lamaran->lowongan->judul ?? '-'); $jenis = $lamaran->id_program ? 'Magang' : 'Kerja'; @endphp
+                <tr><td class="py-3 font-bold text-zinc-800">{{ $lamaran->pelamar->name ?? 'Nama tidak ditemukan' }}</td><td class="py-3 text-zinc-600">{{ $namaPosisi }}</td><td class="py-3"><span class="rounded-full {{ $jenis === 'Magang' ? 'bg-orange-50 text-orange-600' : 'bg-zinc-100 text-zinc-700' }} px-2.5 py-1 text-[10px] font-bold">{{ $jenis }}</span></td><td class="py-3 text-zinc-400">{{ $lamaran->tgl_pengajuan ? $lamaran->tgl_pengajuan->format('d M Y') : '-' }}</td><td class="py-3 text-right"><a href="{{ route('admin.pelamar.show', $lamaran->id_lamaran) }}" class="rounded-full bg-zinc-900 px-3 py-1.5 text-[10px] font-bold text-white hover:bg-black">Lihat</a></td></tr>
+              @empty
+                <tr><td colspan="5" class="py-10 text-center text-zinc-400">Belum ada pelamar baru.</td></tr>
+              @endforelse
+            </tbody>
           </table>
         </div>
-      </div>
-
-      <!-- BAGIAN 2: USER / PELAMAR DENGAN CV & BERKAS BELUM LENGKAP -->
-      <div class="w-full max-w-6xl mx-auto scroll-rv bg-white rounded-2xl sm:rounded-3xl border border-black/5 p-4 sm:p-6 md:p-8 lg:p-10 shadow-sm space-y-4 sm:space-y-6 min-w-0">
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 pb-4 border-b border-black/5 min-w-0">
-          <div>
-            <h3 class="text-sm font-bold tracking-wide text-zinc-900 uppercase">User & CV Belum Lengkap</h3>
-            <p class="text-[11px] text-zinc-400 mt-0.5">Daftar akun yang mendaftar namun belum melengkapi profil atau berkas persyaratannya.</p>
-          </div>
-          <span class="text-xs bg-rose-50 text-rose-500 font-bold px-3 py-1 rounded-full">Perlu Diperhatikan</span>
-        </div>
-
-        <div class="w-full min-w-0 overflow-x-auto overscroll-x-contain">
-          <table class="w-full min-w-[420px] text-left border-collapse">
-            <thead>
-              <tr class="border-b border-black/5 text-[11px] font-semibold text-zinc-400 uppercase">
-                <th class="py-3 px-4">Nama Pengguna</th>
-                <th class="py-3 px-4">Email</th>
-                <th class="py-3 px-4">No. Telepon</th>
-              </tr>
-            </thead>
-            
-<tbody class="divide-y divide-black/5 text-xs">
-    @forelse($userBelumLengkapList as $user)
-        <tr class="table-row-item table-row-hover">
-            <td class="py-4 px-4 font-bold text-zinc-900">
-                {{ $user->name }}
-            </td>
-
-            <td class="py-4 px-4 text-zinc-600">
-                {{ $user->email }}
-            </td>
-
-            <td class="py-4 px-4 text-zinc-600">
-                {{ $user->no_telepon ?? '-' }}
-            </td>
-        </tr>
-    @empty
-        <tr>
-            <td colspan="3" class="py-12 text-center text-xs text-zinc-400">
-                Semua pelamar sudah melengkapi profil dan CV.
-            </td>
-        </tr>
-    @endforelse
-</tbody>
-
-          </table>
-        </div>
-      </div>
-
+      </section>
     </main>
   </div>
-
-  <!-- GSAP & ScrollTrigger Script -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-  <script>
-    gsap.registerPlugin(ScrollTrigger);
-
-    // Animasi masuk untuk card statistik
-  gsap.fromTo(
-    '.stat-card-inner',
-    {
-      y: 25,
-      opacity: 0
-    },
-    {
-      y: 0,
-      opacity: 1,
-      duration: 0.8,
-      stagger: 0.15,
-      ease: 'power3.out',
-      delay: 0.2
-    }
-  );
-
-    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-    window.scrollTo(0, 0);
-
-    const $ = (s, c = document) => [...c.querySelectorAll(s)];
-
-    // 1. Animasi Transisi Saat Halaman Di-scroll (ScrollTrigger)
-    $('.scroll-rv').forEach((section) => {
-      gsap.fromTo(section, 
-        { y: 50, opacity: 0 },
-        { 
-          y: 0, 
-          opacity: 1, 
-          duration: 1, 
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: section,
-            start: 'top 85%',
-            toggleActions: 'play none none none'
-          }
-        }
-      );
-    });
-
-    // 2. Animasi Baris Tabel Muncul Mengalir Saat Scroll
-    $('.table-row-item').forEach((row, index) => {
-      gsap.fromTo(row,
-        { y: 20, opacity: 0 },
-        { 
-          y: 0, 
-          opacity: 1, 
-          duration: 0.6, 
-          delay: (index % 3) * 0.1, 
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: row,
-            start: 'top 90%',
-            toggleActions: 'play none none none'
-          }
-        }
-      );
-    });
-
-    // 3. Efek Angka Berjalan (Count-Up Animation untuk Statistik)
-    $('.count-target').forEach(counter => {
-      const target = parseInt(counter.dataset.target) || 0;
-      const obj = { val: 0 };
-      gsap.to(obj, {
-        val: target,
-        duration: 1.5,
-        ease: 'power1.out',
-        scrollTrigger: {
-          trigger: counter,
-          start: 'top 85%',
-          toggleActions: 'play none none none'
-        },
-        onUpdate: () => {
-          counter.textContent = Math.round(obj.val);
-        }
-      });
-    });
-
-    // 4. Efek Interaktif Hover pada Kartu Statistik
-  $('.stat-card').forEach(card => {
-
-    card.addEventListener('pointerenter', () => {
-      gsap.to(card, {
-        y: -6,
-        scale: 1.015,
-        duration: 0.35,
-        ease: 'power2.out',
-        overwrite: 'auto'
-      });
-    });
-
-    card.addEventListener('pointerleave', () => {
-      gsap.to(card, {
-        y: 0,
-        scale: 1,
-        duration: 0.4,
-        ease: 'power2.out',
-        overwrite: 'auto'
-      });
-    });
-
-  });
-  </script>
 </body>
 </html>

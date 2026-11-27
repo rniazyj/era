@@ -3,6 +3,7 @@
 <style>
   .kw, .kw * { box-sizing: border-box; }
   .kw { color: #141414; max-width: 78rem; }
+  @media (min-width: 1024px) { .kw { margin-top: 3.5rem; } }
   .kw a { text-decoration: none; }
   .kw h1, .kw h2, .kw h3, .kw p, .kw ul, .kw ol { margin: 0; padding: 0; }
   .kw ul, .kw ol { list-style: none; }

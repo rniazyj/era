@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\JadwalInterview;
 use App\Models\Lamaran;
+use App\Models\LowonganKerja;
+use App\Models\ProgramMagang;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 
 class AdminDashboardController extends Controller
 {
@@ -59,10 +63,60 @@ class AdminDashboardController extends Controller
             ->orderBy('users.name')
             ->get();
 
+        $ringkasanStatus = Lamaran::query()
+            ->selectRaw("COALESCE(status_lamaran, 'diajukan') as status, COUNT(*) as jumlah")
+            ->groupBy('status_lamaran')
+            ->pluck('jumlah', 'status')
+            ->toArray();
+
+        $lowonganAktif = LowonganKerja::where('status', 'dibuka')->count()
+            + ProgramMagang::where('status', 'dibuka')->count();
+
+        $jadwalHariIni = JadwalInterview::whereDate('tgl_interview', today())
+            ->where('status_jadwal', JadwalInterview::TERJADWAL)
+            ->count();
+
+        $jadwalPekanIni = JadwalInterview::whereBetween('tgl_interview', [today(), today()->addDays(7)])
+            ->where('status_jadwal', JadwalInterview::TERJADWAL)
+            ->count();
+
+        $jadwalPerluTindakLanjut = JadwalInterview::whereDate('tgl_interview', '<', today())
+            ->where('status_jadwal', JadwalInterview::TERJADWAL)
+            ->count();
+
+        $trenLamaran = collect(range(6, 0))->map(function (int $offset) {
+            $tanggal = today()->subDays($offset);
+
+            return [
+                'label' => $tanggal->locale('id')->isoFormat('ddd'),
+                'jumlah' => Lamaran::whereDate('tgl_pengajuan', $tanggal)->count(),
+            ];
+        })->values();
+
+        $jadwalTerbaru = JadwalInterview::with(['lamaran.pelamar', 'lamaran.lowongan', 'lamaran.program'])
+            ->whereBetween('tgl_interview', [today(), today()->addDays(14)])
+            ->where('status_jadwal', JadwalInterview::TERJADWAL)
+            ->orderBy('tgl_interview')
+            ->orderBy('jam_mulai')
+            ->limit(4)
+            ->get();
+
+        $pelamarDiproses = Lamaran::where('status_lamaran', 'diproses')->count();
+        $pelamarDiterima = Lamaran::where('status_lamaran', 'diterima')->count();
+
         return view('admin.dashboard', compact(
             'totalPelamarBaru',
             'pelamarBaruList',
-            'userBelumLengkapList'
+            'userBelumLengkapList',
+            'ringkasanStatus',
+            'lowonganAktif',
+            'jadwalHariIni',
+            'jadwalPekanIni',
+            'jadwalPerluTindakLanjut',
+            'trenLamaran',
+            'jadwalTerbaru',
+            'pelamarDiproses',
+            'pelamarDiterima'
         ));
     }
 }

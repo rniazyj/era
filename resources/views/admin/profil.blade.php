@@ -1,4 +1,3 @@
-
 @php
     $user = auth()->user();
 
@@ -513,7 +512,7 @@
         @include('partials.sidebar')
 
         {{-- KONTEN UTAMA --}}
-        <main class="min-w-0 w-full flex-1 px-4 sm:px-6 md:px-8 lg:px-10 pt-6 sm:pt-8 lg:pt-10 pb-20">
+        <main class="min-w-0 w-full flex-1 px-4 sm:px-6 md:px-8 lg:px-10 pt-20 sm:pt-24 lg:pt-10 pb-20">
 
             <div class="profile-content">
 
